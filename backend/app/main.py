@@ -3,10 +3,12 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.api.import_files import router as import_router
 from app.api.routes import router
 
 app = FastAPI(title="AC Actions Map — AC Social", version="0.1.0")
 app.include_router(router)
+app.include_router(import_router)
 
 
 @app.middleware("http")

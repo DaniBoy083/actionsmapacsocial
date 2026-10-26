@@ -58,6 +58,9 @@ with pymupdf.open() as document:
         page.insert_text((60, 80), "FICHA SINTETICA - TESTE SEM DADOS REAIS")
         page.insert_text((60, 110), f"Nome: Pessoa de teste {index + 1}")
     document.save(pdf)
+client_pdf = Path(__file__).resolve().parents[2] / "tmp/e2e-import.pdf"
+client_pdf.parent.mkdir(parents=True, exist_ok=True)
+client_pdf.write_bytes(pdf.read_bytes())
 imports.SOURCE = pdf
 app.dependency_overrides[identities] = BrowserIdentities
 

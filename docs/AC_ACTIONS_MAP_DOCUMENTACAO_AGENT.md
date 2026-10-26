@@ -7,6 +7,8 @@
 
 > **Instrução prioritária ao agente:** esta aplicação é o **AC Actions Map — AC Social**, dedicada à **gestão de ações institucionais e ao registro geral de seus participantes/beneficiários**, incluindo importação histórica de PDFs. **Não construir tracking de prontuários, consultas, atendimentos clínicos ou jornada integrada** de Psicologia, Nutrição, ABA ou outros setores. Reutilizar apenas a autenticação institucional dos **profissionais** e os padrões técnicos autorizados do ecossistema. Não assumir que o esquema físico, os endpoints ou os arquivos citados abaixo já foram inspecionados.
 
+> **Decisão posterior do responsável — 26/10/2026:** remover a página redundante de Indicadores e concentrar suas métricas em Visão geral; substituir Dados iniciais por **Importar dados**, com inserção por arquivos. Esta decisão prevalece sobre os nomes e rotas propostos abaixo. A implementação e os limites atuais estão em [Importação por arquivos](IMPORTACAO_ARQUIVOS.md); os demais princípios, inclusive revisão nominal, autorização de produção e separação de dados clínicos, permanecem aplicáveis.
+
 ## 1. Objetivo e fronteiras do projeto
 
 Criar o sistema interno que substitui a **administração das ações hoje vinculadas ao mapa da Paraíba no Portal Institucional**. A equipe autorizada poderá cadastrar, listar, editar, excluir logicamente/arquivar e acompanhar ações realizadas em **um ou vários municípios/locais**; registrar dados gerais das pessoas beneficiadas; importar registros iniciais de formulários PDF digitalizados; e disponibilizar resumos e indicadores gerais à integração institucional.

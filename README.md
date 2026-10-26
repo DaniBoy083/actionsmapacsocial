@@ -2,9 +2,9 @@
 
 Primeira entrega de desenvolvimento para gestão de ações institucionais e registros gerais de beneficiários. Não contém prontuários ou tracking clínico. A especificação específica em `docs/AC_ACTIONS_MAP_DOCUMENTACAO_AGENT.md` prevalece sobre o planejamento anterior.
 
-Inclui login institucional, autorização no backend, dashboard, CRUD de ações com N locais da Paraíba, beneficiários cifrados, revisão manual/idempotente do documento histórico, indicadores, outbox e diagnóstico exclusivo de Tecnologia, páginas 404/erro e documentação de integração.
+Inclui login institucional, autorização no backend, Visão geral com indicadores, CRUD de ações com N locais da Paraíba, beneficiários cifrados, importação revisada por PDF/CSV/JSON, outbox e diagnóstico exclusivo de Tecnologia, páginas 404/erro e documentação de integração.
 
-**Estado:** desenvolvimento com SQLite isolado; produção preparada para Next.js + FastAPI no mesmo projeto Vercel, com PostgreSQL institucional em schema próprio e credencial restrita. Consulte [deploy de produção](docs/DEPLOY_PRODUCAO.md) e [conformidade e pendências](docs/CONFORMIDADE_E_PENDENCIAS.md). Nenhuma pessoa real foi importada e a integração receptora da Agenda permanece pendente.
+**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI no mesmo projeto Vercel, PostgreSQL institucional em schema próprio e credencial restrita. A ação Melhor Visão/Mamanguape e 32 registros nominais conferidos foram importados com autorização expressa; 18 páginas aguardam confirmação da grafia. Consulte [deploy de produção](docs/DEPLOY_PRODUCAO.md) e [conformidade e pendências](docs/CONFORMIDADE_E_PENDENCIAS.md). A integração receptora da Agenda permanece pendente.
 
 ## Rodar localmente no Windows
 
@@ -39,11 +39,11 @@ Não troque `localhost` por `127.0.0.1` no navegador sem atualizar `FRONTEND_ORI
 
 Localmente, os cadastros ficam em `backend/private/actions.sqlite3`, ignorado pelo Git. Preserve o banco e `BENEFICIARIES_KEY` em backup controlado; perder/trocar a chave impede ler nomes já cifrados. A inicialização local não cria tabelas no PostgreSQL. Em produção, `APP_ENV=production` exige PostgreSQL/TLS e usa o schema `actions_map`; a migração administrativa não é executada no startup.
 
-O assistente histórico lê a fonte privada já fornecida em `docs/data/ilovepdf_merged.pdf`; num novo clone esse arquivo não é distribuído. Sem a fonte, a interface informa indisponibilidade. Não colocar fichas em `/public` nem versionar transcrições. A revisão é manual, página a página, sem OCR externo. Upload genérico ainda está pendente.
+A página **Importar dados** (`/importacoes`) recebe PDF, CSV e JSON, com prévia, revisão por registro, ação de destino e confirmação. Até 8 MiB e 200 páginas/registros por arquivo; arquivos temporários cifrados, privados e com expiração técnica de 24 horas. `/dados-iniciais` redireciona para ela. A página `/indicadores` foi removida; os totais permanecem em Visão geral. Consulte [formatos, limites e operação](docs/IMPORTACAO_ARQUIVOS.md). O acervo original de aproximadamente 241 MB permanece local e usa carga assistida com revisão, sem upload público.
 
 ## Verificação
 
-Validação local desta entrega: **34 testes backend e 10 cenários de navegador aprovados**, incluindo acessibilidade automatizada em desktop/celular; lint, TypeScript, Ruff e build aprovados. Detalhes e limites estão no [registro de conformidade](docs/CONFORMIDADE_E_PENDENCIAS.md).
+Validação da revisão de importações: **61 testes backend aprovados**; testes de navegador em desktop/celular, acessibilidade, lint, TypeScript, Ruff e build são registrados na [revisão dos princípios](docs/REVISAO_PRINCIPIOS_2026-10-26.md). A integração externa e a homologação institucional continuam pendentes.
 
 ```powershell
 npm.cmd run lint
@@ -72,6 +72,8 @@ A API local oferece documentação em **http://127.0.0.1:8000/docs**. O diagnós
 - [Descoberta, fontes verificadas e inventário de campos](docs/DESCOBERTA_E_CAMPOS.md)
 - [Arquitetura e limites desta entrega](docs/ARQUITETURA.md)
 - [Deploy Next.js + FastAPI na mesma Vercel](docs/DEPLOY_PRODUCAO.md)
+- [Importação de PDF, CSV e JSON](docs/IMPORTACAO_ARQUIVOS.md)
+- [Revisão dos princípios e evidências](docs/REVISAO_PRINCIPIOS_2026-10-26.md)
 - [O que implementar na Agenda Digital](docs/AGENDA_DIGITAL_IMPLEMENTACAO.md)
 - [Privacidade, retenção e plano de migração](docs/PRIVACIDADE_E_MIGRACAO.md)
 - [Conformidade e próximos incrementos](docs/CONFORMIDADE_E_PENDENCIAS.md)

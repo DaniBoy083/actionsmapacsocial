@@ -197,6 +197,17 @@ def add_beneficiary(
     if source:
         previous = session.scalar(select(Participation).where(Participation.origem == source))
         if previous:
+            person = session.get(Beneficiary, previous.beneficiario_id)
+            stored = json.loads(cipher().decrypt(person.dados_cifrados.encode()))
+            if (
+                previous.acao_id != identifier
+                or stored != {"id": person.id, "nome": data.nome}
+                or person.municipio_residencia_ibge != data.municipio_residencia_ibge
+                or previous.local_indice != data.local_indice
+            ):
+                raise HTTPException(
+                    409, "Origem já importada com outros dados. Solicite correção supervisionada."
+                )
             return "existente"
     beneficiary_id = str(uuid4())
     encrypted = (

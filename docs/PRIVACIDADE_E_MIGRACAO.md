@@ -4,7 +4,7 @@
 
 O módulo armazena somente nome cifrado, município opcional e vínculo geral à ação. Nome não é critério de identidade única. Não copiar prontuários, CPF, contatos, receitas, assinaturas ou chaves de outros sistemas. Auditoria guarda profissional, operação, entidade e horário; não guarda o conteúdo pessoal. A API nominal é privada e auditada; o pipeline contém só IDs técnicos de ações e totais.
 
-O PDF original permanece no disco sob proteção institucional; não é copiado para `/public`, storage público, serviços de OCR/IA ou fixtures. Diretórios de dados, bancos, fontes e imagens temporárias ficam ignorados pelo Git. Um arquivo já presente em commit anterior continua no histórico até eventual limpeza autorizada; removê-lo do índice atual não reescreve histórico.
+O PDF original permanece no disco sob proteção institucional; não é copiado para `/public`, storage público, serviços de OCR/IA ou fixtures. Arquivos selecionados na nova interface ficam temporariamente cifrados em tabelas privadas do módulo, com acesso apenas ao remetente, expiração técnica e quotas, conforme [importação por arquivos](IMPORTACAO_ARQUIVOS.md). Diretórios de dados, bancos, fontes, transcrições e imagens temporárias ficam ignorados pelo Git. O PDF grande foi retirado dos commits que ainda não haviam sido publicados; a cópia local foi preservada.
 
 A instituição precisa definir finalidade, necessidade, base legal, transparência, responsáveis, prazos de retenção, atendimento a titulares e resposta a incidentes. Nenhum prazo jurídico foi presumido. Antes de usar dados reais em novos ambientes, aprovar tratamento, permissões e proteção do storage; usar dados sintéticos em testes.
 
@@ -22,4 +22,4 @@ Não perder `BENEFICIARIES_KEY`: sem ela os cadastros locais ficam ilegíveis. B
 
 ## Gate de produção
 
-Exige autenticação e revogação homologadas, credenciais SQL restritas, sessão/storage multi-instância, revisão da migração, upload/storage privado, limites do parser/quotas, monitoramento, política de retenção/publicação e testes de backup/restauração. Esta primeira entrega bloqueia persistência/importação/publicação produtivas até essas implementações.
+Autenticação, sessão PostgreSQL multi-instância, credencial SQL restrita, migrações, storage cifrado de uploads, limites do parser/quotas e confirmação administrativa de importação estão implementados. Publicação permanece bloqueada até a integração institucional. Monitoramento operacional, decisões de retenção/publicação, agendamento protegido do expurgo e ensaio integral de backup/restauração permanecem necessários para homologação. A expiração de 24 horas dos arquivos é um controle técnico temporário; não constitui prazo jurídico de retenção dos beneficiários.

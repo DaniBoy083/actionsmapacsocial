@@ -6,3 +6,4 @@ psycopg[binary]==3.3.6
 httpx==0.28.1
 pydantic-settings==2.16.1
 cryptography==47.0.0
+PyMuPDF==2.0

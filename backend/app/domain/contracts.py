@@ -111,6 +111,7 @@ class ImportConfirmation(StrictModel):
     importacao_id: str
     acao_id: str
     registros: list[ImportRecord] = Field(min_length=1, max_length=200)
+    confirmacao_producao: bool = False
 
     @model_validator(mode="after")
     def reviewed(self) -> Self:

@@ -2,6 +2,8 @@
 
 A especificação `AC_ACTIONS_MAP_DOCUMENTACAO_AGENT.md` prevalece quando diverge do planejamento anterior: cadastro próprio de beneficiários, sem `usuario_id` clínico, sem tracking assistencial, N locais por ação. O pedido de desenvolvimento autoriza esta implementação local; não autoriza migrar/importar produção.
 
+**Atualização posterior:** o responsável autorizou o deploy conjunto, a persistência isolada e, após prévia nominal, a gravação em produção dos 32 registros conferidos do Programa Melhor Visão em Mamanguape. Essa carga foi realizada com backup e auditoria; 18 grafias permanecem pendentes. Os limites da descoberta inicial abaixo registram aquele momento, sem substituir essas autorizações posteriores. Consulte [deploy](DEPLOY_PRODUCAO.md) e [revisão atual](REVISAO_PRINCIPIOS_2026-10-26.md).
+
 ## Fontes realmente verificadas
 
 - Três documentos Markdown do projeto e as duas capturas em `docs/references/`. Login e shell seguem a paleta, composição, sidebar e footer dessas referências. Logotipo real reutilizado do repositório da Agenda Digital.

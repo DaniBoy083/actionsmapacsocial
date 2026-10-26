@@ -30,12 +30,14 @@ from app.infrastructure.actions import (
 )
 from app.infrastructure.database import get_engine, get_identity_engine
 from app.infrastructure.identity import IdentityRepository, verify_password
+from app.infrastructure.import_files import analyze_pdf, document_for
 from app.infrastructure.imports import metadata, render_page
 from app.infrastructure.models import (
     Action,
     Audit,
     Beneficiary,
     ImportBatch,
+    ImportDocument,
     Outbox,
     Participation,
     SessionRecord,
@@ -263,9 +265,12 @@ def beneficiary(
     identifier: str, data: BeneficiaryInput, professional: Professional = Depends(writer)
 ):
     with Session(get_engine()) as session, session.begin():
+        session.scalar(select(Action).where(Action.id == identifier).with_for_update())
         result = add_beneficiary(session, identifier, data, professional)
         row = action_or_404(session, identifier)
         row.versao += 1
+        row.status = "rascunho"
+        row.aprovado_por = row.publicado_por = None
         row.atualizado_em = datetime.now(UTC)
         session.flush()
         enqueue(session, row)
@@ -336,13 +341,26 @@ def require_batch(session: Session, identifier: str, professional: Professional)
 
 @router.get("/importacoes/{identifier}/paginas/{page}")
 def page_preview(
-    identifier: str, page: int, professional: Professional = Depends(current_professional)
+    identifier: str,
+    page: int,
+    rotacao: int = Query(0, ge=0, le=270, multiple_of=90),
+    professional: Professional = Depends(current_professional),
 ):
     with Session(get_engine()) as session, session.begin():
         batch = require_batch(session, identifier, professional)
         if not 1 <= page <= batch.paginas:
             raise HTTPException(404, "Página não encontrada.")
         audit(session, professional, "importacoes.page", identifier)
+        if session.get(ImportDocument, identifier):
+            _, document = document_for(session, identifier, professional)
+            if document.formato != "pdf":
+                raise HTTPException(422, "Este arquivo possui registros tabulares.")
+            content = cipher().decrypt(document.conteudo_cifrado.encode())
+            return Response(
+                analyze_pdf(content, page, rotacao),
+                media_type="image/jpeg",
+                headers={"Cache-Control": "no-store"},
+            )
     return Response(
         render_page(page), media_type="image/png", headers={"Cache-Control": "no-store"}
     )
@@ -350,12 +368,17 @@ def page_preview(
 
 @router.post("/importacoes/confirmar")
 def confirm(data: ImportConfirmation, professional: Professional = Depends(writer)):
-    if get_settings().production:
-        raise HTTPException(
-            503, "Importação de produção depende de autorização e storage homologado."
-        )
     with Session(get_engine()) as session, session.begin():
         batch = require_batch(session, data.importacao_id, professional)
+        uploaded = session.get(ImportDocument, batch.id)
+        if get_settings().production:
+            if not uploaded:
+                raise HTTPException(503, "Selecione e revise um arquivo na área Importar dados.")
+            if not data.confirmacao_producao:
+                raise HTTPException(422, "Confirme expressamente a importação em produção.")
+        if uploaded:
+            document_for(session, batch.id, professional)
+        session.scalar(select(Action).where(Action.id == data.acao_id).with_for_update())
         row = action_or_404(session, data.acao_id)
         included = existing = 0
         for record in data.registros:
@@ -375,14 +398,23 @@ def confirm(data: ImportConfirmation, professional: Professional = Depends(write
             existing += result == "existente"
         if included:
             row.versao += 1
+            row.status = "rascunho"
+            row.aprovado_por = row.publicado_por = None
             row.atualizado_em = datetime.now(UTC)
             session.flush()
             enqueue(session, row)
         audit(session, professional, "importacoes.confirmar", batch.id)
+        sources = [
+            hashlib.sha256(f"{batch.hash_arquivo}:{page}:{row.id}".encode()).hexdigest()
+            for page in range(1, batch.paginas + 1)
+        ]
+        processed = session.scalar(
+            select(func.count()).select_from(Participation).where(Participation.origem.in_(sources))
+        )
         return {
             "incluidos": included,
             "existentes": existing,
-            "pendentes": batch.paginas - len(data.registros),
+            "pendentes": batch.paginas - processed,
         }
 
 

@@ -12,7 +12,7 @@ import {
 import { api, dateLabel, errorMessage, type Indicators } from "@/lib/api";
 import { useSession } from "@/components/session-context";
 
-export function Overview({ indicators = false }: { indicators?: boolean }) {
+export function Overview() {
   const session = useSession();
   const query = useQuery({
     queryKey: ["indicadores"],
@@ -46,16 +46,8 @@ export function Overview({ indicators = false }: { indicators?: boolean }) {
     <>
       <div className="page-heading">
         <div>
-          <h1>
-            {indicators
-              ? "Indicadores das ações"
-              : `Olá, ${session.nome.split(" ")[0]}`}
-          </h1>
-          <p>
-            {indicators
-              ? "Acompanhe a presença institucional por município."
-              : "Uma visão das iniciativas e do alcance da AC Social na Paraíba."}
-          </p>
+          <h1>{`Olá, ${session.nome.split(" ")[0]}`}</h1>
+          <p>Uma visão das iniciativas e do alcance da AC Social na Paraíba.</p>
         </div>
         <Button
           component={Link}

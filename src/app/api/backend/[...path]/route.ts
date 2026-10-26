@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { backendUrl } from "@/lib/backend";
 const permitted =
-  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|tecnologia\/saude|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|[a-zA-Z0-9-]+\/paginas\/\d+))$/;
+  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|tecnologia\/saude|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|arquivos|[a-zA-Z0-9-]+(?:\/(preparar|paginas\/\d+|partes\/\d+))?))$/;
 async function proxy(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },
@@ -23,7 +23,7 @@ async function proxy(
   try {
     const url = new URL(`${backendUrl()}/api/v1/${targetPath}`);
     url.search = request.nextUrl.search;
-    let body: string | undefined;
+    let body: ArrayBuffer | undefined;
     if (!["GET", "HEAD"].includes(request.method) && request.body) {
       const reader = request.body.getReader();
       const chunks: Uint8Array[] = [];
@@ -41,7 +41,13 @@ async function proxy(
         }
         chunks.push(value);
       }
-      body = Buffer.concat(chunks).toString("utf8");
+      const binary = new Uint8Array(bytes);
+      let offset = 0;
+      for (const chunk of chunks) {
+        binary.set(chunk, offset);
+        offset += chunk.byteLength;
+      }
+      body = binary.buffer;
     }
     const upstream = await fetch(url, {
       method: request.method,
@@ -75,4 +81,10 @@ async function proxy(
     );
   }
 }
-export { proxy as GET, proxy as POST, proxy as PATCH, proxy as DELETE };
+export {
+  proxy as GET,
+  proxy as POST,
+  proxy as PUT,
+  proxy as PATCH,
+  proxy as DELETE,
+};

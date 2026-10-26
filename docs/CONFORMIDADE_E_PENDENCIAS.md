@@ -4,6 +4,8 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 
 **Atualização de produção:** após solicitação expressa de hospedagem do backend na própria Vercel, foram implementados Services, binding privado, schema PostgreSQL `actions_map`, migração Alembic e credencial restrita. O relato operacional atual está em [deploy de produção](DEPLOY_PRODUCAO.md); as pendências de integração com Agenda, importação produtiva e homologação continuam válidas.
 
+**Revisão posterior — importações e navegação:** Visão geral concentra os indicadores; a página redundante foi removida. Dados iniciais foi substituída por importação PDF/CSV/JSON com storage temporário cifrado e autorização expressa de produção. A descrição abaixo registra a primeira entrega; o estado atualizado, as correções e os limites estão em [revisão dos princípios](REVISAO_PRINCIPIOS_2026-10-26.md) e [importação por arquivos](IMPORTACAO_ARQUIVOS.md).
+
 | Requisito | Estado nesta entrega |
 | --- | --- |
 | Nome, identidade visual e referências | Implementados; logotipo existente, paleta, login, sidebar responsiva e footer único |
@@ -13,13 +15,13 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 | Tecnologia exclusiva, inclusive API direta | Implementado e testado; diagnóstico sanitizado sem exibição de tokens |
 | CRUD de ações e N locais PB | Implementado localmente; busca, filtros, paginação, versão/409, modal, edição e arquivamento confirmado |
 | Beneficiários gerais e auditoria | Cadastro/leitura local cifrados; edição, correção/remoção, associação de cadastro existente a outra ação e busca/deduplicação supervisionada ainda pendentes |
-| Importação histórica | Fonte autorizada local, prévia privada, revisão manual, lote idempotente; upload genérico/storage privado e OCR local opcional ainda pendentes |
-| PDF real | 50 páginas inspecionadas; nenhuma pessoa real importada ou transcrita nesta entrega |
-| Persistência PostgreSQL institucional | Schema `actions_map`, oito tabelas, revisão Alembic e credencial restrita provisionados; sem importação de pessoas |
+| Importação por arquivos | PDF/CSV/JSON, prévia privada, revisão manual, rotação, lote idempotente e storage temporário cifrado; OCR não é presumido, conciliação entre fontes continua pendente |
+| PDF real | Ação Melhor Visão/Mamanguape e 32 beneficiários/participações importados com autorização; 18 grafias pendentes; prévia e transcrições privadas fora do Git |
+| Persistência PostgreSQL institucional | Schema `actions_map`, dez tabelas, Alembic até `0003_private_file_import`, sessão distribuída e credencial restrita |
 | Aprovação e preview editorial | Rascunho → revisão → validada; edição retira aprovação; publicação permanece bloqueada |
 | Pipeline sem dados pessoais | DTO e outbox transacional implementados, envio/ACK/backoff testados com transporte simulado; receptor e fluxo externo pendentes |
 | Tokens e rotação | Exibe somente alias/escopo/status; provisionamento/rotação reforçados no secret manager ainda precisam de integração |
-| Indicadores | Ações distintas, participações, municípios e revisões; recorte municipal de ações sem duplicar total global; filtros analíticos avançados e pessoas únicas pendentes |
+| Visão geral e indicadores | Única página de métricas, ações distintas/participações/municípios/revisões; filtros analíticos avançados e pessoas únicas pendentes |
 | Not found e error page | `not-found.tsx`, `error.tsx` e `global-error.tsx`, português e recuperação sem detalhes internos |
 | LGPD / retenção / publicação | Minimização técnica inicial; decisões institucionais e validação independente ainda pendentes |
 | Legado e escritor único | Inventário/documentação; nenhuma migração ou retirada de CRUD executada |
@@ -35,8 +37,8 @@ Executar: `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd run build`, `npm
 
 ## Próxima sequência
 
-1. Revisar o modelo relacional final e os casos de uso restantes de beneficiários/importações; migrar a persistência local para schema institucional isolado com Alembic/grants aprovados.
-2. Definir conta ativa/SSO e sessão distribuída; confirmar formatos adicionais de hash legados e recuperação de acesso pela Agenda.
-3. Implementar upload privado, rotação de páginas, quotas, processamento limitado e correções/deduplicação supervisionadas. A primeira página e outras fichas do PDF estão giradas; a orientação do visualizador precisa ser ajustável.
+1. Completar casos de uso de correção/remoção e associação de beneficiários existentes, conciliação entre fontes e evolução relacional dos locais. Persistência institucional e Alembic/grants já foram implementados.
+2. Homologar revogação institucional, recuperação de acesso pela Agenda e eventual SSO. A sessão PostgreSQL distribuída, scrypt e revalidação de equipe/tipo já estão implementados.
+3. Agendar e monitorar o expurgo de arquivos, homologar retenção e conferir as 18 grafias pendentes. Upload privado, rotação, quotas e parser limitado já estão implementados; OCR local continua opcional e não autoriza inferir nomes.
 4. Implementar o receptor e a integração externa descritos em `AGENDA_DIGITAL_IMPLEMENTACAO.md`; homologar a governança editorial e métricas municipais/temporais.
 5. Testar backup/restauração, homologar privacidade/acessibilidade, conciliar legado e executar a virada com único escritor.

@@ -85,6 +85,23 @@ class ImportBatch(Base):
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class ImportDocument(Base):
+    __tablename__ = "acoes_map_documentos_importacao"
+    id: Mapped[str] = mapped_column(ForeignKey(ImportBatch.id), primary_key=True)
+    formato: Mapped[str] = mapped_column(String(8))
+    tamanho: Mapped[int] = mapped_column(Integer)
+    estado: Mapped[str] = mapped_column(String(20), default="recebendo")
+    conteudo_cifrado: Mapped[str | None] = mapped_column(Text)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class ImportChunk(Base):
+    __tablename__ = "acoes_map_partes_importacao"
+    documento_id: Mapped[str] = mapped_column(ForeignKey(ImportDocument.id), primary_key=True)
+    indice: Mapped[int] = mapped_column(Integer, primary_key=True)
+    conteudo_cifrado: Mapped[str] = mapped_column(Text)
+
+
 class Outbox(Base):
     __tablename__ = "acoes_map_integracoes_outbox"
     id: Mapped[str] = mapped_column(String(36), primary_key=True)

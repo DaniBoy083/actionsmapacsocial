@@ -7,7 +7,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMediaQuery } from "@mui/material";
 import {
   FiArrowUpRight,
-  FiBarChart2,
   FiChevronLeft,
   FiFilePlus,
   FiGrid,
@@ -38,8 +37,7 @@ export function AppShell({
   const links = [
     { href: "/dashboard", label: "Visão geral", icon: FiGrid },
     { href: "/acoes", label: "Ações institucionais", icon: FiMapPin },
-    { href: "/dados-iniciais", label: "Dados iniciais", icon: FiFilePlus },
-    { href: "/indicadores", label: "Indicadores", icon: FiBarChart2 },
+    { href: "/importacoes", label: "Importar dados", icon: FiFilePlus },
     ...(session.equipe === "tecnologia"
       ? [
           {

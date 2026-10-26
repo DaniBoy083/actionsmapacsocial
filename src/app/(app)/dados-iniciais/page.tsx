@@ -1,4 +1,4 @@
-import { ImportWizard } from "@/features/imports/import-wizard";
+import { permanentRedirect } from "next/navigation";
 export default function InitialDataPage() {
-  return <ImportWizard />;
+  permanentRedirect("/importacoes");
 }

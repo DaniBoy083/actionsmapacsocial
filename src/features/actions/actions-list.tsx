@@ -99,11 +99,11 @@ export function ActionsList() {
         <div className="actions-row">
           <Button
             component={Link}
-            href="/dados-iniciais"
+            href="/importacoes"
             variant="outlined"
             startIcon={<FiFilePlus />}
           >
-            Cadastrar dados iniciais
+            Importar dados de arquivo
           </Button>
           <Button
             variant="contained"

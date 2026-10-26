@@ -660,6 +660,19 @@
               "type": "integer",
               "title": "Page"
             }
+          },
+          {
+            "name": "rotacao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "multipleOf": 90,
+              "maximum": 270,
+              "minimum": 0,
+              "default": 0,
+              "title": "Rotacao"
+            }
           }
         ],
         "responses": {
@@ -730,6 +743,192 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/importacoes/arquivos": {
+      "post": {
+        "summary": "Start File",
+        "operationId": "start_file_api_v1_importacoes_arquivos_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileStart"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/importacoes/{identifier}/partes/{index}": {
+      "put": {
+        "summary": "Upload Chunk",
+        "operationId": "upload_chunk_api_v1_importacoes__identifier__partes__index__put",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Identifier"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Index"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/importacoes/{identifier}/preparar": {
+      "post": {
+        "summary": "Prepare File",
+        "operationId": "prepare_file_api_v1_importacoes__identifier__preparar_post",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Identifier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/importacoes/{identifier}": {
+      "get": {
+        "summary": "Get File",
+        "operationId": "get_file_api_v1_importacoes__identifier__get",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Identifier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove File",
+        "operationId": "remove_file_api_v1_importacoes__identifier__delete",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Identifier"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -852,6 +1051,38 @@
         ],
         "title": "BeneficiaryInput"
       },
+      "FileStart": {
+        "properties": {
+          "formato": {
+            "type": "string",
+            "enum": [
+              "pdf",
+              "csv",
+              "json"
+            ],
+            "title": "Formato"
+          },
+          "tamanho": {
+            "type": "integer",
+            "maximum": 8388608.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Tamanho"
+          },
+          "hash_arquivo": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Hash Arquivo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "formato",
+          "tamanho",
+          "hash_arquivo"
+        ],
+        "title": "FileStart"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -883,6 +1114,11 @@
             "maxItems": 200,
             "minItems": 1,
             "title": "Registros"
+          },
+          "confirmacao_producao": {
+            "type": "boolean",
+            "title": "Confirmacao Producao",
+            "default": false
           }
         },
         "additionalProperties": false,

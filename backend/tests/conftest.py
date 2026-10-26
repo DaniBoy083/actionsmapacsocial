@@ -56,6 +56,7 @@ def api_client(tmp_path, monkeypatch):
     app.dependency_overrides[identities] = lambda: repo
     monkeypatch.setattr("app.security.session.get_engine", lambda: engine)
     monkeypatch.setattr("app.api.routes.get_engine", lambda: engine)
+    monkeypatch.setattr("app.api.import_files.get_engine", lambda: engine)
     with TestClient(app, raise_server_exceptions=False) as client:
         yield client, engine, repo
     app.dependency_overrides.clear()
