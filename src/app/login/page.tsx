@@ -45,6 +45,7 @@ export default function LoginPage() {
           <Image
             className="brand-image"
             src="/logo-ac-social.png"
+            unoptimized
             alt="AC Social"
             width={80}
             height={80}

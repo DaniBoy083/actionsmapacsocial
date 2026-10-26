@@ -40,6 +40,8 @@ O build do FastAPI executa `python -m app.check_deployment`, que valida produç�
 
 Validação local: 38 testes backend, 10 cenários de navegador em desktop/celular, lint, TypeScript e build. O Playwright usa `next start` do build compilado nas portas 3100/8100 para não interromper o `next dev` do usuário.
 
+Verificação do deploy publicado: login e healthcheck HTTP 200, API sem sessão HTTP 401, credenciais deliberadamente inválidas HTTP 401 e navegação protegida redirecionando ao login. Nenhuma credencial real foi usada no teste de autenticação. O logotipo institucional de 4,8 KB é servido diretamente: sua URL estática responde 200, enquanto a otimização de imagens retornava 404 na configuração com Services.
+
 O GitHub Actions não executou os jobs por bloqueio de faturamento da conta, conforme anotação do próprio GitHub. Essa pendência externa precisa ser regularizada no GitHub; não é falha do código nem foi resolvida alterando o workflow.
 
 Importação histórica em produção, storage privado de uploads, integração receptora da Agenda, publicação no Portal, rotação operacional, testes de restauração e homologação institucional permanecem pendentes. A presença do frontend/API na Vercel não equivale ao aceite integral do MVP ou a certificação de privacidade.

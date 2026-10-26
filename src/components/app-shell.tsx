@@ -95,6 +95,7 @@ export function AppShell({
               <>
                 <Image
                   src="/logo-ac-social.png"
+                  unoptimized
                   alt="AC Social"
                   width={48}
                   height={48}
