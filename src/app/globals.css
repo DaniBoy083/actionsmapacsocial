@@ -41,6 +41,10 @@ a {
   outline: 3px solid #65111f;
   outline-offset: 4px;
 }
+/* O campo MUI já indica foco na borda externa; evita um segundo contorno no input. */
+.login-fields .MuiInputBase-input:focus-visible {
+  outline: none;
+}
 .skip-link {
   position: fixed;
   z-index: 2000;
