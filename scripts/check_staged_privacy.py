@@ -30,7 +30,8 @@ if bad_paths:
     sys.exit(1)
 diff = subprocess.check_output(["git", "diff", "--cached", "--no-ext-diff"], cwd=root)
 config = {
-    **dotenv_values(root / ".env"), **dotenv_values(root / ".env.local"),
+    **dotenv_values(root / ".env"),
+    **dotenv_values(root / ".env.local"),
     **dotenv_values(root / "artifacts/production-config.env"),
 }
 secrets = [

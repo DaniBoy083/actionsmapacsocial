@@ -119,12 +119,17 @@ def main() -> int:
         )
         raw.execute(
             sql.SQL(
-                "GRANT SELECT (id,email,password,display_name,user_type) ON public.profissionais_cadastrados TO {}"
+                "GRANT EXECUTE ON FUNCTION actions_map.authentication_identity(text,boolean) TO {}"
             ).format(sql.Identifier(ROLE))
         )
         raw.execute(
             sql.SQL(
-                "GRANT SELECT (name,professional_ids_json) ON public.equipes_profissionais TO {}"
+                "REVOKE SELECT (id,email,password,display_name,user_type) ON public.profissionais_cadastrados FROM {}"
+            ).format(sql.Identifier(ROLE))
+        )
+        raw.execute(
+            sql.SQL(
+                "REVOKE SELECT (name,professional_ids_json) ON public.equipes_profissionais FROM {}"
             ).format(sql.Identifier(ROLE))
         )
         raw.execute(sql.SQL("REVOKE ALL ON SCHEMA actions_map FROM PUBLIC"))
@@ -168,7 +173,7 @@ def main() -> int:
         assert connection.scalar(text("SELECT 1")) == 1
         assert (
             connection.scalar(text("SELECT version_num FROM actions_map.alembic_version"))
-            == "0001_actions_map"
+            == "0002_authentication_lookup"
         )
         assert connection.scalar(text("SELECT count(*) FROM actions_map.acoes_map_acoes")) == 0
     print(

@@ -1,8 +1,11 @@
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
+import pytest
 from app.check_deployment import check
 from app.config import Settings
+from app.infrastructure.identity import IdentityRepository
 from app.infrastructure.models import LoginLimit
 from cryptography.fernet import Fernet
 from sqlalchemy.dialects import postgresql
@@ -52,3 +55,60 @@ def test_backend_remains_private_and_frontend_has_binding():
     assert [
         item["source"] for item in config["rewrites"] if item["destination"]["service"] == "backend"
     ] == ["/api/v1/health"]
+
+
+def test_authentication_lookup_preserves_rls_and_restricts_public_access():
+    root = Path(__file__).resolve().parents[1] / "alembic/versions"
+    sql = (root / "0002_authentication_lookup.sql").read_text(encoding="utf-8")
+    migration = (root / "0002_authentication_lookup.py").read_text(encoding="utf-8")
+    assert "SECURITY DEFINER" in sql and "STABLE" in sql
+    assert "SET search_path = pg_catalog, pg_temp" in sql
+    assert "LIMIT 2" in sql and "lookup_value" in sql
+    assert "DISABLE ROW" not in sql and "CREATE POLICY" not in sql
+    assert "FROM PUBLIC" in migration
+
+
+@pytest.mark.parametrize("by_id", [False, True])
+def test_production_identity_uses_bound_delegated_lookup(monkeypatch, by_id):
+    calls = []
+
+    class Connection:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def begin(self):
+            return self
+
+        def execute(self, statement, parameters=None):
+            calls.append((str(statement), parameters))
+            return SimpleNamespace(
+                mappings=lambda: SimpleNamespace(
+                    all=lambda: [
+                        {
+                            "id": "synthetic-id",
+                            "display_name": "Pessoa Sintética",
+                            "user_type": "administracao",
+                            "password": "synthetic-not-a-real-digest",
+                            "teams": ["Tecnologia"],
+                        }
+                    ]
+                )
+            )
+
+    monkeypatch.setattr(
+        "app.infrastructure.identity.get_settings", lambda: SimpleNamespace(production=True)
+    )
+    monkeypatch.setattr(
+        "app.infrastructure.identity.get_identity_engine",
+        lambda: SimpleNamespace(connect=Connection),
+    )
+    value = "synthetic-id" if by_id else "test@example.invalid"
+    identity = IdentityRepository().find(value, by_id=by_id)
+    assert identity[0].allowed
+    assert calls[-1] == (
+        "SELECT * FROM actions_map.authentication_identity(:value, :by_id)",
+        {"value": value, "by_id": by_id},
+    )

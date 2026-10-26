@@ -4,6 +4,7 @@ import re
 
 from sqlalchemy import text
 
+from app.config import get_settings
 from app.domain.contracts import Professional, normalize
 from app.infrastructure.database import get_identity_engine
 
@@ -21,10 +22,16 @@ class IdentityRepository:
             ON e.professional_ids_json @> jsonb_build_array(p.id)
           WHERE {column} = :value GROUP BY p.id LIMIT 2
         """)
+        params = {"value": value}
+        if get_settings().production:
+            # RLS do cadastro mestre permanece ativo. O runtime só recebe EXECUTE
+            # em uma consulta vinculada a identificador, sem SELECT direto no cadastro.
+            query = text("SELECT * FROM actions_map.authentication_identity(:value, :by_id)")
+            params["by_id"] = by_id
         with get_identity_engine().connect() as conn, conn.begin():
             conn.execute(text("SET TRANSACTION READ ONLY"))
             conn.execute(text("SET LOCAL statement_timeout = '8s'"))
-            rows = conn.execute(query, {"value": value}).mappings().all()
+            rows = conn.execute(query, params).mappings().all()
         if len(rows) != 1:
             return None
         row = rows[0]
