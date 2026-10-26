@@ -1,0 +1,15 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = [".venv"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Objetos imutáveis de dependência: padrão explícito do FastAPI.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/conftest.py" = ["E402"]
+"tests/browser_server.py" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

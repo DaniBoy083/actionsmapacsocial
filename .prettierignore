@@ -1,0 +1,9 @@
+node_modules
+.next
+/backend/
+docs/contracts
+docs/data
+artifacts
+tmp
+test-results
+package-lock.json

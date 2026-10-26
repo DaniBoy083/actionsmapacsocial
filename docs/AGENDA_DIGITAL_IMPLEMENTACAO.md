@@ -1,0 +1,93 @@
+# Implementação necessária na Agenda Digital
+
+## Estado e responsabilidade
+
+Esta entrega modifica somente o AC Actions Map. **A Agenda ainda não recebe os resumos.** O código existente da Agenda exporta análises por GET (`/api/analytics` e `/api/analytics/atendimentos`); essa exportação não deve ser confundida com uma API de ingestão. Não houve alteração, commit ou deploy nos repositórios vizinhos.
+
+Fluxo obrigatório: **AC Actions Map → Agenda Digital → Plataforma Consolidada de Dados → Portal Institucional**. O módulo não chama diretamente a Plataforma ou o Portal para publicar. Não transportar beneficiários ou identidades de profissionais no pipeline.
+
+## 1. Receptor versionado proposto
+
+Implementar `POST /api/integracoes/v1/acoes/resumos` no backend da Agenda. Trata-se de um contrato **proposto**, a compatibilizar com os padrões institucionais e aprovar antes de ativação.
+
+Headers obrigatórios: `Authorization: Bearer <credencial de serviço>`, `Idempotency-Key`, `Content-Type: application/json`. Somente HTTPS; token exclusivo por aplicação/ambiente, escopo `acoes.resumos.write`, rotação/revogação com auditoria e autorização reforçada. Guardar hash do token no receptor; nunca registrar headers ou o corpo completo.
+
+Payload de exemplo sintético:
+
+```json
+{
+  "schema_version": "1.0",
+  "event_id": "d2e316e8-e289-4289-ae29-32d4cb73eaaf",
+  "source": "ac-actions-map",
+  "acao_id": "7b94c4ed-ddbc-40b1-a695-2b48137f979c",
+  "revisao": 2,
+  "operacao": "upsert",
+  "categoria": "mobilizacao",
+  "inicio_em": "2026-10-01",
+  "fim_em": null,
+  "municipios_ibge": ["2507507", "2504009"],
+  "quantidade_acoes": 1,
+  "quantidade_participacoes": 12,
+  "publicavel": false
+}
+```
+
+O schema executável está em `backend/app/domain/contracts.py` (`Summary`); a API privada em `docs/contracts/actions-map.openapi.json`. `acao_id` é exclusivamente um ID técnico da ação, nunca de beneficiário. `publicavel` permanece `false` nesta etapa. Títulos e resumos editoriais públicos ainda exigem contrato separado/estendido com revisão; não são enviados por este worker.
+
+Rejeitar campos extras em **todas as profundidades**, tipos inválidos, municípios fora do catálogo PB, quantidades negativas, fonte/versão desconhecida e corpo excessivo. Não aceitar listas de pessoas, nomes, CPF, nascimento, telefone, e-mail, endereços privados, prontuários ou `usuario_id`.
+
+## 2. Recebimento transacional e idempotência
+
+1. Autenticar/autorizar a credencial e aplicar limite de requisições por cliente.
+2. Validar esquema e calcular hash canônico do conteúdo.
+3. Gravar na mesma transação: inbox (evento + chave + hash + origem), snapshot corrente da ação por fonte/ID/revisão e outbox para a Plataforma.
+4. Constraint única por `(cliente, idempotency_key)` e por `(source, event_id)`. Mesmo evento/chave com conteúdo diferente retorna **409**. Concorrência deve usar constraint SQL, não só verificação prévia.
+5. Retry com conteúdo idêntico devolve o mesmo reconhecimento sem gerar outro efeito.
+6. Somente após commit, responder 200/202 com o ACK abaixo. Um 2xx vazio não confirma entrega para o worker atual.
+
+```json
+{
+  "schema_version": "1.0",
+  "event_id": "d2e316e8-e289-4289-ae29-32d4cb73eaaf",
+  "status": "accepted"
+}
+```
+
+Para repetição legítima, `status: "duplicate"`. Falhas de autenticação: 401; escopo: 403; esquema: 422; conflito: 409; limite: 429; indisponibilidade temporária: 503. Erros sanitizados, sem refletir conteúdo sensível. A fila do Map retenta com backoff, até dez tentativas; não bloqueia o cadastro da ação. Adicionar replay manual auditável e reconciliação antes de produção.
+
+## 3. Semântica e ordenação
+
+Os eventos são **snapshots de substituição**, não incrementos. Upsert pela chave `(source, acao_id)` somente se `revisao` for maior que a vigente. Uma revisão antiga entregue depois de uma nova é reconhecida/armazenada sem substituir o snapshot recente. Não somar eventos nem revisões para calcular indicadores.
+
+- Uma ação em três municípios é **uma ação global**, com presença em três recortes municipais.
+- `quantidade_participacoes` é total global da ação. **Não dividir nem replicar como total de beneficiários por município.** Ainda não existe recorte municipal seguro de participações neste contrato.
+- `operacao: "archive"` substitui o snapshot anterior e informa zero nas quantidades ativas. Preservar auditoria e evitar reaparecimento por evento antigo.
+- Registros de participação não equivalem a pessoas únicas. Não deduplicar por nome nem somar com atendimentos clínicos exportados pela Agenda.
+- O campo `publicavel` é uma elegibilidade técnica futura, não aprovação automática da Plataforma. Suprimir células pequenas e combinações de risco conforme governança aprovada; não fixar um limiar sem validação institucional.
+
+## 4. Encaminhamento para a Plataforma
+
+Inventariar com a equipe responsável o contrato real Agenda → Plataforma. A API GET de analytics existente deve continuar compatível. Acrescentar uma fonte de ações separada do conjunto de atendimentos clínicos, com contadores/documentação próprios. Se o destino trabalhar por pull, oferecer endpoint privado de snapshots e cursor/revisão; se por push, usar outbox com ACK e idempotência equivalentes. Essa escolha ainda não foi confirmada.
+
+Na Plataforma: versionar a ingestão, reconciliar fonte/eventos, aprovar conteúdo público e implementar projeção por allowlist. Somente a API pública da Plataforma alimentará o Portal. Planejar retirada do CRUD antigo do Portal com um único escritor e rollback da origem de leitura.
+
+## 5. Identidade e operação na Agenda
+
+- Preservar `profissionais_cadastrados`, `user_type=administracao` e vínculo real de equipes. O Map já consulta esses dados sem criar senha paralela.
+- Documentar uma estratégia explícita de conta ativa/revogação; o schema atual verificado não possui flag de atividade.
+- Se for escolhido SSO entre aplicações, definir emissão/validação de sessão e audiência; não compartilhar cookies ou segredos por cópia informal. O Map usa sessão própria, com as mesmas credenciais institucionais.
+- Provisionar URL pública da Agenda para o atalho `AGENDA_WEB_URL`. Sem URL confirmada o atalho não aponta para destino inventado.
+- Diagnóstico de Tecnologia: eventos recebidos, pendentes/entregues, última confirmação, quantidade de tentativas e códigos seguros de erro. Administração não consulta tokens ou diagnósticos técnicos.
+
+## 6. Aceite antes de ativar
+
+- [ ] Endpoint, esquema, fonte e credenciais homologados em staging.
+- [ ] Reenvio idêntico produz um efeito; conteúdo divergente gera 409.
+- [ ] Entrega fora de ordem não restaura snapshot antigo; arquivamento remove totais ativos.
+- [ ] Município múltiplo não duplica o total global e não distribui participações indevidamente.
+- [ ] Banco/Agenda/Plataforma indisponíveis preservam operações e retomam com backoff.
+- [ ] Nenhum campo nominal, identificador individual ou dado clínico atravessa o fluxo.
+- [ ] Logs, rotação/revogação, monitoramento e replay auditável testados.
+- [ ] Backups/restauração e rollback testados; responsáveis aprovam a virada do escritor do Portal.
+
+Depois da homologação, configurar no **backend** do Map `AGENDA_SUMMARIES_URL` e `AGENDA_SERVICE_TOKEN`. Executar um único worker: `python -m app.infrastructure.outbox`, com `PYTHONPATH=backend`, inicialmente em staging. Não configurar isso no navegador. A implementação SQLite local ainda não oferece coordenação de múltiplos workers; a versão PostgreSQL deverá usar locking/lease e `SKIP LOCKED`.

@@ -31,8 +31,21 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env
-.env.local
+.env*
+!.env.example
+!.env.exemple
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+*.sqlite3
+*.sqlite3-*
+/tmp/
+/artifacts/
+/test-results/
+/playwright-report/
+/backend/private/
+# Documentos de beneficiários permanecem privados e fora de novos commits.
+/docs/data/*.pdf
 
 # vercel
 .vercel

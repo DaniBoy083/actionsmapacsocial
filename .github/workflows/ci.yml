@@ -1,0 +1,25 @@
+name: Qualidade
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm.cmd ci
+      - run: python -m venv backend/.venv
+      - run: backend/.venv/Scripts/python.exe -m pip install -r backend/requirements.txt
+      - run: backend/.venv/Scripts/python.exe scripts/setup_local.py
+      - run: npm.cmd run lint
+      - run: npm.cmd run typecheck
+      - run: backend/.venv/Scripts/python.exe -m ruff check --config backend/pyproject.toml backend/app backend/tests scripts
+      - run: npm.cmd run test:backend
+      - run: npm.cmd run build
+      - run: npx.cmd playwright install chromium
+      - run: npm.cmd run test:e2e

@@ -1,0 +1,103 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "source": {
+      "const": "ac-actions-map",
+      "default": "ac-actions-map",
+      "title": "Source",
+      "type": "string"
+    },
+    "acao_id": {
+      "title": "Acao Id",
+      "type": "string"
+    },
+    "revisao": {
+      "minimum": 1,
+      "title": "Revisao",
+      "type": "integer"
+    },
+    "operacao": {
+      "default": "upsert",
+      "enum": [
+        "upsert",
+        "archive"
+      ],
+      "title": "Operacao",
+      "type": "string"
+    },
+    "categoria": {
+      "title": "Categoria",
+      "type": "string"
+    },
+    "inicio_em": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Inicio Em"
+    },
+    "fim_em": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Fim Em"
+    },
+    "municipios_ibge": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Municipios Ibge",
+      "type": "array"
+    },
+    "quantidade_acoes": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Quantidade Acoes",
+      "type": "integer"
+    },
+    "quantidade_participacoes": {
+      "minimum": 0,
+      "title": "Quantidade Participacoes",
+      "type": "integer"
+    },
+    "publicavel": {
+      "default": false,
+      "title": "Publicavel",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "event_id",
+    "acao_id",
+    "revisao",
+    "categoria",
+    "inicio_em",
+    "fim_em",
+    "municipios_ibge",
+    "quantidade_acoes",
+    "quantidade_participacoes"
+  ],
+  "title": "Summary",
+  "type": "object"
+}
