@@ -2,7 +2,8 @@ from functools import lru_cache
 from pathlib import Path
 
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Engine, make_url
+from sqlalchemy.pool import NullPool
 
 from app.config import get_settings
 
@@ -12,7 +13,11 @@ def institutional_engine(url: str) -> Engine:
         "postgresql://", "postgresql+psycopg://", 1
     )
     return create_engine(
-        url, hide_parameters=True, pool_pre_ping=True, connect_args={"connect_timeout": 8}
+        url,
+        hide_parameters=True,
+        pool_pre_ping=True,
+        poolclass=NullPool,
+        connect_args={"connect_timeout": 8},
     )
 
 
@@ -28,9 +33,20 @@ def get_identity_engine() -> Engine:
 def get_engine() -> Engine:
     config = get_settings()
     url = config.actions_storage_url
+    if config.production:
+        url = config.database_url.get_secret_value()
+        parsed = make_url(url)
+        if parsed.drivername not in {
+            "postgres",
+            "postgresql",
+            "postgresql+psycopg",
+        } or parsed.query.get("sslmode") not in {"require", "verify-ca", "verify-full"}:
+            raise RuntimeError("Produção exige PostgreSQL com TLS.")
+        # Schema isolado; nunca cria tabelas no startup ou modifica a identidade institucional.
+        return institutional_engine(url).execution_options(
+            schema_translate_map={None: "actions_map"}
+        )
     if url.startswith("sqlite:"):
-        if config.production:
-            raise RuntimeError("Produção exige persistência institucional revisada.")
         if ":memory:" not in url:
             Path(url.removeprefix("sqlite:///")).parent.mkdir(parents=True, exist_ok=True)
         engine = create_engine(url, connect_args={"check_same_thread": False}, hide_parameters=True)

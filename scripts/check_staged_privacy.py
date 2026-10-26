@@ -29,7 +29,10 @@ if bad_paths:
     print("PRIVACY_ERRO: arquivo privado no staging.")
     sys.exit(1)
 diff = subprocess.check_output(["git", "diff", "--cached", "--no-ext-diff"], cwd=root)
-config = {**dotenv_values(root / ".env"), **dotenv_values(root / ".env.local")}
+config = {
+    **dotenv_values(root / ".env"), **dotenv_values(root / ".env.local"),
+    **dotenv_values(root / "artifacts/production-config.env"),
+}
 secrets = [
     value.encode()
     for name, value in config.items()

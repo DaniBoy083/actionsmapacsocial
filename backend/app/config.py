@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import SecretStr
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -13,7 +13,12 @@ class Settings(BaseSettings):
         extra="ignore",
     )
     app_env: str = "development"
-    database_url: SecretStr = SecretStr("")
+    database_url: SecretStr = Field(
+        default=SecretStr(""),
+        validation_alias=AliasChoices(
+            "ACTIONS_DATABASE_URL", "DATABASE_URL", "POSTGRES_DATABASE_URL", "POSTGRES_URL"
+        ),
+    )
     actions_storage_url: str = "sqlite:///" + (ROOT / "backend/private/actions.sqlite3").as_posix()
     session_secret: SecretStr = SecretStr("")
     beneficiaries_key: SecretStr = SecretStr("")

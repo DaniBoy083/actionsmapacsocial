@@ -406,7 +406,9 @@ def technical_health(_professional: Professional = Depends(technologist)):
         "banco": status,
         "latencia_ms": round((time.monotonic() - started) * 1000),
         "api": "API_OK",
-        "armazenamento": "local isolado",
+        "armazenamento": "PostgreSQL institucional / actions_map"
+        if config.production
+        else "local isolado",
         "agenda": "CONFIG_PENDENTE" if not config.agenda_summaries_url else "NAO_VERIFICADA",
         "fila_pendente": pending,
         "ultima_confirmacao": delivered,

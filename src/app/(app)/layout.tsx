@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import type { Session } from "@/lib/api";
+import { backendUrl } from "@/lib/backend";
 // A verificação da identidade sempre aguarda a sessão atual do servidor.
 export const instant = false;
 async function SessionGate({ children }: { children: React.ReactNode }) {
@@ -10,17 +11,11 @@ async function SessionGate({ children }: { children: React.ReactNode }) {
   if (!token) redirect("/login");
   let response: Response;
   try {
-    response = await fetch(
-      new URL(
-        "/api/v1/auth/me",
-        process.env.ACTIONS_API_URL || "http://127.0.0.1:8000",
-      ),
-      {
-        headers: { Cookie: `ac_actions_session=${token.value}` },
-        cache: "no-store",
-        signal: AbortSignal.timeout(12_000),
-      },
-    );
+    response = await fetch(`${backendUrl()}/api/v1/auth/me`, {
+      headers: { Cookie: `ac_actions_session=${token.value}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(12_000),
+    });
   } catch {
     return (
       <main id="conteudo" className="error-scene">

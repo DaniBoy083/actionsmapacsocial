@@ -4,7 +4,7 @@ Primeira entrega de desenvolvimento para gestão de ações institucionais e reg
 
 Inclui login institucional, autorização no backend, dashboard, CRUD de ações com N locais da Paraíba, beneficiários cifrados, revisão manual/idempotente do documento histórico, indicadores, outbox e diagnóstico exclusivo de Tecnologia, páginas 404/erro e documentação de integração.
 
-**Estado:** armazenamento operacional local isolado. PostgreSQL institucional usado somente para leitura da identidade; nenhuma migração, importação de pessoas reais, publicação externa ou deploy foi executado. Receptor da Agenda e persistência institucional do módulo ainda precisam de implementação/homologação. Consulte [conformidade e pendências](docs/CONFORMIDADE_E_PENDENCIAS.md).
+**Estado:** desenvolvimento com SQLite isolado; produção preparada para Next.js + FastAPI no mesmo projeto Vercel, com PostgreSQL institucional em schema próprio e credencial restrita. Consulte [deploy de produção](docs/DEPLOY_PRODUCAO.md) e [conformidade e pendências](docs/CONFORMIDADE_E_PENDENCIAS.md). Nenhuma pessoa real foi importada e a integração receptora da Agenda permanece pendente.
 
 ## Rodar localmente no Windows
 
@@ -15,7 +15,7 @@ Preparação inicial:
 ```powershell
 npm.cmd ci
 python -m venv backend/.venv
-.\backend\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
+.\backend\.venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
 .\backend\.venv\Scripts\python.exe scripts/setup_local.py
 ```
 
@@ -37,7 +37,7 @@ Abra **http://localhost:3000**. Entre com o e-mail/senha institucionais de profi
 
 Não troque `localhost` por `127.0.0.1` no navegador sem atualizar `FRONTEND_ORIGIN`. O host/origem exatos fazem parte da proteção CSRF. `ACTIONS_API_URL` é configuração privada do Next; `DATABASE_URL`, `SESSION_SECRET`, `BENEFICIARIES_KEY` e o token da Agenda nunca recebem prefixo `NEXT_PUBLIC_`.
 
-Os cadastros ficam em `backend/private/actions.sqlite3`, ignorado pelo Git. Preserve o banco e `BENEFICIARIES_KEY` em backup controlado; perder/trocar a chave impede ler nomes já cifrados. Este banco é distinto da conexão institucional e a inicialização não cria tabelas no PostgreSQL. `APP_ENV=production` bloqueia o armazenamento SQLite até a implementação institucional homologada.
+Localmente, os cadastros ficam em `backend/private/actions.sqlite3`, ignorado pelo Git. Preserve o banco e `BENEFICIARIES_KEY` em backup controlado; perder/trocar a chave impede ler nomes já cifrados. A inicialização local não cria tabelas no PostgreSQL. Em produção, `APP_ENV=production` exige PostgreSQL/TLS e usa o schema `actions_map`; a migração administrativa não é executada no startup.
 
 O assistente histórico lê a fonte privada já fornecida em `docs/data/ilovepdf_merged.pdf`; num novo clone esse arquivo não é distribuído. Sem a fonte, a interface informa indisponibilidade. Não colocar fichas em `/public` nem versionar transcrições. A revisão é manual, página a página, sem OCR externo. Upload genérico ainda está pendente.
 
@@ -55,7 +55,7 @@ npx.cmd playwright install chromium
 npm.cmd run test:e2e
 ```
 
-Playwright inicia frontend/backend próprios nas portas **3100/8100**, usa identidades sintéticas, documento sintético e SQLite temporário. Nenhum cadastro real é necessário e não há gravação institucional. Essas portas devem estar livres. O Chromium é baixado apenas na preparação do ambiente. Capturas/relatórios ficam ignorados em `artifacts/` e `test-results/`.
+Playwright inicia frontend compilado/backend próprios nas portas **3100/8100**; execute `npm.cmd run build` antes. Usa identidades sintéticas, documento sintético e SQLite temporário. Nenhum cadastro real é necessário e não há gravação institucional. Essas portas devem estar livres. O Chromium é baixado apenas na preparação do ambiente. Capturas/relatórios ficam ignorados em `artifacts/` e `test-results/`.
 
 Para executar o frontend compilado, mantenha o backend aberto e use `npm.cmd run build`, depois `npm.cmd start`. Isso permite testar o build local; não significa que o sistema está homologado para produção.
 
@@ -71,6 +71,7 @@ A API local oferece documentação em **http://127.0.0.1:8000/docs**. O diagnós
 
 - [Descoberta, fontes verificadas e inventário de campos](docs/DESCOBERTA_E_CAMPOS.md)
 - [Arquitetura e limites desta entrega](docs/ARQUITETURA.md)
+- [Deploy Next.js + FastAPI na mesma Vercel](docs/DEPLOY_PRODUCAO.md)
 - [O que implementar na Agenda Digital](docs/AGENDA_DIGITAL_IMPLEMENTACAO.md)
 - [Privacidade, retenção e plano de migração](docs/PRIVACIDADE_E_MIGRACAO.md)
 - [Conformidade e próximos incrementos](docs/CONFORMIDADE_E_PENDENCIAS.md)

@@ -2,6 +2,8 @@
 
 Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP institucional nem certificação de conformidade absoluta. A especificação específica do AC Actions Map prevalece sobre as decisões conflitantes do planejamento anterior.
 
+**Atualização de produção:** após solicitação expressa de hospedagem do backend na própria Vercel, foram implementados Services, binding privado, schema PostgreSQL `actions_map`, migração Alembic e credencial restrita. O relato operacional atual está em [deploy de produção](DEPLOY_PRODUCAO.md); as pendências de integração com Agenda, importação produtiva e homologação continuam válidas.
+
 | Requisito | Estado nesta entrega |
 | --- | --- |
 | Nome, identidade visual e referências | Implementados; logotipo existente, paleta, login, sidebar responsiva e footer único |
@@ -13,7 +15,7 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 | Beneficiários gerais e auditoria | Cadastro/leitura local cifrados; edição, correção/remoção, associação de cadastro existente a outra ação e busca/deduplicação supervisionada ainda pendentes |
 | Importação histórica | Fonte autorizada local, prévia privada, revisão manual, lote idempotente; upload genérico/storage privado e OCR local opcional ainda pendentes |
 | PDF real | 50 páginas inspecionadas; nenhuma pessoa real importada ou transcrita nesta entrega |
-| Persistência PostgreSQL institucional | Somente identidade/metadados lidos; tabelas novas/grants/migração Alembic ainda pendentes de revisão |
+| Persistência PostgreSQL institucional | Schema `actions_map`, oito tabelas, revisão Alembic e credencial restrita provisionados; sem importação de pessoas |
 | Aprovação e preview editorial | Rascunho → revisão → validada; edição retira aprovação; publicação permanece bloqueada |
 | Pipeline sem dados pessoais | DTO e outbox transacional implementados, envio/ACK/backoff testados com transporte simulado; receptor e fluxo externo pendentes |
 | Tokens e rotação | Exibe somente alias/escopo/status; provisionamento/rotação reforçados no secret manager ainda precisam de integração |
@@ -21,7 +23,7 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 | Not found e error page | `not-found.tsx`, `error.tsx` e `global-error.tsx`, português e recuperação sem detalhes internos |
 | LGPD / retenção / publicação | Minimização técnica inicial; decisões institucionais e validação independente ainda pendentes |
 | Legado e escritor único | Inventário/documentação; nenhuma migração ou retirada de CRUD executada |
-| Produção / backups / restauração | Não habilitados nem certificados nesta etapa |
+| Produção / backups / restauração | Hospedagem conjunta e persistência preparadas; restauração integral e homologação continuam pendentes |
 
 ## Verificações
 

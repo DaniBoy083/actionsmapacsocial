@@ -27,7 +27,7 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: "npm.cmd run dev -- --port 3100",
+      command: "npm.cmd run start -- --port 3100",
       url: "http://localhost:3100/login",
       env: {
         ACTIONS_API_URL: "http://127.0.0.1:8100",

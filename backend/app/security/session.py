@@ -5,7 +5,8 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy import delete
-from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -44,11 +45,13 @@ def enforce_origin(request: Request) -> None:
 def consume_login(identifier: str, address: str) -> None:
     now = datetime.now(UTC)
     allowed = True
-    with Session(get_engine()) as session, session.begin():
+    engine = get_engine()
+    with Session(engine) as session, session.begin():
         session.execute(delete(LoginLimit).where(LoginLimit.expires_at <= now))
         for value, limit in [(identifier, 5), ("address:" + address, 25)]:
             key = hmac.new(secret(), value.encode(), hashlib.sha256).hexdigest()
-            statement = insert(LoginLimit).values(
+            factory = pg_insert if engine.dialect.name == "postgresql" else sqlite_insert
+            statement = factory(LoginLimit).values(
                 key=key, attempts=1, expires_at=now + timedelta(minutes=10)
             )
             statement = statement.on_conflict_do_update(

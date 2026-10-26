@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { backendUrl } from "@/lib/backend";
 const permitted =
   /^(auth\/(login|me|logout)|localidades\/pb|indicadores|tecnologia\/saude|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|[a-zA-Z0-9-]+\/paginas\/\d+))$/;
 async function proxy(
@@ -14,17 +15,14 @@ async function proxy(
     request.headers.get("origin") !== request.nextUrl.origin
   )
     return Response.json({ detail: "Origem não autorizada." }, { status: 403 });
-  const url = new URL(
-    `/api/v1/${targetPath}`,
-    process.env.ACTIONS_API_URL || "http://127.0.0.1:8000",
-  );
-  url.search = request.nextUrl.search;
   const headers = new Headers();
   for (const name of ["cookie", "content-type", "x-csrf-token", "origin"]) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }
   try {
+    const url = new URL(`${backendUrl()}/api/v1/${targetPath}`);
+    url.search = request.nextUrl.search;
     let body: string | undefined;
     if (!["GET", "HEAD"].includes(request.method) && request.body) {
       const reader = request.body.getReader();

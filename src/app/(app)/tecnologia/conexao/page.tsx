@@ -77,7 +77,7 @@ export default function ConnectionPage() {
                   <tr>
                     <td>Armazenamento do módulo</td>
                     <td>{query.data.armazenamento}</td>
-                    <td>Sem migração institucional aplicada</td>
+                    <td>Persistência isolada do módulo</td>
                   </tr>
                   <tr>
                     <td>Agenda Digital</td>
