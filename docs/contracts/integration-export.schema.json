@@ -1,0 +1,207 @@
+{
+  "$defs": {
+    "Summary": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.1",
+          "default": "1.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "source": {
+          "const": "ac-actions-map",
+          "default": "ac-actions-map",
+          "title": "Source",
+          "type": "string"
+        },
+        "acao_id": {
+          "title": "Acao Id",
+          "type": "string"
+        },
+        "revisao": {
+          "minimum": 1,
+          "title": "Revisao",
+          "type": "integer"
+        },
+        "operacao": {
+          "default": "upsert",
+          "enum": [
+            "upsert",
+            "archive"
+          ],
+          "title": "Operacao",
+          "type": "string"
+        },
+        "categoria": {
+          "title": "Categoria",
+          "type": "string"
+        },
+        "inicio_em": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Inicio Em"
+        },
+        "fim_em": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Fim Em"
+        },
+        "municipios_ibge": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Municipios Ibge",
+          "type": "array"
+        },
+        "quantidade_acoes": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Quantidade Acoes",
+          "type": "integer"
+        },
+        "quantidade_participacoes": {
+          "minimum": 0,
+          "title": "Quantidade Participacoes",
+          "type": "integer"
+        },
+        "quantidade_pessoas_contempladas": {
+          "minimum": 0,
+          "title": "Quantidade Pessoas Contempladas",
+          "type": "integer"
+        },
+        "publicavel": {
+          "default": false,
+          "title": "Publicavel",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event_id",
+        "acao_id",
+        "revisao",
+        "categoria",
+        "inicio_em",
+        "fim_em",
+        "municipios_ibge",
+        "quantidade_acoes",
+        "quantidade_participacoes",
+        "quantidade_pessoas_contempladas"
+      ],
+      "title": "Summary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source": {
+      "const": "ac-actions-map",
+      "title": "Source",
+      "type": "string"
+    },
+    "exportacao_id": {
+      "title": "Exportacao Id",
+      "type": "string"
+    },
+    "capturado_em": {
+      "format": "date-time",
+      "title": "Capturado Em",
+      "type": "string"
+    },
+    "expira_em": {
+      "format": "date-time",
+      "title": "Expira Em",
+      "type": "string"
+    },
+    "checksum": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Checksum",
+      "type": "string"
+    },
+    "page": {
+      "maximum": 10,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "page_size": {
+      "const": 100,
+      "title": "Page Size",
+      "type": "integer"
+    },
+    "total_pages": {
+      "maximum": 10,
+      "minimum": 1,
+      "title": "Total Pages",
+      "type": "integer"
+    },
+    "total_itens": {
+      "maximum": 1000,
+      "minimum": 0,
+      "title": "Total Itens",
+      "type": "integer"
+    },
+    "quantidade_acoes": {
+      "minimum": 0,
+      "title": "Quantidade Acoes",
+      "type": "integer"
+    },
+    "quantidade_pessoas_contempladas": {
+      "minimum": 0,
+      "title": "Quantidade Pessoas Contempladas",
+      "type": "integer"
+    },
+    "escopo": {
+      "title": "Escopo",
+      "type": "string"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/Summary"
+      },
+      "title": "Items",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "source",
+    "exportacao_id",
+    "capturado_em",
+    "expira_em",
+    "checksum",
+    "page",
+    "page_size",
+    "total_pages",
+    "total_itens",
+    "quantidade_acoes",
+    "quantidade_pessoas_contempladas",
+    "escopo",
+    "items"
+  ],
+  "title": "ExportPage",
+  "type": "object"
+}

@@ -164,6 +164,14 @@ test("Administração não acessa diagnóstico técnico", async ({ page }) => {
       async () => (await fetch("/api/backend/tecnologia/saude")).status,
     ),
   ).toBe(403);
+  expect(
+    await page.evaluate(
+      async () => (await fetch("/api/backend/tecnologia/tokens")).status,
+    ),
+  ).toBe(403);
+  await expect(
+    page.getByRole("button", { name: "Criar token", exact: true }),
+  ).toHaveCount(0);
 });
 
 async function createDestination(page: Page, name: string) {

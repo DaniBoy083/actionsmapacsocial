@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { backendUrl } from "@/lib/backend";
 const permitted =
-  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|tecnologia\/(saude|sincronizar-agenda)|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|arquivos|[a-zA-Z0-9-]+(?:\/(preparar|paginas\/\d+|partes\/\d+))?))$/;
+  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|tecnologia\/(saude|sincronizar-agenda|tokens(?:\/[a-f0-9-]{36}\/(revogar|rotacionar))?)|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|arquivos|[a-zA-Z0-9-]+(?:\/(preparar|paginas\/\d+|partes\/\d+))?))$/;
 async function proxy(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },

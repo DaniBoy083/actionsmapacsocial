@@ -467,6 +467,10 @@ def technical_health(_professional: Professional = Depends(technologist)):
             if config.agenda_service_token.get_secret_value()
             else "ausente",
         },
+        "endpoints": {
+            "saude": config.frontend_origin.rstrip("/") + "/api/integracoes/v1/health",
+            "resumos": config.frontend_origin.rstrip("/") + "/api/integracoes/v1/acoes/resumos",
+        },
     }
 
 

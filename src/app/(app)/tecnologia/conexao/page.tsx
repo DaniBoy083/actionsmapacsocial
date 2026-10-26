@@ -3,6 +3,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Alert, Button, Chip } from "@mui/material";
 import { useSession } from "@/components/session-context";
 import { api, dateLabel, errorMessage } from "@/lib/api";
+import {
+  CredentialManager,
+  IntegrationResources,
+} from "@/features/integrations/credential-manager";
 type Health = {
   banco: string;
   latencia_ms: number;
@@ -13,6 +17,7 @@ type Health = {
   ultima_confirmacao: string | null;
   verificado_em: string;
   credencial: { alias: string; escopo: string; status: string };
+  endpoints: { saude: string; resumos: string };
 };
 export default function ConnectionPage() {
   const session = useSession();
@@ -66,7 +71,12 @@ export default function ConnectionPage() {
         <>
           <section className="panel">
             <h2>Serviços</h2>
-            <div className="table-scroll">
+            <div
+              className="table-scroll"
+              tabIndex={0}
+              role="region"
+              aria-label="Serviços da integração — tabela com rolagem"
+            >
               <table className="data-table">
                 <thead>
                   <tr>
@@ -118,18 +128,24 @@ export default function ConnectionPage() {
             </Button>
           </section>
           <section className="panel">
-            <h2>Credencial de integração</h2>
+            <h2>Envio automático do Map para a Agenda</h2>
             <p>
               Alias: <strong>{query.data.credencial.alias}</strong>
             </p>
             <p>Escopo: {query.data.credencial.escopo}</p>
             <p>Status: {query.data.credencial.status}</p>
             <Alert severity="info">
-              Provisionamento e rotação devem ocorrer pelo gerenciador
-              institucional de segredos. O recebimento só é confirmado após o
-              reconhecimento do evento pela Agenda.
+              Esta credencial é usada pelo envio automático e administrada no
+              gerenciador institucional de segredos. Os tokens abaixo permitem à
+              Agenda consultar os resumos do Map. O envio é confirmado após o
+              reconhecimento pela Agenda.
             </Alert>
           </section>
+          <IntegrationResources endpoints={query.data.endpoints} />
+          <CredentialManager
+            csrfToken={session.csrf_token}
+            endpoint={query.data.endpoints.resumos}
+          />
         </>
       )}
     </>

@@ -2,7 +2,7 @@
 
 Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP institucional nem certificação de conformidade absoluta. A especificação específica do AC Actions Map prevalece sobre as decisões conflitantes do planejamento anterior.
 
-**Atualização de produção:** após solicitação expressa de hospedagem do backend na própria Vercel, foram implementados Services, binding privado, schema PostgreSQL `actions_map`, migração Alembic e credencial restrita. O relato operacional atual está em [deploy de produção](DEPLOY_PRODUCAO.md); as pendências de integração com Agenda, importação produtiva e homologação continuam válidas.
+**Atualização de produção:** Services, binding privado, schema PostgreSQL `actions_map` e credencial restrita foram implementados. A carga das 50 fichas e o recebimento do resumo na Agenda foram conferidos; o relato está em [deploy de produção](DEPLOY_PRODUCAO.md). A gestão de tokens desta entrega exige aplicar 0005 antes de seu deploy. Consumo pela Plataforma/Portal e homologações institucionais permanecem separados dessa entrega.
 
 **Revisão posterior — importações e navegação:** Visão geral concentra os indicadores; a página redundante foi removida. Dados iniciais foi substituída por importação PDF/CSV/JSON com storage temporário cifrado e autorização expressa de produção. A descrição abaixo registra a primeira entrega; o estado atualizado, as correções e os limites estão em [revisão dos princípios](REVISAO_PRINCIPIOS_2026-10-26.md) e [importação por arquivos](IMPORTACAO_ARQUIVOS.md).
 
@@ -17,10 +17,10 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 | Beneficiários gerais e auditoria | Cadastro/leitura local cifrados; edição, correção/remoção, associação de cadastro existente a outra ação e busca/deduplicação supervisionada ainda pendentes |
 | Importação por arquivos | PDF/CSV/JSON, prévia privada, revisão manual, rotação, lote idempotente e storage temporário cifrado; OCR não é presumido, conciliação entre fontes continua pendente |
 | PDF real | 50 fichas aprovadas pelo responsável e importadas; municípios ausentes preenchidos com Mamanguape por orientação expressa; nenhuma ficha pendente; prévia e transcrições privadas fora do Git |
-| Persistência PostgreSQL institucional | Schema `actions_map`, dez tabelas, Alembic até `0003_private_file_import`, sessão distribuída e credencial restrita |
+| Persistência PostgreSQL institucional | Produção registrada até 0004, dez tabelas próprias; revisão 0005 preparada acrescenta duas tabelas de integrações. Sessão distribuída e credencial restrita preservadas |
 | Aprovação e preview editorial | Cadastro direto em revisão → validada → publicada; estado antigo removido da aplicação e bloqueado por constraint SQL; edição retira aprovação |
 | Pipeline sem dados pessoais | Contrato 1.1, outbox/ACK/backoff e receptor na Agenda implementados; envia pessoas contempladas, quantidade de ações e municípios; consumo pela Plataforma/Portal pendente |
-| Tokens e rotação | Exibe somente alias/escopo/status; provisionamento/rotação reforçados no secret manager ainda precisam de integração |
+| Tokens e rotação | Tokens de leitura para a Agenda: criação/exibição única, confirmação da senha, hash, validade, cota, rotação/revogação auditadas e cópia de endpoints/cURL. A credencial de envio existente permanece no secret manager. Migração 0005 preparada, sem alteração produtiva nesta entrega |
 | Visão geral e indicadores | Única página de métricas, ações distintas/participações/municípios/revisões; filtros analíticos avançados e pessoas únicas pendentes |
 | Not found e error page | `not-found.tsx`, `error.tsx` e `global-error.tsx`, português e recuperação sem detalhes internos |
 | LGPD / retenção / publicação | Minimização técnica inicial; decisões institucionais e validação independente ainda pendentes |
@@ -29,7 +29,7 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 
 ## Verificações
 
-Resultado local atualizado em 26/10/2026: **64 testes pytest aprovados**, **14 cenários Playwright aprovados** (desktop/celular), incluindo varredura Axe do login, painel e modal sem violações nas regras WCAG A/AA selecionadas. ESLint, TypeScript, Ruff, build Next de produção e `pip check` aprovados. Inspeção visual das capturas confirmou a correção da altura dos campos, contraste e composição institucional. Não houve uso de dados reais nos testes.
+Resultado local atualizado em 26/10/2026: **74 testes pytest aprovados**, **16 cenários Playwright aprovados** (desktop/celular), incluindo varredura Axe do login, painel, modal e integrações sem violações nas regras WCAG A/AA selecionadas. ESLint, TypeScript, Ruff, build Next de produção e `pip check` aprovados. Inspeção visual das capturas confirmou a correção da altura dos campos, contraste e composição institucional. Não houve uso de dados reais nos testes. A migração/grants, exportação e revogação também foram verificadas em PostgreSQL descartável; a cota aceitou 60 de 70 chamadas com 12 trabalhadores concorrentes. Detalhes e instalação em [gestão de integrações](GESTAO_TOKENS_E_ENDPOINTS_AGENDA.md).
 
 Foram encontradas e corrigidas durante a validação: conflito de `box-sizing`/fonte com inputs MUI, herança de cor em links usados como botões, selects não controlados, contabilização indevida de logins bem-sucedidos no limite por conta e seletores ambíguos nos testes. A suíte final foi repetida integralmente após as correções. Há um aviso de depreciação do transporte httpx no TestClient da versão instalada de Starlette; não impede os testes e deve ser acompanhado em futura atualização das dependências.
 

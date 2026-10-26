@@ -51,7 +51,7 @@ def main():
                 raise ValueError("Versão de origem inesperada.")
             config = Config(str(ROOT / "backend/alembic.ini"))
             config.attributes["connection"] = connection
-            command.upgrade(config, "head")
+            command.upgrade(config, "0004_remove_drafts")
         else:
             migration = ROOT.parent / "agenda-digital/src/lib/migrations/actions-map-20261026.ts"
             source = migration.read_text(encoding="utf-8").replace("\r\n", "\n")

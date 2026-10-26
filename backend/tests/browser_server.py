@@ -23,6 +23,8 @@ os.environ.update(
         "BENEFICIARIES_KEY": Fernet.generate_key().decode(),
         "FRONTEND_ORIGIN": "http://localhost:3100",
         "AGENDA_WEB_URL": "https://agenda.example.invalid",
+        "AGENDA_SUMMARIES_URL": "",
+        "AGENDA_SERVICE_TOKEN": "",
     }
 )
 from app.domain.contracts import Professional

@@ -148,6 +148,16 @@ def main() -> int:
                 sql.Identifier(ROLE)
             )
         )
+        raw.execute(
+            sql.SQL("REVOKE DELETE ON actions_map.acoes_map_credenciais_integracao FROM {}").format(
+                sql.Identifier(ROLE)
+            )
+        )
+        raw.execute(
+            sql.SQL("REVOKE UPDATE ON actions_map.acoes_map_exportacoes_integracao FROM {}").format(
+                sql.Identifier(ROLE)
+            )
+        )
         updated = (
             connection.execute(
                 text(
@@ -173,7 +183,7 @@ def main() -> int:
         assert connection.scalar(text("SELECT 1")) == 1
         assert (
             connection.scalar(text("SELECT version_num FROM actions_map.alembic_version"))
-            == "0004_remove_drafts"
+            == "0005_integration_tokens"
         )
         assert connection.scalar(text("SELECT count(*) FROM actions_map.acoes_map_acoes")) == 0
     print(

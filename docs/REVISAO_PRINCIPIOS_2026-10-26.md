@@ -19,13 +19,14 @@ Revisão contra a especificação específica do AC Actions Map, os anexos inspe
 | Governança editorial | Cadastro direto em revisão, validação e publicação. Estado antigo removido por solicitação do responsável. Mudanças retiram aprovação e elegibilidade pública anterior |
 | Pipeline institucional | Mantém Map → Agenda → Plataforma → Portal. Contrato 1.1 envia pessoas contempladas, quantidade de ações e municípios. `publicavel=true` somente após publicação; nenhum nome/ID individual ou campo clínico |
 | Responsividade e acessibilidade | Fluxos de navegador em desktop/celular, labels, foco, mensagens, prévia privada e verificação Axe. Corrigida interação do seletor de arquivos antes da hidratação; análise do modal espera sua animação terminar |
-| Segredos e migrações | Nenhuma chave/DSN/transcrição/PDF em commits. Migração `0003` aditiva com backup cifrado verificado, duas tabelas privadas, grants mínimos e preservação do RLS e das ações existentes |
+| Segredos e migrações | Nenhuma chave/DSN/transcrição/PDF em commits. Migrações administrativas com backup cifrado verificado e preservação do RLS/dados. Revisão 0005 preparada para credenciais por hash e exportações agregadas, sem migração produtiva nesta entrega |
+| Gestão de integrações | Criação, rotação e revogação de tokens de leitura exigem perfil, origem, CSRF e senha institucional; segredo exibido uma vez fora do cache/storage. Cota transacional, endpoints/cURL copiáveis, exportação congelada e auditoria; a credencial de envio permanece independente |
 
 ## Verificação executável
 
-- Backend: **64 testes aprovados**, incluindo arquivos reais sintéticos, conteúdo ativo/forjado, dados extras, quotas, proprietário, CSRF, expiração, rotação, revisão, autorização produtiva, idempotência, rollback, publicação com ACK, retirada de elegibilidade e rejeição do estado removido.
+- Backend: **74 testes aprovados**, incluindo arquivos sintéticos, dados extras, quotas, proprietário, CSRF, expiração, rotação, revisão, autorização, idempotência, rollback, publicação com ACK, retirada, rejeição do estado removido e gestão de tokens. PostgreSQL local descartável confirmou migração, grants, revogação e 60 aceitações em 70 consultas concorrentes com 12 trabalhadores.
 - Frontend: build de produção, TypeScript e ESLint aprovados. Ruff verificado com a configuração explícita `backend/pyproject.toml`.
-- Playwright: **14 cenários aprovados** em desktop/celular, incluindo cadastro/edição/arquivamento, perfis, 404, upload binário PDF, rotação, importação CSV, preservação de revisão e Axe. A execução completa terminou em 57,4 segundos. Capturas conferidas visualmente.
+- Playwright: **16 cenários aprovados** em desktop/celular, incluindo cadastro/edição/arquivamento, perfis, 404, upload binário PDF, importação CSV, preservação de revisão, gestão de tokens, cópia de endpoint/cURL e Axe. As tabelas da página de integrações receberam região identificada e foco para rolagem por teclado no celular.
 - Dados de testes automatizados são sintéticos e usam SQLite temporário. Não há teste de login com a senha real do responsável nem criação de sessão por impersonação.
 
 Comandos completos no README. Artefatos locais de teste ficam ignorados pelo Git.

@@ -8,6 +8,8 @@ Inclui login institucional, autorização no backend, Visão geral com indicador
 
 ## Rodar localmente no Windows
 
+**Gestão de integrações:** criação, rotação e revogação de tokens de leitura para a Agenda, com confirmação da senha institucional, cópia de endpoints/cURL e exportação agregada consistente. Em PostgreSQL, aplicar a migração `0005_integration_tokens` antes do deploy desta funcionalidade. Veja [gestão de tokens e instalação](docs/GESTAO_TOKENS_E_ENDPOINTS_AGENDA.md). Esta alteração foi preparada para commit; seu push/deploy e a migração produtiva ficam com o operador.
+
 Requisitos: Node.js 22+, Python 3.12+, acesso de rede à base institucional para autenticação e as variáveis existentes de conexão fornecidas pela Tecnologia. Os comandos abaixo partem da raiz deste projeto e não exigem ativar scripts PowerShell.
 
 Preparação inicial:

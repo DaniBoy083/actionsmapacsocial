@@ -126,3 +126,33 @@ class Outbox(Base):
     proxima_tentativa: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     erro: Mapped[str | None] = mapped_column(String(80))
     enviado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class IntegrationCredential(Base):
+    __tablename__ = "acoes_map_credenciais_integracao"
+    __table_args__ = (
+        CheckConstraint("escopo = 'acoes.resumos.read'", name="ck_credencial_escopo"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    nome: Mapped[str] = mapped_column(String(80))
+    prefixo: Mapped[str] = mapped_column(String(16))
+    sufixo: Mapped[str] = mapped_column(String(4))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    escopo: Mapped[str] = mapped_column(String(40), default="acoes.resumos.read")
+    criado_por: Mapped[str] = mapped_column(String(160))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    expira_em: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    revogado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    ultimo_uso_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    chamadas: Mapped[int] = mapped_column(Integer, default=0)
+    janela_minuto: Mapped[int] = mapped_column(Integer, default=0)
+    chamadas_janela: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class IntegrationExport(Base):
+    __tablename__ = "acoes_map_exportacoes_integracao"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    credencial_id: Mapped[str] = mapped_column(ForeignKey(IntegrationCredential.id), index=True)
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    expira_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    payload: Mapped[dict] = mapped_column(JSON)
