@@ -25,7 +25,7 @@ type Credential = {
   token_mascarado: string;
   escopo: string;
   criado_em: string;
-  expira_em: string;
+  expira_em: string | null;
   ultimo_uso_em: string | null;
   chamadas: number;
   status: "ativa" | "expirada" | "revogada";
@@ -41,10 +41,14 @@ const credentialSchema = z.object({
     .trim()
     .min(3, "Informe um nome com pelo menos três caracteres.")
     .max(80),
-  validade_dias: z.number().int().min(1).max(365),
+  validade_dias: z.number().int().min(1).max(365).nullable(),
   password: z.string().min(1, "Confirme sua senha institucional.").max(1024),
 });
 type CredentialForm = z.infer<typeof credentialSchema>;
+
+function expirationLabel(value: string | null) {
+  return value === null ? "Nunca expira" : dateLabel(value);
+}
 
 function curl(endpoint: string, token = "<TOKEN_DA_AGENDA>") {
   // URLs vêm da origem de configuração; a lista não aceita entrada livre do usuário.
@@ -161,7 +165,7 @@ export function CredentialManager({
   function open(next: Operation) {
     form.reset({
       nome: next.credential?.nome || "Agenda Digital",
-      validade_dias: 90,
+      validade_dias: next.credential?.expira_em === null ? null : 90,
       password: "",
     });
     setFailure("");
@@ -277,7 +281,7 @@ export function CredentialManager({
                       }[credential.status]
                     }
                   </td>
-                  <td>{dateLabel(credential.expira_em)}</td>
+                  <td>{expirationLabel(credential.expira_em)}</td>
                   <td>
                     {dateLabel(credential.ultimo_uso_em)}
                     <br />
@@ -361,15 +365,21 @@ export function CredentialManager({
                   render={({ field }) => (
                     <TextField
                       {...field}
+                      value={field.value === null ? "nunca" : field.value}
                       label="Validade do token"
                       select
                       fullWidth
                       margin="normal"
                       disabled={pending}
                       onChange={(event) =>
-                        field.onChange(Number(event.target.value))
+                        field.onChange(
+                          event.target.value === "nunca"
+                            ? null
+                            : Number(event.target.value),
+                        )
                       }
                     >
+                      <MenuItem value="nunca">Nunca expirar</MenuItem>
                       {[30, 90, 180, 365].map((value) => (
                         <MenuItem key={value} value={value}>
                           {value} dias
@@ -467,8 +477,8 @@ export function CredentialManager({
                 </Button>
               </Stack>
               <p>
-                Validade: {dateLabel(issued.credencial.expira_em)}. Escopo:{" "}
-                {issued.credencial.escopo}.
+                Validade: {expirationLabel(issued.credencial.expira_em)}.
+                Escopo: {issued.credencial.escopo}.
               </p>
             </>
           )}

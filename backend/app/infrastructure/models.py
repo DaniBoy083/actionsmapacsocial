@@ -141,7 +141,7 @@ class IntegrationCredential(Base):
     escopo: Mapped[str] = mapped_column(String(40), default="acoes.resumos.read")
     criado_por: Mapped[str] = mapped_column(String(160))
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
-    expira_em: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expira_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     revogado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     ultimo_uso_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     chamadas: Mapped[int] = mapped_column(Integer, default=0)

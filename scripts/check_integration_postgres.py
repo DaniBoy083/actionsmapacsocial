@@ -126,6 +126,27 @@ def main():
             config = Config(str(ROOT / "backend/alembic.ini"))
             config.attributes["connection"] = connection
             command.upgrade(config, "0005_integration_tokens")
+            connection.execute(
+                text("""INSERT INTO actions_map.acoes_map_credenciais_integracao
+                (id,nome,prefixo,sufixo,token_hash,escopo,criado_por,criado_em,expira_em,chamadas,janela_minuto,chamadas_janela)
+                VALUES('00000000-0000-0000-0000-000000000001','Prazo existente','synthetic','only',:hash,'acoes.resumos.read',
+                'synthetic-tech',now(),'2030-01-01T00:00:00Z',0,0,0)"""),
+                {"hash": "0" * 64},
+            )
+            before = connection.execute(
+                text(
+                    "SELECT token_hash,expira_em FROM actions_map.acoes_map_credenciais_integracao WHERE nome='Prazo existente'"
+                )
+            ).one()
+            command.upgrade(config, "0006_nonexpiring_tokens")
+            assert (
+                before
+                == connection.execute(
+                    text(
+                        "SELECT token_hash,expira_em FROM actions_map.acoes_map_credenciais_integracao WHERE nome='Prazo existente'"
+                    )
+                ).one()
+            )
         with Session(engine) as session, session.begin():
             session.execute(text("SET LOCAL ROLE ac_actions_map_runtime"))
             assert not session.scalar(
@@ -134,7 +155,11 @@ def main():
                 )
             )
             issued = SqlCredentialRepository(session).create(
-                CredentialInput(nome="Agenda sintética PostgreSQL", password="synthetic-only"),
+                CredentialInput(
+                    nome="Agenda sintética PostgreSQL",
+                    password="synthetic-only",
+                    validade_dias=None,
+                ),
                 Professional(
                     profissional_id="synthetic-tech",
                     nome="Teste",
@@ -142,6 +167,7 @@ def main():
                     equipe="tecnologia",
                 ),
             )
+            assert issued["credencial"]["expira_em"] is None
             assert export_page(session, issued["credencial"]["id"], 1, None)["items"] == []
         if datetime.now(UTC).second > 54:
             time.sleep(61 - datetime.now(UTC).second)
@@ -167,7 +193,7 @@ def main():
             )
         assert consume(None) == 401
         print(
-            "POSTGRES_INTEGRATION_OK: migração 0005, grants mínimos, exportação, revogação e cota 60/70 sob 12 trabalhadores."
+            "POSTGRES_INTEGRATION_OK: migrações 0005/0006, prazo existente preservado, token sem expiração, grants, exportação, revogação e cota 60/70 sob 12 trabalhadores."
         )
     finally:
         if engine:

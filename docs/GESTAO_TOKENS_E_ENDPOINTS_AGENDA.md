@@ -21,7 +21,9 @@ Criar um token de leitura não troca a credencial de envio nem instala automatic
 6. Para substituir, usar **Rotacionar** e confirmar a senha. A substituição e a revogação anterior são atômicas; atualizar o consumidor da Agenda com a nova chave. Falha na criação do substituto preserva a credencial antiga.
 7. Para encerrar acesso, usar **Revogar**. As próximas requisições, inclusive páginas de exportações já abertas, exigem novamente uma credencial ativa. Requisições autorizadas antes da revogação podem concluir normalmente.
 
-Validade padrão de 90 dias, limitada a 1–365 dias na API. A interface oferece 30, 90, 180 ou 365 dias. Limite de 20 tokens ativos. Tokens inativos não são recuperáveis; criar substituto. A listagem prioriza ativos e mostra até 100 registros de metadados.
+Validade padrão de 90 dias. A interface oferece **Nunca expirar**, 30, 90, 180 ou 365 dias, tanto na criação quanto na rotação. Na API, `validade_dias: null` significa sem expiração e retorna `expira_em: null`; omitir o campo mantém o padrão de 90 dias. Prazos numéricos continuam limitados a 1–365 dias; zero não é um marcador de validade ilimitada.
+
+A opção sem prazo aparece como **Nunca expira** na listagem e na exibição única. Rotacionar um token permanente mantém essa opção selecionada, podendo escolher um prazo. Os tokens existentes conservam suas datas e estados, inclusive os já expirados ou revogados. Tokens sem prazo permanecem sujeitos à revogação, rotação, escopo de leitura, confirmação institucional e cota; contam no limite de 20 ativos. Tokens inativos não são recuperáveis; criar substituto. A listagem prioriza ativos e mostra até 100 registros de metadados. A exportação continua expirando em cinco minutos, e a exibição única do segredo em dois minutos.
 
 ## Endpoints e comandos
 
@@ -71,6 +73,8 @@ Erros: 401 credencial/senha inválida; 403 perfil, origem ou CSRF; 404 token ine
 
 Alembic **`0005_integration_tokens`**, após `0004_remove_drafts`, acrescenta somente `actions_map.acoes_map_credenciais_integracao` e `actions_map.acoes_map_exportacoes_integracao`. O runtime recebe SELECT/INSERT/UPDATE de credenciais, sem DELETE; SELECT/INSERT/DELETE de exportações. Não ganha privilégios sobre profissionais, equipes, tabelas clínicas, segredos de outras aplicações ou auditoria existente.
 
+Alembic **`0006_nonexpiring_tokens`** permite `NULL` somente em `expira_em` das credenciais. Não atualiza registros existentes nem altera a expiração das exportações. O comando abaixo aplica até 0006, partindo de 0004, 0005 ou da própria 0006; o provisionamento inicial também usa a nova revisão.
+
 SQLite de desenvolvimento cria as tabelas próprias como já faz o projeto. PostgreSQL exige a migração administrativa; startup e build não fazem DDL. Com a configuração administrativa privada já preparada neste ambiente:
 
 ```powershell
@@ -83,13 +87,23 @@ backend\.venv\Scripts\python.exe scripts/migrate_integration_tokens.py --apply
 
 O script usa `.env.local` administrativo e `artifacts/production-config.env` privado; requer TLS e a chave existente do backup, sem imprimir valores. Snapshot em REPEATABLE READ, trava, timeouts, conferência de ações/beneficiários e flags de RLS. Não rotaciona credenciais existentes. Aplicar antes de disponibilizar a nova página em produção. O push/deploy é responsabilidade do operador que solicitou este commit; nenhuma migração/deploy produtivo foi executado nesta entrega.
 
-Rollback: voltar ao código anterior preservando as duas tabelas. Não apagar hashes/auditoria ou executar downgrade destrutivo. A credencial antiga do envio e sua outbox continuam independentes.
+Em um **SQLite de desenvolvimento já existente**, `create_all` não altera a coluna antiga. Com o backend local parado, aplicar a atualização administrativa própria, que faz backup cifrado verificado e preserva credenciais/validade antes de alterar a coluna por batch:
+
+```powershell
+backend\.venv\Scripts\python.exe scripts/migrate_integration_tokens.py --sqlite-development --apply
+```
+
+Esse modo recusa produção e arquivos fora do workspace; não usa a conexão PostgreSQL institucional. SQLite novo já recebe o modelo nullable. A migração local pode ser repetida sem novo efeito. Não excluir o banco para atualizar.
+
+Rollback: preservar as duas tabelas e usar uma versão compatível com a estrutura e os registros existentes. Não apagar hashes/auditoria ou executar downgrade destrutivo. A credencial antiga do envio e sua outbox continuam independentes.
+
+Após emitir tokens permanentes na revisão 0006, manter uma versão do backend que reconheça `expira_em=null`. Para recuar a opção visual, ocultá-la mantendo esse suporte; a versão anterior que exigia data não é compatível com os novos registros. Não atribuir prazos artificiais, remover tokens ou mudar sua revogação automaticamente para viabilizar rollback.
 
 ## Verificação e limites do aceite
 
 Testes cobrem criação/exibição única, hash persistido, RBAC, CSRF/origem, confirmação da senha e limites, expiração, rotação e revogação, isolamento do token, exportação congelada, retirada, 101 ações em duas páginas, exportação vazia, vinculação ao token e cota compartilhada. O navegador testa cópia, criação/rotação/revogação, acesso administrativo recusado e Axe em desktop/celular.
 
-Uma verificação adicional usa PostgreSQL **local descartável**: aplica 0005 com o papel restrito, verifica grants, exporta vazio, executa 70 consultas com 12 trabalhadores — 60 aceitas e 10 limitadas — e confere revogação. Não carrega `.env` nem acessa produção:
+Uma verificação adicional usa PostgreSQL **local descartável**: aplica 0005/0006, confirma que a migração preserva o prazo/hash de um token existente, verifica grants, cria token sem expiração, exporta vazio, executa 70 consultas com 12 trabalhadores — 60 aceitas e 10 limitadas — e confere revogação. Um teste adicional verifica a migração do SQLite legado com backup e preservação dos registros. Não carrega `.env` nem acessa produção:
 
 ```powershell
 backend\.venv\Scripts\python.exe scripts/check_integration_postgres.py --bin 'CAMINHO_DOS_BINARIOS_POSTGRESQL'

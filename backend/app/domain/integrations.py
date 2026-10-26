@@ -14,7 +14,7 @@ class CredentialMetadata(StrictModel):
     token_mascarado: str
     escopo: Literal["acoes.resumos.read"]
     criado_em: datetime
-    expira_em: datetime
+    expira_em: datetime | None
     revogado_em: datetime | None
     ultimo_uso_em: datetime | None
     chamadas: int
@@ -55,7 +55,7 @@ class CredentialAuthorization(StrictModel):
 
 class CredentialInput(CredentialAuthorization):
     nome: str = Field(min_length=3, max_length=80)
-    validade_dias: int = Field(default=90, ge=1, le=365, strict=True)
+    validade_dias: int | None = Field(default=90, ge=1, le=365, strict=True)
 
     @field_validator("nome")
     @classmethod

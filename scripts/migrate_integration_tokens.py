@@ -1,4 +1,4 @@
-"""Prévia por padrão; aplica somente 0005 após backup cifrado consistente e verificado."""
+"""Prévia por padrão; aplica até 0006 após backup cifrado consistente e verificado."""
 
 import argparse
 from pathlib import Path
@@ -16,7 +16,36 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--sqlite-development", action="store_true")
     args = parser.parse_args()
+    if args.sqlite_development:
+        from app.config import get_settings
+        from app.infrastructure.local_migrations import allow_nonexpiring_local_tokens
+
+        settings = get_settings()
+        parsed = make_url(settings.actions_storage_url)
+        if settings.production or parsed.drivername != "sqlite" or not parsed.database:
+            raise ValueError("Modo exclusivo do armazenamento SQLite de desenvolvimento.")
+        database = Path(parsed.database).resolve()
+        if not database.is_relative_to(ROOT):
+            raise ValueError("SQLite de desenvolvimento deve estar neste workspace.")
+        changed = False
+        if database.is_file():
+            changed = allow_nonexpiring_local_tokens(
+                create_engine(parsed, hide_parameters=True),
+                settings.beneficiaries_key.get_secret_value(),
+                ROOT / "artifacts/private-import/backups",
+                apply=args.apply,
+            )
+        print(
+            "INTEGRATION_SQLITE_OK: "
+            + (
+                "migração e backup verificados."
+                if changed
+                else "prévia ou atualização desnecessária; sem alteração."
+            )
+        )
+        return
     private = dotenv_values(ROOT / "artifacts/production-config.env")
     url = make_url(dotenv_values(ROOT / ".env.local")["DATABASE_URL"])
     if url.query.get("sslmode") not in {"require", "verify-ca", "verify-full"}:
@@ -35,7 +64,11 @@ def main():
         ):
             raise RuntimeError("Outra migração está em execução.")
         revision = connection.scalar(text("SELECT version_num FROM actions_map.alembic_version"))
-        if revision not in {"0004_remove_drafts", "0005_integration_tokens"}:
+        if revision not in {
+            "0004_remove_drafts",
+            "0005_integration_tokens",
+            "0006_nonexpiring_tokens",
+        }:
             raise ValueError("Versão de origem inesperada.")
         before = connection.execute(
             text(
@@ -48,12 +81,12 @@ def main():
             )
         ).one()
         if not args.apply:
-            print("INTEGRATION_PREFLIGHT_OK: duas tabelas novas; nenhuma migração aplicada.")
+            print("INTEGRATION_PREFLIGHT_OK: revisões 0005/0006; nenhuma migração aplicada.")
             return
         backup_module(connection, private["BENEFICIARIES_KEY"])
         config = Config(str(ROOT / "backend/alembic.ini"))
         config.attributes["connection"] = connection
-        command.upgrade(config, "0005_integration_tokens")
+        command.upgrade(config, "0006_nonexpiring_tokens")
         after = connection.execute(
             text(
                 "SELECT relrowsecurity,relforcerowsecurity FROM pg_class WHERE oid='public.profissionais_cadastrados'::regclass"

@@ -39,7 +39,9 @@ def metadata(row: IntegrationCredential) -> dict:
         "chamadas": row.chamadas,
         "status": "revogada"
         if row.revogado_em
-        else ("expirada" if row.expira_em.replace(tzinfo=UTC) <= now else "ativa"),
+        else (
+            "expirada" if row.expira_em and row.expira_em.replace(tzinfo=UTC) <= now else "ativa"
+        ),
     }
 
 
@@ -59,7 +61,8 @@ class SqlCredentialRepository:
             .select_from(IntegrationCredential)
             .where(
                 IntegrationCredential.revogado_em.is_(None),
-                IntegrationCredential.expira_em > datetime.now(UTC),
+                IntegrationCredential.expira_em.is_(None)
+                | (IntegrationCredential.expira_em > datetime.now(UTC)),
             )
         )
         if active >= 20:
@@ -76,7 +79,9 @@ class SqlCredentialRepository:
             token_hash=hashlib.sha256(token.encode()).hexdigest(),
             escopo=SCOPE,
             criado_por=professional.profissional_id,
-            expira_em=datetime.now(UTC) + timedelta(days=data.validade_dias),
+            expira_em=datetime.now(UTC) + timedelta(days=data.validade_dias)
+            if data.validade_dias is not None
+            else None,
         )
         self.session.add(row)
         self.session.flush()
@@ -104,7 +109,9 @@ class SqlCredentialRepository:
         row = self.session.get(IntegrationCredential, identifier)
         if not row:
             raise HTTPException(404, "Token não encontrado.")
-        if row.revogado_em or row.expira_em.replace(tzinfo=UTC) <= datetime.now(UTC):
+        if row.revogado_em or (
+            row.expira_em and row.expira_em.replace(tzinfo=UTC) <= datetime.now(UTC)
+        ):
             raise HTTPException(409, "Crie um novo token para substituir uma credencial inativa.")
         self.revoke(identifier, professional)
         self.session.flush()
@@ -126,7 +133,7 @@ def consume_service_token(session: Session, authorization: str) -> tuple[str, in
             IntegrationCredential.token_hash == token_hash,
             IntegrationCredential.escopo == SCOPE,
             IntegrationCredential.revogado_em.is_(None),
-            IntegrationCredential.expira_em > now,
+            IntegrationCredential.expira_em.is_(None) | (IntegrationCredential.expira_em > now),
         )
         .with_for_update()
     )
@@ -138,7 +145,7 @@ def consume_service_token(session: Session, authorization: str) -> tuple[str, in
         .where(
             IntegrationCredential.id == row.id,
             IntegrationCredential.revogado_em.is_(None),
-            IntegrationCredential.expira_em > now,
+            IntegrationCredential.expira_em.is_(None) | (IntegrationCredential.expira_em > now),
             (IntegrationCredential.janela_minuto != minute)
             | (IntegrationCredential.chamadas_janela < RATE_LIMIT),
         )

@@ -64,7 +64,10 @@ def list_credentials(professional: Professional = Depends(technologist)):
             .order_by(
                 (
                     IntegrationCredential.revogado_em.is_(None)
-                    & (IntegrationCredential.expira_em > datetime.now(UTC))
+                    & (
+                        IntegrationCredential.expira_em.is_(None)
+                        | (IntegrationCredential.expira_em > datetime.now(UTC))
+                    )
                 ).desc(),
                 IntegrationCredential.criado_em.desc(),
             )

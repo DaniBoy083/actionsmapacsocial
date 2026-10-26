@@ -4,10 +4,12 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from app.domain.contracts import ActionInput
+from app.domain.integrations import CredentialInput
 from app.infrastructure.actions import change_status, save_action
+from app.infrastructure.integrations import SqlCredentialRepository
 from app.infrastructure.models import Audit, IntegrationCredential, IntegrationExport
 from conftest import PASSWORD
-from sqlalchemy import func, select
+from sqlalchemy import MetaData, create_engine, func, inspect, select
 from sqlalchemy.orm import Session
 from test_actions import create
 
@@ -226,3 +228,98 @@ def test_multiple_pages_are_frozen_and_totals_do_not_repeat(authenticated):
     assert unchanged == second and newer["id"] not in {
         row["acao_id"] for row in first["items"] + second["items"]
     }
+
+
+def test_never_expiring_token_preserves_finite_tokens_and_supports_rotation(authenticated):
+    client, engine, _ = authenticated
+    finite = issue(client)
+    with Session(engine) as session:
+        original_expiry = session.get(IntegrationCredential, finite["credencial"]["id"]).expira_em
+    response = client.post(
+        BASE, json={"nome": "Agenda permanente", "validade_dias": None, "password": PASSWORD}
+    )
+    assert response.status_code == 201, response.text
+    permanent = response.json()
+    assert permanent["credencial"]["expira_em"] is None
+    assert permanent["credencial"]["status"] == "ativa"
+    headers = {"Authorization": "Bearer " + permanent["token"]}
+    assert client.get("/api/v1/integracoes/health", headers=headers).status_code == 200
+    listing = client.get(BASE).json()
+    assert (
+        next(row for row in listing if row["id"] == permanent["credencial"]["id"])["expira_em"]
+        is None
+    )
+    with Session(engine) as session:
+        assert (
+            session.get(IntegrationCredential, finite["credencial"]["id"]).expira_em
+            == original_expiry
+        )
+    rotated = client.post(
+        BASE + f"/{permanent['credencial']['id']}/rotacionar",
+        json={
+            "nome": "Agenda permanente substituta",
+            "validade_dias": None,
+            "password": PASSWORD,
+        },
+    )
+    assert rotated.status_code == 201 and rotated.json()["credencial"]["expira_em"] is None
+    assert client.get("/api/v1/integracoes/health", headers=headers).status_code == 401
+    replacement = rotated.json()
+    headers = {"Authorization": "Bearer " + replacement["token"]}
+    assert client.get("/api/v1/integracoes/health", headers=headers).status_code == 200
+    assert (
+        client.post(
+            BASE + f"/{replacement['credencial']['id']}/revogar", json={"password": PASSWORD}
+        ).status_code
+        == 200
+    )
+    assert client.get("/api/v1/integracoes/health", headers=headers).status_code == 401
+
+
+def test_never_expiring_tokens_count_toward_active_limit(authenticated):
+    client, engine, repo = authenticated
+    with Session(engine) as session, session.begin():
+        repository = SqlCredentialRepository(session)
+        for index in range(20):
+            repository.create(
+                CredentialInput(nome=f"Permanente {index}", validade_dias=None, password=PASSWORD),
+                repo.professional,
+            )
+    limited = client.post(BASE, json={"nome": "Excede limite", "password": PASSWORD})
+    assert limited.status_code == 409
+
+
+def test_existing_sqlite_migration_preserves_credentials(tmp_path):
+    from app.domain.contracts import Professional
+    from app.infrastructure.local_migrations import allow_nonexpiring_local_tokens
+    from app.infrastructure.models import Base
+    from cryptography.fernet import Fernet
+
+    engine = create_engine("sqlite:///" + (tmp_path / "legacy.sqlite3").as_posix())
+    legacy = IntegrationCredential.__table__.to_metadata(MetaData())
+    legacy.c.expira_em.nullable = False
+    legacy.create(engine)
+    Base.metadata.create_all(engine)
+    professional = Professional(
+        profissional_id="test-tech", nome="Teste", tipo_login="administracao", equipe="tecnologia"
+    )
+    with Session(engine) as session, session.begin():
+        finite = SqlCredentialRepository(session).create(
+            CredentialInput(nome="Token antigo", password=PASSWORD), professional
+        )
+    key = Fernet.generate_key().decode()
+    assert allow_nonexpiring_local_tokens(engine, key, tmp_path / "backups", apply=True)
+    assert next(
+        column
+        for column in inspect(engine).get_columns(legacy.name)
+        if column["name"] == "expira_em"
+    )["nullable"]
+    assert not allow_nonexpiring_local_tokens(engine, key, tmp_path / "backups", apply=True)
+    assert len(list((tmp_path / "backups").glob("*.fernet"))) == 1
+    with Session(engine) as session, session.begin():
+        assert session.get(IntegrationCredential, finite["credencial"]["id"]).expira_em is not None
+        permanent = SqlCredentialRepository(session).create(
+            CredentialInput(nome="Token novo", password=PASSWORD, validade_dias=None), professional
+        )
+        assert permanent["credencial"]["expira_em"] is None
+    engine.dispose()

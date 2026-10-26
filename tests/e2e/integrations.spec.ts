@@ -56,6 +56,10 @@ test("Tecnologia cria, copia, rotaciona e revoga token de leitura", async ({
   await page.getByRole("button", { name: "Criar token", exact: true }).click();
   let dialog = page.getByRole("dialog");
   await dialog.getByLabel("Nome do token", { exact: false }).fill(name);
+  await dialog.getByRole("combobox", { name: "Validade do token" }).click();
+  await page
+    .getByRole("option", { name: "Nunca expirar", exact: true })
+    .click();
   await dialog
     .getByLabel("Confirme sua senha institucional", { exact: false })
     .fill("Somente-teste-2026");
@@ -67,6 +71,7 @@ test("Tecnologia cria, copia, rotaciona e revoga token de leitura", async ({
     .getByLabel("Token de integração", { exact: true })
     .inputValue();
   expect(raw).toMatch(/^acm_/);
+  await expect(dialog.getByText(/Validade: Nunca expira/)).toBeVisible();
   await dialog
     .getByRole("button", { name: "Copiar token", exact: true })
     .click();
@@ -116,10 +121,17 @@ test("Tecnologia cria, copia, rotaciona e revoga token de leitura", async ({
   ).toHaveCount(0);
   const listing = await page.request.get("/api/backend/tecnologia/tokens");
   expect(await listing.text()).not.toContain(raw);
+  expect(
+    (await listing.json()).find((row: { nome: string }) => row.nome === name)
+      .expira_em,
+  ).toBeNull();
   await page
     .getByRole("button", { name: `Rotacionar token ${name}`, exact: true })
     .click();
   dialog = page.getByRole("dialog");
+  await expect(
+    dialog.getByRole("combobox", { name: "Validade do token" }),
+  ).toHaveText("Nunca expirar");
   await dialog
     .getByLabel("Confirme sua senha institucional", { exact: false })
     .fill("Somente-teste-2026");

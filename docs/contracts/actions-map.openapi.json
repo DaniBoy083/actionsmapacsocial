@@ -1355,9 +1355,16 @@
             "title": "Nome"
           },
           "validade_dias": {
-            "type": "integer",
-            "maximum": 365.0,
-            "minimum": 1.0,
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 365.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Validade Dias",
             "default": 90
           }
@@ -1395,8 +1402,15 @@
             "title": "Criado Em"
           },
           "expira_em": {
-            "type": "string",
-            "format": "date-time",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Expira Em"
           },
           "revogado_em": {
