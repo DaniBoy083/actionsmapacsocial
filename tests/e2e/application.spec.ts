@@ -12,6 +12,25 @@ async function login(page: Page, admin = false) {
   await expect(page.getByRole("heading", { name: /Olá/ })).toBeVisible();
 }
 
+test("login recusado informa credenciais inválidas sem alegar sessão expirada", async ({
+  page,
+}) => {
+  await page.goto("/login");
+  await page.getByLabel("E-mail", { exact: true }).fill("test@example.invalid");
+  await page
+    .getByLabel("Senha", { exact: true })
+    .fill("senha-incorreta-sintetica");
+  await page.getByRole("button", { name: "Acessar plataforma" }).click();
+  await expect(
+    page
+      .getByRole("region", { name: "Entrar na plataforma" })
+      .getByRole("alert"),
+  ).toHaveText("Não foi possível entrar com essas credenciais.");
+  await expect(
+    page.getByText("Sua sessão expirou. Entre novamente."),
+  ).toHaveCount(0);
+});
+
 test("acessibilidade automatizada do login, painel e modal", async ({
   page,
 }) => {

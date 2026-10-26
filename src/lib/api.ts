@@ -6,10 +6,10 @@ export const api = axios.create({
 });
 export function errorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    if (error.response?.status === 401)
-      return "Sua sessão expirou. Entre novamente.";
     const detail = error.response?.data?.detail;
     if (typeof detail === "string") return detail;
+    if (error.response?.status === 401)
+      return "Sua sessão expirou. Entre novamente.";
   }
   return "Não foi possível concluir. Verifique a conexão e tente novamente.";
 }
