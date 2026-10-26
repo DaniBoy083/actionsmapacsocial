@@ -41,3 +41,7 @@ As configurações de serviço são privadas: `AGENDA_SUMMARIES_URL`, `AGENDA_SE
 `scripts/migrate_publication.py --target agenda --apply` e `--target map --apply` aplicam somente as revisões respectivas após backup cifrado verificado, com lock e timeout. Preservam a contagem de beneficiários e as flags de RLS. O receptor foi preparado e testado numa cópia isolada antes de ser aplicado à Agenda.
 
 Verificação: testes de contrato, autenticação, ACK, publicação/retirada, idempotência, ordenação, migrações e ausência do estado removido; checks de arquitetura/OpenAPI/documentação da Agenda, builds dos dois projetos e navegação desktop/celular. A recepção na Agenda e a atualização do Portal são etapas distintas do fluxo institucional.
+
+## Resultado em produção — 26/10/2026
+
+Migrações aplicadas, status antigos convertidos e nenhuma ação em rascunho. Melhor Visão está **Publicada**, revisão **9**, com entrega `entregue` confirmada por ACK 1.1. O GET autenticado da Agenda retornou o mesmo snapshot enviado: **50 pessoas contempladas, 1 ação, Mamanguape (2508901)**. Os 50 beneficiários cifrados foram preservados. O consumidor da Plataforma continua sendo a próxima etapa para alimentar o Portal.

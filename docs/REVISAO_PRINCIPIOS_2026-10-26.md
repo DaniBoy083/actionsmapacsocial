@@ -23,7 +23,7 @@ Revisão contra a especificação específica do AC Actions Map, os anexos inspe
 
 ## Verificação executável
 
-- Backend: **61 testes aprovados**, incluindo arquivos reais sintéticos, conteúdo ativo/forjado, dados extras, quotas, proprietário, CSRF, expiração, rotação, revisão, autorização produtiva, idempotência e rollback.
+- Backend: **64 testes aprovados**, incluindo arquivos reais sintéticos, conteúdo ativo/forjado, dados extras, quotas, proprietário, CSRF, expiração, rotação, revisão, autorização produtiva, idempotência, rollback, publicação com ACK, retirada de elegibilidade e rejeição do estado removido.
 - Frontend: build de produção, TypeScript e ESLint aprovados. Ruff verificado com a configuração explícita `backend/pyproject.toml`.
 - Playwright: **14 cenários aprovados** em desktop/celular, incluindo cadastro/edição/arquivamento, perfis, 404, upload binário PDF, rotação, importação CSV, preservação de revisão e Axe. A execução completa terminou em 57,4 segundos. Capturas conferidas visualmente.
 - Dados de testes automatizados são sintéticos e usam SQLite temporário. Não há teste de login com a senha real do responsável nem criação de sessão por impersonação.

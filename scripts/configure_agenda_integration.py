@@ -1,7 +1,6 @@
 """Provisiona credencial exclusiva do resumo, sem imprimir segredo ou alterar contas."""
 
 import hashlib
-import json
 import secrets
 import shutil
 import subprocess
@@ -11,7 +10,7 @@ from dotenv import dotenv_values, set_key
 
 ROOT = Path(__file__).resolve().parents[1]
 AGENDA_PROJECT = "prj_lKBMccjvQAMWdWCfWArqOum8vbNc"
-TEAM = "team_BZDIfdem8wKcHqtNm6ZawZme"
+MAP_PROJECT = "prj_bgoJYESb2U7PtZWIsvh6yL6aUqDM"
 AGENDA_URL = "https://agenda-digital-ac-social.vercel.app/api/integracoes/v1/acoes/resumos"
 
 
@@ -24,20 +23,31 @@ def main():
     token = current.get("AGENDA_SERVICE_TOKEN") or secrets.token_hex(32)
     set_key(config, "AGENDA_SUMMARIES_URL", AGENDA_URL)
     set_key(config, "AGENDA_SERVICE_TOKEN", token)
-    source = ROOT / "artifacts/agenda-receiver-source"
-    link = source / ".vercel/project.json"
-    link.parent.mkdir(parents=True, exist_ok=True)
-    link.write_text(json.dumps({"projectId": AGENDA_PROJECT, "orgId": TEAM}), encoding="utf-8")
-    for cwd, key, value, sensitive in [
-        (source, "ACTIONS_MAP_TOKEN_SHA256", hashlib.sha256(token.encode()).hexdigest(), True),
-        (ROOT, "AGENDA_SUMMARIES_URL", AGENDA_URL, False),
-        (ROOT, "AGENDA_SERVICE_TOKEN", token, True),
+    for project, key, value, sensitive in [
+        (
+            AGENDA_PROJECT,
+            "ACTIONS_MAP_TOKEN_SHA256",
+            hashlib.sha256(token.encode()).hexdigest(),
+            True,
+        ),
+        (MAP_PROJECT, "AGENDA_SUMMARIES_URL", AGENDA_URL, False),
+        (MAP_PROJECT, "AGENDA_SERVICE_TOKEN", token, True),
     ]:
-        args = [cli, "env", "add", key, "production", "--non-interactive"]
+        args = [
+            cli,
+            "env",
+            "add",
+            key,
+            "production",
+            "--project",
+            project,
+            "--force",
+            "--non-interactive",
+        ]
         if sensitive:
             args.append("--sensitive")
         result = subprocess.run(
-            args, check=False, input=value.encode(), capture_output=True, cwd=cwd, timeout=45
+            args, check=False, input=value.encode(), capture_output=True, cwd=ROOT, timeout=45
         )
         if result.returncode:
             raise RuntimeError("Variável não provisionada: " + key)

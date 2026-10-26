@@ -29,7 +29,7 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 
 ## Verificações
 
-Resultado final local em 26/10/2026: **34 testes pytest aprovados**, **10 cenários Playwright aprovados** (desktop/celular), incluindo varredura Axe do login, painel e modal sem violações nas regras WCAG A/AA selecionadas. ESLint, TypeScript, Ruff, build Next de produção e `pip check` aprovados. Inspeção visual das capturas confirmou a correção da altura dos campos, contraste e composição institucional. Não houve uso de dados reais nos testes.
+Resultado local atualizado em 26/10/2026: **64 testes pytest aprovados**, **14 cenários Playwright aprovados** (desktop/celular), incluindo varredura Axe do login, painel e modal sem violações nas regras WCAG A/AA selecionadas. ESLint, TypeScript, Ruff, build Next de produção e `pip check` aprovados. Inspeção visual das capturas confirmou a correção da altura dos campos, contraste e composição institucional. Não houve uso de dados reais nos testes.
 
 Foram encontradas e corrigidas durante a validação: conflito de `box-sizing`/fonte com inputs MUI, herança de cor em links usados como botões, selects não controlados, contabilização indevida de logins bem-sucedidos no limite por conta e seletores ambíguos nos testes. A suíte final foi repetida integralmente após as correções. Há um aviso de depreciação do transporte httpx no TestClient da versão instalada de Starlette; não impede os testes e deve ser acompanhado em futura atualização das dependências.
 
@@ -40,5 +40,5 @@ Executar: `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd run build`, `npm
 1. Completar casos de uso de correção/remoção e associação de beneficiários existentes, conciliação entre fontes e evolução relacional dos locais. Persistência institucional e Alembic/grants já foram implementados.
 2. Homologar revogação institucional, recuperação de acesso pela Agenda e eventual SSO. A sessão PostgreSQL distribuída, scrypt e revalidação de equipe/tipo já estão implementados.
 3. Agendar e monitorar o expurgo de arquivos e homologar retenção. As 50 fichas históricas já foram aprovadas pelo responsável e importadas. Upload privado, rotação, quotas e parser limitado estão implementados; OCR local continua opcional e não autoriza inferir nomes.
-4. Implementar o receptor e a integração externa descritos em `AGENDA_DIGITAL_IMPLEMENTACAO.md`; homologar a governança editorial e métricas municipais/temporais.
+4. Ativar o consumidor da Plataforma para a exportação já implementada na Agenda, conforme `AGENDA_DIGITAL_IMPLEMENTACAO.md`; homologar a governança editorial e métricas municipais/temporais.
 5. Testar backup/restauração, homologar privacidade/acessibilidade, conciliar legado e executar a virada com único escritor.

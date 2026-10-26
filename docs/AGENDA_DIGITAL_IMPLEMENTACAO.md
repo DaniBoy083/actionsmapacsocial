@@ -64,7 +64,7 @@ Os eventos são **snapshots de substituição**, não incrementos. Upsert pela c
 - `quantidade_participacoes` é total global da ação. **Não dividir nem replicar como total de beneficiários por município.** Ainda não existe recorte municipal seguro de participações neste contrato.
 - `operacao: "archive"` substitui o snapshot anterior e informa zero nas quantidades ativas. Preservar auditoria e evitar reaparecimento por evento antigo.
 - Pessoas contempladas são contadas dentro de cada ação. Não interpretar sua soma entre ações como pessoas únicas globais nem somar com atendimentos clínicos.
-- O campo `publicavel` é uma elegibilidade técnica futura, não aprovação automática da Plataforma. Suprimir células pequenas e combinações de risco conforme governança aprovada; não fixar um limiar sem validação institucional.
+- O campo `publicavel` indica publicação aprovada no Map. A Plataforma ainda precisa aprovar sua projeção pública. Suprimir células pequenas e combinações de risco conforme governança aprovada; não fixar um limiar sem validação institucional.
 
 ## 4. Encaminhamento para a Plataforma
 

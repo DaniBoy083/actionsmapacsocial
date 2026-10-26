@@ -30,6 +30,8 @@ O startup não cria tabelas. Migrações são um comando administrativo separado
 | `BENEFICIARIES_KEY` | Fernet autenticado para nomes; preservar em backup seguro |
 | `FRONTEND_ORIGIN` | Origem HTTPS exata do domínio de produção |
 | `AGENDA_WEB_URL` | Atalho institucional para a Agenda |
+| `AGENDA_SUMMARIES_URL` | Endpoint HTTPS de recebimento dos resumos 1.1 na Agenda |
+| `AGENDA_SERVICE_TOKEN` | Credencial exclusiva do envio; somente seu hash fica no receptor |
 | `ACTIONS_BACKEND_URL` | Binding privado, gerado automaticamente pela Vercel |
 
 Segredos foram provisionados como variáveis sensíveis sem impressão de valores. Não colocar essas chaves em `NEXT_PUBLIC_*`. As variáveis `POSTGRES_*` da integração Neon não bastavam para publicar a aplicação; o backend usa agora uma credencial própria.
@@ -38,7 +40,7 @@ O build do FastAPI executa `python -m app.check_deployment`, que valida produç�
 
 ## Verificações e limitações
 
-Validação local: 38 testes backend, 10 cenários de navegador em desktop/celular, lint, TypeScript e build. O Playwright usa `next start` do build compilado nas portas 3100/8100 para não interromper o `next dev` do usuário.
+Validação local atual: 64 testes backend, 14 cenários de navegador em desktop/celular, lint, TypeScript e build. O Playwright usa `next start` do build compilado nas portas 3100/8100 para não interromper o `next dev` do usuário.
 
 Verificação do deploy publicado: login e healthcheck HTTP 200, API sem sessão HTTP 401, credenciais deliberadamente inválidas HTTP 401 e navegação protegida redirecionando ao login. Nenhuma credencial real foi usada no teste de autenticação. O logotipo institucional de 4,8 KB é servido diretamente: sua URL estática responde 200, enquanto a otimização de imagens retornava 404 na configuração com Services.
 
@@ -46,6 +48,14 @@ O GitHub Actions não executou os jobs por bloqueio de faturamento da conta, con
 
 Atualização: a revisão `0003_private_file_import` adiciona armazenamento temporário cifrado para uploads PDF/CSV/JSON. As duas tabelas foram migradas com backup cifrado verificado, grants restritos e preservação da ação existente e do RLS. PyMuPDF passou ao runtime de produção; o parser continua subprocessado sem segredos. A BFF preserva o corpo binário e admite PUT somente na allowlist das importações. Consulte [operação, formatos e limites](IMPORTACAO_ARQUIVOS.md).
 
-A ação **Melhor Visão**, em Mamanguape, foi cadastrada após confirmação do município pelo responsável, sem presumir datas. A primeira carga incluiu 32 fichas. Posteriormente, o responsável aprovou as 18 grafias restantes e determinou Mamanguape para os municípios ausentes. A complementação incluiu **18 novos registros**, preencheu **15 cadastros existentes** e preservou os municípios já informados. O lote final possui **50 beneficiários/participações**, nenhuma ficha pendente e nenhum município ausente. A operação passou por staging cifrado, repetição sem duplicação, backup verificado, auditoria e leitura independente de conferência dos nomes e do resumo com 50 participações. Publicação permanece bloqueada. Não equiparar registros a pessoas únicas entre fontes diferentes. Backups, transcrições e documento original permanecem privados e fora do Git/deploy.
+A ação **Melhor Visão**, em Mamanguape, foi cadastrada após confirmação do município pelo responsável, sem presumir datas. A primeira carga incluiu 32 fichas. Posteriormente, o responsável aprovou as 18 grafias restantes e determinou Mamanguape para os municípios ausentes. A complementação incluiu **18 novos registros**, preencheu **15 cadastros existentes** e preservou os municípios já informados. O lote final possui **50 beneficiários/participações**, nenhuma ficha pendente e nenhum município ausente. A operação passou por staging cifrado, repetição sem duplicação, backup verificado, auditoria e leitura independente de conferência dos nomes e do resumo com 50 participações. A publicação foi autorizada posteriormente e confirmada conforme o registro abaixo. Não equiparar registros a pessoas únicas entre fontes diferentes. Backups, transcrições e documento original permanecem privados e fora do Git/deploy.
 
-Integração receptora da Agenda, publicação no Portal, rotação operacional, agendamento institucional do expurgo, testes integrais de restauração e homologação continuam pendentes. A presença do frontend/API na Vercel não equivale ao aceite integral do MVP ou a certificação de privacidade.
+## Publicação e recebimento na Agenda
+
+Em 26/10/2026, as revisões `0004_remove_drafts` (Map) e `202610260001` (Agenda) foram aplicadas com backups cifrados verificados. As 50 fichas e as flags de RLS foram preservadas. A constraint de status impede reintroduzir o estado removido.
+
+Melhor Visão foi aprovada e publicada na **revisão 9**. A outbox recebeu ACK 1.1 e ficou `entregue`. Uma consulta HTTPS autenticada independente ao receptor da Agenda confirmou o mesmo snapshot: **50 pessoas contempladas, 1 ação, Mamanguape (2508901), `publicavel=true`**. Nenhum dado nominal foi enviado. A verificação final confirmou ausência de ações em rascunho e preservação dos beneficiários cifrados.
+
+Os dois projetos estão na Vercel. Login e health do Map respondem 200; API privada do Map, receptor e exportação da Agenda rejeitam acesso sem credencial com 401. O gate obrigatório da Agenda passou com zero vulnerabilidades reportadas, 565 testes da suíte principal, 10 testes PostgreSQL de concorrência, 10 cenários de navegador e build. O provisionamento identifica explicitamente cada projeto Vercel para não herdar o vínculo da pasta superior. As senhas institucionais não foram alteradas.
+
+O consumidor da Plataforma e a publicação no Portal, rotação operacional, agendamento institucional do expurgo, testes integrais de restauração e homologação continuam pendentes. O recebimento na Agenda não comprova atualização do Portal nem equivale ao aceite integral do MVP ou a certificação de privacidade.
