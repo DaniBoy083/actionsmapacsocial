@@ -4,7 +4,7 @@ Primeira entrega de desenvolvimento para gestão de ações institucionais e reg
 
 Inclui login institucional, autorização no backend, Visão geral com indicadores, CRUD de ações com N locais da Paraíba, beneficiários cifrados, importação revisada por PDF/CSV/JSON, outbox e diagnóstico exclusivo de Tecnologia, páginas 404/erro e documentação de integração.
 
-**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI no mesmo projeto Vercel, PostgreSQL institucional em schema próprio e credencial restrita. A ação Melhor Visão/Mamanguape e 32 registros nominais conferidos foram importados com autorização expressa; 18 páginas aguardam confirmação da grafia. Consulte [deploy de produção](docs/DEPLOY_PRODUCAO.md) e [conformidade e pendências](docs/CONFORMIDADE_E_PENDENCIAS.md). A integração receptora da Agenda permanece pendente.
+**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI no mesmo projeto Vercel, PostgreSQL institucional em schema próprio e credencial restrita. As 50 fichas do Programa Melhor Visão foram aprovadas pelo responsável e importadas; municípios ausentes foram preenchidos com Mamanguape por sua orientação expressa. Consulte [deploy de produção](docs/DEPLOY_PRODUCAO.md) e [conformidade e pendências](docs/CONFORMIDADE_E_PENDENCIAS.md). A integração receptora da Agenda permanece pendente.
 
 ## Rodar localmente no Windows
 

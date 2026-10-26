@@ -16,7 +16,7 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 | CRUD de ações e N locais PB | Implementado localmente; busca, filtros, paginação, versão/409, modal, edição e arquivamento confirmado |
 | Beneficiários gerais e auditoria | Cadastro/leitura local cifrados; edição, correção/remoção, associação de cadastro existente a outra ação e busca/deduplicação supervisionada ainda pendentes |
 | Importação por arquivos | PDF/CSV/JSON, prévia privada, revisão manual, rotação, lote idempotente e storage temporário cifrado; OCR não é presumido, conciliação entre fontes continua pendente |
-| PDF real | Ação Melhor Visão/Mamanguape e 32 beneficiários/participações importados com autorização; 18 grafias pendentes; prévia e transcrições privadas fora do Git |
+| PDF real | 50 fichas aprovadas pelo responsável e importadas; municípios ausentes preenchidos com Mamanguape por orientação expressa; nenhuma ficha pendente; prévia e transcrições privadas fora do Git |
 | Persistência PostgreSQL institucional | Schema `actions_map`, dez tabelas, Alembic até `0003_private_file_import`, sessão distribuída e credencial restrita |
 | Aprovação e preview editorial | Rascunho → revisão → validada; edição retira aprovação; publicação permanece bloqueada |
 | Pipeline sem dados pessoais | DTO e outbox transacional implementados, envio/ACK/backoff testados com transporte simulado; receptor e fluxo externo pendentes |
@@ -39,6 +39,6 @@ Executar: `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd run build`, `npm
 
 1. Completar casos de uso de correção/remoção e associação de beneficiários existentes, conciliação entre fontes e evolução relacional dos locais. Persistência institucional e Alembic/grants já foram implementados.
 2. Homologar revogação institucional, recuperação de acesso pela Agenda e eventual SSO. A sessão PostgreSQL distribuída, scrypt e revalidação de equipe/tipo já estão implementados.
-3. Agendar e monitorar o expurgo de arquivos, homologar retenção e conferir as 18 grafias pendentes. Upload privado, rotação, quotas e parser limitado já estão implementados; OCR local continua opcional e não autoriza inferir nomes.
+3. Agendar e monitorar o expurgo de arquivos e homologar retenção. As 50 fichas históricas já foram aprovadas pelo responsável e importadas. Upload privado, rotação, quotas e parser limitado estão implementados; OCR local continua opcional e não autoriza inferir nomes.
 4. Implementar o receptor e a integração externa descritos em `AGENDA_DIGITAL_IMPLEMENTACAO.md`; homologar a governança editorial e métricas municipais/temporais.
 5. Testar backup/restauração, homologar privacidade/acessibilidade, conciliar legado e executar a virada com único escritor.
