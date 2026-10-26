@@ -43,6 +43,9 @@ def snapshot(session: Session, row: Action) -> dict:
     count = session.scalar(
         select(func.count()).select_from(Participation).where(Participation.acao_id == row.id)
     )
+    delivery = session.scalar(
+        select(Outbox).where(Outbox.idempotency_key == f"acao:{row.id}:v{row.versao}")
+    )
     return {
         "id": row.id,
         "versao": row.versao,
@@ -57,6 +60,19 @@ def snapshot(session: Session, row: Action) -> dict:
             {**p, "municipio_nome": MUNICIPALITIES[p["municipio_ibge"]]} for p in row.locais
         ],
         "beneficiarios": count,
+        "pessoas_contempladas": session.scalar(
+            select(func.count(func.distinct(Participation.beneficiario_id))).where(
+                Participation.acao_id == row.id
+            )
+        )
+        or 0,
+        "integracao": {
+            "status": delivery.status,
+            "enviado_em": delivery.enviado_em,
+            "erro": delivery.erro,
+        }
+        if delivery
+        else None,
         "criado_em": row.criado_em,
         "atualizado_em": row.atualizado_em,
         "aprovado_por": row.aprovado_por,
@@ -84,8 +100,17 @@ def enqueue(session: Session, row: Action) -> None:
         municipios_ibge=sorted({p["municipio_ibge"] for p in row.locais}),
         quantidade_acoes=0 if row.status == "arquivada" else 1,
         quantidade_participacoes=0 if row.status == "arquivada" else count,
-        # Habilitação editorial pública exige governança e contrato ainda pendentes.
-        publicavel=False,
+        quantidade_pessoas_contempladas=0
+        if row.status == "arquivada"
+        else (
+            session.scalar(
+                select(func.count(func.distinct(Participation.beneficiario_id))).where(
+                    Participation.acao_id == row.id
+                )
+            )
+            or 0
+        ),
+        publicavel=row.status == "publicada",
     )
     session.add(
         Outbox(
@@ -126,7 +151,7 @@ def save_action(
             .values(
                 **values,
                 versao=data.versao + 1,
-                status="rascunho",
+                status="em_revisao",
                 aprovado_por=None,
                 publicado_por=None,
                 atualizado_em=datetime.now(UTC),
@@ -161,6 +186,8 @@ def change_status(
     values = {"status": target, "versao": version + 1, "atualizado_em": datetime.now(UTC)}
     if target == "validada":
         values["aprovado_por"] = professional.profissional_id
+    if target == "em_revisao":
+        values["aprovado_por"] = values["publicado_por"] = None
     if target == "publicada":
         values["publicado_por"] = professional.profissional_id
     result = session.execute(

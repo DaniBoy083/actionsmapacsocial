@@ -178,12 +178,12 @@ def test_publication_requires_workflow_and_real_integration(authenticated):
     client, _, _ = authenticated
     action = create(client, resumo_publico="Resumo editorial para revisão.")
     url = f"/api/v1/acoes/{action['id']}"
-    assert client.post(url + "/aprovar", json={"versao": 1}).status_code == 409
-    assert client.post(url + "/revisar", json={"versao": 1}).status_code == 200
-    assert client.post(url + "/aprovar", json={"versao": 2}).status_code == 200
-    assert client.post(url + "/publicar", json={"versao": 3}).status_code == 503
-    edited = client.patch(url, json={**ACTION, "versao": 3})
-    assert edited.json()["status"] == "rascunho" and edited.json()["aprovado_por"] is None
+    assert action["status"] == "em_revisao"
+    assert client.post(url + "/publicar", json={"versao": 1}).status_code == 503
+    assert client.post(url + "/aprovar", json={"versao": 1}).status_code == 200
+    assert client.post(url + "/publicar", json={"versao": 2}).status_code == 503
+    edited = client.patch(url, json={**ACTION, "versao": 2})
+    assert edited.json()["status"] == "em_revisao" and edited.json()["aprovado_por"] is None
 
 
 def test_import_idempotency_and_transaction(authenticated):

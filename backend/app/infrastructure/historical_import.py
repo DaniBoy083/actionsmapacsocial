@@ -145,7 +145,7 @@ def import_history(
             row.versao += 1
             row.atualizado_em = datetime.now(UTC)
             # Uma carga altera os indicadores e exige nova revisão editorial.
-            row.status = "rascunho"
+            row.status = "em_revisao"
             row.aprovado_por = row.publicado_por = None
             session.flush()
             enqueue(session, row)

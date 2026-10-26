@@ -30,7 +30,7 @@ def test_delivery_requires_ack_and_retries_safely(authenticated, monkeypatch, sc
             json={
                 "status": scenario,
                 "event_id": event["event_id"] if scenario != "invalid_ack" else "wrong",
-                "schema_version": "1.0",
+                "schema_version": "1.1",
             },
         )
 

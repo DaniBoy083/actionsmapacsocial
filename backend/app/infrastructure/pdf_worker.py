@@ -19,9 +19,13 @@ def run() -> None:
     with pymupdf.open(sys.argv[1]) as document:
         if document.is_encrypted or not 1 <= len(document) <= 200 or document.xref_length() > 20000:
             raise ValueError("PDF_INVALIDO")
-        active = any(re.search(r"/(JavaScript|JS|OpenAction|AA|Launch|RichMedia|EmbeddedFiles)\b",
-                               document.xref_object(index))
-                     for index in range(1, document.xref_length()))
+        active = any(
+            re.search(
+                r"/(JavaScript|JS|OpenAction|AA|Launch|RichMedia|EmbeddedFiles)\b",
+                document.xref_object(index),
+            )
+            for index in range(1, document.xref_length())
+        )
         if document.embfile_count() or active:
             raise ValueError("PDF_ATIVO")
         if len(sys.argv) == 2:

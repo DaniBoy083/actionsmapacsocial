@@ -130,7 +130,15 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Status"
+                },
+                {
+                  "const": "",
+                  "type": "string"
+                }
+              ],
               "default": "",
               "title": "Status"
             }
@@ -749,6 +757,22 @@
         }
       }
     },
+    "/api/v1/tecnologia/sincronizar-agenda": {
+      "post": {
+        "summary": "Synchronize Agenda",
+        "operationId": "synchronize_agenda_api_v1_tecnologia_sincronizar_agenda_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/importacoes/arquivos": {
       "post": {
         "summary": "Start File",
@@ -1225,6 +1249,16 @@
           "password"
         ],
         "title": "Login"
+      },
+      "Status": {
+        "type": "string",
+        "enum": [
+          "em_revisao",
+          "validada",
+          "publicada",
+          "arquivada"
+        ],
+        "title": "Status"
       },
       "ValidationError": {
         "properties": {

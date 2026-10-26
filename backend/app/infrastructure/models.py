@@ -1,7 +1,16 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -19,6 +28,11 @@ class Base(DeclarativeBase):
 
 class Action(Base):
     __tablename__ = "acoes_map_acoes"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('em_revisao','validada','publicada','arquivada')", name="ck_acoes_status"
+        ),
+    )
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
     versao: Mapped[int] = mapped_column(Integer, default=1)
     nome: Mapped[str] = mapped_column(String(160))
@@ -27,7 +41,7 @@ class Action(Base):
     resumo_publico: Mapped[str] = mapped_column(Text, default="")
     inicio_em: Mapped[str | None] = mapped_column(String(10))
     fim_em: Mapped[str | None] = mapped_column(String(10))
-    status: Mapped[str] = mapped_column(String(20), default="rascunho", index=True)
+    status: Mapped[str] = mapped_column(String(20), default="em_revisao", index=True)
     locais: Mapped[list] = mapped_column(JSON)
     criado_por: Mapped[str] = mapped_column(String(160))
     aprovado_por: Mapped[str | None] = mapped_column(String(160))

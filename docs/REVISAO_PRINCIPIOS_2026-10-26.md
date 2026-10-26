@@ -16,8 +16,8 @@ Revisão contra a especificação específica do AC Actions Map, os anexos inspe
 | Proteção dos arquivos | Conteúdo cifrado no schema próprio, proprietário por profissional, expiração, quotas, sem nomes originais de arquivo persistidos, sem URL pública, OCR externo ou armazenamento de revisão em localStorage |
 | Entrada não confiável | Tamanho/hash, assinatura e parser PDF isolado, limites de tempo/CPU/memória/objetos, formatos estruturados estritos, SQL parametrizado, CSRF/origem e limite de corpo no BFF/API |
 | Atomicidade e duplicação | Origem por hash/página ou registro/ação, transação com auditoria/outbox, reenvio idêntico reconhecido, divergência de dados retorna 409, falha desfaz o lote e nomes iguais não são unidos |
-| Governança editorial | Cadastro inicial em rascunho; inclusão de participações agora também retira aprovação anterior. Publicação continua bloqueada até contrato receptor e homologação |
-| Pipeline institucional | Mantém Map → Agenda → Plataforma → Portal. Outbox transmite apenas resumos permitidos, `publicavel=false`, sem nomes/IDs individuais ou campos clínicos |
+| Governança editorial | Cadastro direto em revisão, validação e publicação. Estado antigo removido por solicitação do responsável. Mudanças retiram aprovação e elegibilidade pública anterior |
+| Pipeline institucional | Mantém Map → Agenda → Plataforma → Portal. Contrato 1.1 envia pessoas contempladas, quantidade de ações e municípios. `publicavel=true` somente após publicação; nenhum nome/ID individual ou campo clínico |
 | Responsividade e acessibilidade | Fluxos de navegador em desktop/celular, labels, foco, mensagens, prévia privada e verificação Axe. Corrigida interação do seletor de arquivos antes da hidratação; análise do modal espera sua animação terminar |
 | Segredos e migrações | Nenhuma chave/DSN/transcrição/PDF em commits. Migração `0003` aditiva com backup cifrado verificado, duas tabelas privadas, grants mínimos e preservação do RLS e das ações existentes |
 
@@ -32,7 +32,7 @@ Comandos completos no README. Artefatos locais de teste ficam ignorados pelo Git
 
 ## Pendências que impedem uma afirmação de “100%”
 
-1. Receptor na Agenda, integração com a Plataforma, substituição do escritor no Portal e publicação pública dependem de outros projetos/contratos. Não se simula entrega nem se libera publicação sem esses componentes.
+1. O receptor e a exportação de ações foram implementados na Agenda. A Plataforma ainda deve consumir essa fonte e atualizar o Portal; a recepção na Agenda não é prova de atualização do mapa público.
 2. Política institucional de retenção, governança de publicação, monitoramento operacional e ensaio integral de restauração ainda precisam de homologação. O expurgo tem comando seguro, mas seu agendamento institucional não foi presumido.
 3. Correção/remoção de beneficiários, associação de cadastro existente, conciliação entre fontes distintas, filtros analíticos avançados e refinamentos do modelo relacional continuam pendências do MVP já registradas. Não houve preenchimento por inferência nem migração automática de dados clínicos/Portal.
 4. O lote histórico foi concluído após aprovação expressa do responsável das 18 fichas restantes e sua orientação de preencher municípios ausentes com Mamanguape. A conferência produtiva confirmou 50 fichas, nenhum município ausente e ausência de duplicação da origem, após staging cifrado e backup verificado. A prévia nominal fica privada e separada do commit. A identificação de pessoas únicas entre fontes diferentes continua dependendo de conciliação supervisionada.

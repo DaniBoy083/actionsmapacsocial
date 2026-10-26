@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Alert, Button, Chip } from "@mui/material";
 import { useSession } from "@/components/session-context";
 import { api, dateLabel, errorMessage } from "@/lib/api";
@@ -20,6 +20,15 @@ export default function ConnectionPage() {
     queryKey: ["saude"],
     queryFn: async () => (await api.get<Health>("/tecnologia/saude")).data,
     enabled: session.equipe === "tecnologia",
+  });
+  const synchronize = useMutation({
+    mutationFn: () =>
+      api.post(
+        "/tecnologia/sincronizar-agenda",
+        {},
+        { headers: { "X-CSRF-Token": session.csrf_token } },
+      ),
+    onSuccess: () => query.refetch(),
   });
   if (session.equipe !== "tecnologia")
     return (
@@ -42,6 +51,11 @@ export default function ConnectionPage() {
           Verificar novamente
         </Button>
       </div>
+      {synchronize.isError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {errorMessage(synchronize.error)}
+        </Alert>
+      )}
       {query.isPending ? (
         <div className="panel" role="status">
           Verificando serviços…
@@ -91,6 +105,17 @@ export default function ConnectionPage() {
               Última confirmação: {dateLabel(query.data.ultima_confirmacao)}.
               Verificado em {dateLabel(query.data.verificado_em)}.
             </p>
+            <Button
+              onClick={() => synchronize.mutate()}
+              disabled={
+                synchronize.isPending ||
+                query.data.credencial.status !== "configurada"
+              }
+            >
+              {synchronize.isPending
+                ? "Sincronizando…"
+                : "Sincronizar resumos com a Agenda"}
+            </Button>
           </section>
           <section className="panel">
             <h2>Credencial de integração</h2>
@@ -101,8 +126,8 @@ export default function ConnectionPage() {
             <p>Status: {query.data.credencial.status}</p>
             <Alert severity="info">
               Provisionamento e rotação devem ocorrer pelo gerenciador
-              institucional de segredos. A integração receptora da Agenda
-              aguarda implementação e homologação.
+              institucional de segredos. O recebimento só é confirmado após o
+              reconhecimento do evento pela Agenda.
             </Alert>
           </section>
         </>

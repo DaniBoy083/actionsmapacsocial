@@ -149,7 +149,7 @@ export function ActionDialog({
         <DialogContent>
           <p className="muted">
             Registre as informações gerais e todos os locais de realização. O
-            cadastro será salvo como rascunho.
+            cadastro será salvo para revisão.
           </p>
           {failure && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -271,7 +271,7 @@ export function ActionDialog({
             variant="contained"
             disabled={isSubmitting || !municipalities.data}
           >
-            {isSubmitting ? "Salvando…" : "Salvar rascunho"}
+            {isSubmitting ? "Salvando…" : "Salvar ação"}
           </Button>
         </DialogActions>
       </form>

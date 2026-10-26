@@ -46,7 +46,6 @@ class Professional(StrictModel):
 
 
 class Status(StrEnum):
-    DRAFT = "rascunho"
     REVIEW = "em_revisao"
     VALIDATED = "validada"
     PUBLISHED = "publicada"
@@ -123,7 +122,7 @@ class ImportConfirmation(StrictModel):
 
 
 class Summary(StrictModel):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["1.1"] = "1.1"
     event_id: str
     source: Literal["ac-actions-map"] = "ac-actions-map"
     acao_id: str
@@ -135,4 +134,12 @@ class Summary(StrictModel):
     municipios_ibge: list[str]
     quantidade_acoes: int = Field(ge=0, le=1)
     quantidade_participacoes: int = Field(ge=0)
+    quantidade_pessoas_contempladas: int = Field(ge=0)
     publicavel: bool = False
+
+    @field_validator("municipios_ibge")
+    @classmethod
+    def valid_municipalities(cls, values: list[str]) -> list[str]:
+        if not values or len(set(values)) != len(values):
+            raise ValueError("Informe municípios válidos sem repetição.")
+        return sorted(Location.municipality(value) for value in values)

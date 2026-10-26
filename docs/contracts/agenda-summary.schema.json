@@ -2,8 +2,8 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.0",
-      "default": "1.0",
+      "const": "1.1",
+      "default": "1.1",
       "title": "Schema Version",
       "type": "string"
     },
@@ -81,6 +81,11 @@
       "title": "Quantidade Participacoes",
       "type": "integer"
     },
+    "quantidade_pessoas_contempladas": {
+      "minimum": 0,
+      "title": "Quantidade Pessoas Contempladas",
+      "type": "integer"
+    },
     "publicavel": {
       "default": false,
       "title": "Publicavel",
@@ -96,7 +101,8 @@
     "fim_em",
     "municipios_ibge",
     "quantidade_acoes",
-    "quantidade_participacoes"
+    "quantidade_participacoes",
+    "quantidade_pessoas_contempladas"
   ],
   "title": "Summary",
   "type": "object"

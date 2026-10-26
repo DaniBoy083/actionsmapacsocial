@@ -2,6 +2,7 @@ import hashlib
 import json
 import time
 from datetime import UTC, datetime
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from sqlalchemy import delete, func, select, text
@@ -17,6 +18,7 @@ from app.domain.contracts import (
     ImportConfirmation,
     Login,
     Professional,
+    Status,
     Version,
 )
 from app.infrastructure.actions import (
@@ -42,6 +44,7 @@ from app.infrastructure.models import (
     Participation,
     SessionRecord,
 )
+from app.infrastructure.outbox import dispatch_pending
 from app.security.session import (
     COOKIE,
     clear_login_failures,
@@ -128,7 +131,7 @@ def municipalities(_professional: Professional = Depends(current_professional)):
 def list_actions(
     busca: str = Query("", max_length=160),
     municipio: str = "",
-    status: str = "",
+    status: Status | Literal[""] = "",
     categoria: str = "",
     inicio: str = "",
     fim: str = "",
@@ -218,8 +221,18 @@ def approve(identifier: str, data: Version, professional: Professional = Depends
 
 @router.post("/acoes/{identifier}/publicar")
 def publish(identifier: str, data: Version, professional: Professional = Depends(writer)):
-    # Reserva a etapa; não permite aparentar publicação no Portal sem integração.
-    raise HTTPException(503, "Publicação aguarda contrato e aprovação institucional da integração.")
+    config = get_settings()
+    if (
+        not config.agenda_summaries_url.startswith("https://")
+        or not config.agenda_service_token.get_secret_value()
+    ):
+        raise HTTPException(
+            503, "Configure a integração autenticada com a Agenda antes de publicar."
+        )
+    with Session(get_engine()) as session, session.begin():
+        return ActionService(SqlActionsRepository(session)).transition(
+            identifier, data.versao, "publicada", professional
+        )
 
 
 @router.get("/acoes/{identifier}/beneficiarios")
@@ -269,7 +282,7 @@ def beneficiary(
         result = add_beneficiary(session, identifier, data, professional)
         row = action_or_404(session, identifier)
         row.versao += 1
-        row.status = "rascunho"
+        row.status = "em_revisao"
         row.aprovado_por = row.publicado_por = None
         row.atualizado_em = datetime.now(UTC)
         session.flush()
@@ -398,7 +411,7 @@ def confirm(data: ImportConfirmation, professional: Professional = Depends(write
             existing += result == "existente"
         if included:
             row.versao += 1
-            row.status = "rascunho"
+            row.status = "em_revisao"
             row.aprovado_por = row.publicado_por = None
             row.atualizado_em = datetime.now(UTC)
             session.flush()
@@ -430,7 +443,7 @@ def technical_health(_professional: Professional = Depends(technologist)):
         status = "DB_ERRO"
     with Session(get_engine()) as session:
         pending = session.scalar(
-            select(func.count()).select_from(Outbox).where(Outbox.status != "entregue")
+            select(func.count()).select_from(Outbox).where(Outbox.status.in_(["pendente", "falha"]))
         )
         delivered = session.scalar(select(func.max(Outbox.enviado_em)))
     config = get_settings()
@@ -441,7 +454,9 @@ def technical_health(_professional: Professional = Depends(technologist)):
         "armazenamento": "PostgreSQL institucional / actions_map"
         if config.production
         else "local isolado",
-        "agenda": "CONFIG_PENDENTE" if not config.agenda_summaries_url else "NAO_VERIFICADA",
+        "agenda": "CONFIG_PENDENTE"
+        if not config.agenda_summaries_url
+        else ("RESUMOS_RECEBIDOS" if delivered else "AGUARDANDO_CONFIRMACAO"),
         "fila_pendente": pending,
         "ultima_confirmacao": delivered,
         "verificado_em": datetime.now(UTC),
@@ -453,3 +468,13 @@ def technical_health(_professional: Professional = Depends(technologist)):
             else "ausente",
         },
     }
+
+
+@router.post("/tecnologia/sincronizar-agenda")
+def synchronize_agenda(
+    _writer: Professional = Depends(writer),
+    professional: Professional = Depends(technologist),
+):
+    with Session(get_engine()) as session, session.begin():
+        audit(session, professional, "integracoes.agenda.sync", "agenda-resumos")
+    return dispatch_pending(limit=2)

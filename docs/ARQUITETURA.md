@@ -16,7 +16,7 @@ Camadas Python:
 
 O SQLite em `backend/private/` serve exclusivamente ao desenvolvimento/testes. Não é fallback de falha do PostgreSQL. Em produção, PostgreSQL/TLS persiste as tabelas próprias no schema `actions_map`; a autenticação usa a consulta institucional delegada. Migrações Alembic e grants são operações administrativas separadas, sem criação de tabelas no startup. Nenhuma migração modifica as tabelas de profissionais ou Portal. Não há prontuário, `usuario_id` clínico ou criação de senha.
 
-As mutações de ação gravam alteração, auditoria e snapshot de outbox na mesma transação. Edição/revisão/arquivamento exigem versão atual; edição invalida aprovação. Ações arquivadas saem das métricas ativas sem apagar beneficiários. Publicação é bloqueada com 503 enquanto o receptor e a governança não estiverem homologados.
+As mutações gravam alteração, auditoria e snapshot de outbox na mesma transação. Ações novas e editadas ficam em revisão; o estado de rascunho foi removido por decisão posterior do responsável. Aprovação, publicação e arquivamento exigem versão atual. Publicação exige integração HTTPS autenticada configurada e resumo validado; a entrega só é confirmada por ACK da Agenda. Arquivamento preserva beneficiários e retira os totais publicados.
 
 Beneficiário mínimo: UUID próprio, nome cifrado com Fernet autenticado e vinculado ao ID no conteúdo, município de residência opcional. Participação aponta à ação e, quando informado, ao índice de um local. Enquanto houver participações localizadas, alteração da lista de locais é bloqueada para não remapear vínculos por acidente; substituição por entidades relacionais está prevista na migração PostgreSQL.
 
@@ -24,7 +24,7 @@ Importação por arquivos: `/importacoes` recebe PDF/CSV/JSON, transmite partes 
 
 A Visão geral é a única página de métricas. A API privada `/api/v1/indicadores` continua fornecendo os totais; a antiga página homônima foi removida. `/dados-iniciais` redireciona para `/importacoes`. A carga assistida do acervo local fica em adaptador operacional de infraestrutura, sem dependência de SQLAlchemy nas entidades ou casos de uso de aplicação.
 
-Worker: envio HTTPS com token servidor, DTO allowlist, chave idempotente, ACK do evento/versão, dez tentativas e backoff. Não roda automaticamente nem tem destinatário configurado por padrão. Uma instância por armazenamento local; leasing/locking distribuído são requisitos da versão institucional.
+Worker: HTTPS com token servidor, DTO allowlist 1.1, pessoas contempladas distintas dentro da ação, chave idempotente, ACK, dez tentativas e backoff. Mutações tentam enviar em background; PostgreSQL coordena workers com SKIP LOCKED. Tecnologia pode sincronizar manualmente, com CSRF e auditoria. A operação deve agendar retentativas em períodos sem tráfego. Receptor e exportação de ações foram implementados na Agenda em schema próprio.
 
 Horários de banco em UTC e apresentação em `America/Fortaleza`, conforme planejamento. Datas sem hora não são deslocadas pelo fuso. Formulários e respostas usam português brasileiro.
 

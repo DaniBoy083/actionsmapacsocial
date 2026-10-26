@@ -1,8 +1,8 @@
 TRANSITIONS = {
-    "em_revisao": {"rascunho"},
+    "em_revisao": {"validada", "publicada"},
     "validada": {"em_revisao"},
     "publicada": {"validada"},
-    "arquivada": {"rascunho", "em_revisao", "validada", "publicada"},
+    "arquivada": {"em_revisao", "validada", "publicada"},
 }
 
 

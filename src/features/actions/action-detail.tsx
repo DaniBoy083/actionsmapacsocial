@@ -45,6 +45,11 @@ export function ActionDetail({ id }: { id: string }) {
   const action = useQuery({
     queryKey: ["acoes", id],
     queryFn: async () => (await api.get<Action>(`/acoes/${id}`)).data,
+    refetchInterval: (query) =>
+      query.state.data?.status === "publicada" &&
+      query.state.data.integracao?.status === "pendente"
+        ? 5000
+        : false,
   });
   const people = useQuery({
     queryKey: ["beneficiarios", id, page],
@@ -158,13 +163,13 @@ export function ActionDetail({ id }: { id: string }) {
           >
             Editar ação
           </Button>
-          {row.status === "rascunho" && (
+          {row.status === "validada" && (
             <Button
               variant="contained"
               disabled={busy}
-              onClick={() => transition("revisar")}
+              onClick={() => transition("publicar")}
             >
-              Enviar para revisão
+              Publicar na Agenda
             </Button>
           )}
           {row.status === "em_revisao" && (
@@ -212,13 +217,32 @@ export function ActionDetail({ id }: { id: string }) {
       </section>
       <section className="panel">
         <h2>Prévia do resumo público</h2>
+        <p>
+          <strong>{row.pessoas_contempladas ?? row.beneficiarios}</strong>{" "}
+          pessoas contempladas · <strong>1</strong> ação ·{" "}
+          {[...new Set(row.locais.map((place) => place.municipio_nome))].join(
+            ", ",
+          )}
+        </p>
         <p style={{ whiteSpace: "pre-wrap" }}>
           {row.resumo_publico || "Resumo ainda não informado."}
         </p>
         <Alert severity="info">
-          A prévia contém somente o conteúdo editorial. A publicação no Portal
-          depende da integração e da aprovação institucional.
+          A Agenda recebe os totais da ação e os municípios, sem dados pessoais.
+          O encaminhamento ao Portal depende do processamento na Plataforma.
         </Alert>
+        {row.status === "publicada" && (
+          <Alert
+            severity={
+              row.integracao?.status === "entregue" ? "success" : "info"
+            }
+            sx={{ mt: 2 }}
+          >
+            {row.integracao?.status === "entregue"
+              ? "Recebimento confirmado pela Agenda Digital."
+              : "Publicação registrada. Aguardando confirmação da Agenda Digital."}
+          </Alert>
+        )}
       </section>
       <section className="panel">
         <div className="page-heading">

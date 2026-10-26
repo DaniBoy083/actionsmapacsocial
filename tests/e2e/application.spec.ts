@@ -105,7 +105,7 @@ test("cadastrar, editar, registrar beneficiário e arquivar ação com vários l
   await page
     .getByRole("option", { name: "Campina Grande", exact: true })
     .click();
-  await dialog.getByRole("button", { name: "Salvar rascunho" }).click();
+  await dialog.getByRole("button", { name: "Salvar ação" }).click();
   await expect(dialog).not.toBeVisible();
   await page.getByLabel("Buscar por nome").fill(name);
   await expect(page.getByRole("row").filter({ hasText: name })).toBeVisible();
@@ -122,7 +122,7 @@ test("cadastrar, editar, registrar beneficiário e arquivar ação com vários l
     .fill(name + " revisada");
   await page
     .getByRole("dialog")
-    .getByRole("button", { name: "Salvar rascunho" })
+    .getByRole("button", { name: "Salvar ação" })
     .click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await page
@@ -212,7 +212,9 @@ test("CSV enviado exige revisão, preserva conferência e registra na ação", a
   await expect(
     page.getByRole("button", { name: "Revisar lote (0)" }),
   ).toBeDisabled();
-  await page.getByRole("combobox", { name: "Ação de destino", exact: true }).click();
+  await page
+    .getByRole("combobox", { name: "Ação de destino", exact: true })
+    .click();
   await page.getByRole("option", { name, exact: true }).click();
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Próximo", exact: true }).click();

@@ -4,7 +4,7 @@ Primeira entrega de desenvolvimento para gestão de ações institucionais e reg
 
 Inclui login institucional, autorização no backend, Visão geral com indicadores, CRUD de ações com N locais da Paraíba, beneficiários cifrados, importação revisada por PDF/CSV/JSON, outbox e diagnóstico exclusivo de Tecnologia, páginas 404/erro e documentação de integração.
 
-**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI no mesmo projeto Vercel, PostgreSQL institucional em schema próprio e credencial restrita. As 50 fichas do Programa Melhor Visão foram aprovadas pelo responsável e importadas; municípios ausentes foram preenchidos com Mamanguape por sua orientação expressa. Consulte [deploy de produção](docs/DEPLOY_PRODUCAO.md) e [conformidade e pendências](docs/CONFORMIDADE_E_PENDENCIAS.md). A integração receptora da Agenda permanece pendente.
+**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI na Vercel, PostgreSQL em schema próprio e credencial restrita. As 50 fichas da Melhor Visão foram aprovadas/importadas e municípios ausentes receberam Mamanguape por orientação expressa. Receptor e exportação de ações implementados na Agenda; o consumo pela Plataforma/Portal continua pendente. Consulte [deploy](docs/DEPLOY_PRODUCAO.md) e [conformidade](docs/CONFORMIDADE_E_PENDENCIAS.md).
 
 ## Rodar localmente no Windows
 
@@ -41,6 +41,8 @@ Localmente, os cadastros ficam em `backend/private/actions.sqlite3`, ignorado pe
 
 A página **Importar dados** (`/importacoes`) recebe PDF, CSV e JSON, com prévia, revisão por registro, ação de destino e confirmação. Até 8 MiB e 200 páginas/registros por arquivo; arquivos temporários cifrados, privados e com expiração técnica de 24 horas. `/dados-iniciais` redireciona para ela. A página `/indicadores` foi removida; os totais permanecem em Visão geral. Consulte [formatos, limites e operação](docs/IMPORTACAO_ARQUIVOS.md). O acervo original de aproximadamente 241 MB permanece local e usa carga assistida com revisão, sem upload público.
 
+As ações são salvas diretamente **Em revisão**, depois validadas e publicadas. O estado anterior de rascunho foi removido. A publicação envia à Agenda número de pessoas contempladas, quantidade de ações e municípios, com ACK e sem dados pessoais. Consulte [fluxo de publicação e contrato 1.1](docs/PUBLICACAO_E_FLUXO_DE_ACOES.md).
+
 ## Verificação
 
 Validação da revisão de importações: **61 testes backend aprovados**; testes de navegador em desktop/celular, acessibilidade, lint, TypeScript, Ruff e build são registrados na [revisão dos princípios](docs/REVISAO_PRINCIPIOS_2026-10-26.md). A integração externa e a homologação institucional continuam pendentes.
@@ -75,8 +77,9 @@ A API local oferece documentação em **http://127.0.0.1:8000/docs**. O diagnós
 - [Importação de PDF, CSV e JSON](docs/IMPORTACAO_ARQUIVOS.md)
 - [Revisão dos princípios e evidências](docs/REVISAO_PRINCIPIOS_2026-10-26.md)
 - [O que implementar na Agenda Digital](docs/AGENDA_DIGITAL_IMPLEMENTACAO.md)
+- [Publicação e fluxo das ações](docs/PUBLICACAO_E_FLUXO_DE_ACOES.md)
 - [Privacidade, retenção e plano de migração](docs/PRIVACIDADE_E_MIGRACAO.md)
 - [Conformidade e próximos incrementos](docs/CONFORMIDADE_E_PENDENCIAS.md)
 - [OpenAPI privado](docs/contracts/actions-map.openapi.json) e [schema de resumo para Agenda](docs/contracts/agenda-summary.schema.json)
 
-Somente após implementar/homologar o receptor, configurar `AGENDA_SUMMARIES_URL` e `AGENDA_SERVICE_TOKEN` no backend. O worker é explícito; não envia automaticamente. Com `PYTHONPATH=backend`, executar `python -m app.infrastructure.outbox`. O fluxo obrigatório permanece Map → Agenda → Plataforma → Portal, sem dados pessoais. A publicação no Portal permanece bloqueada até essa homologação.
+O backend usa `AGENDA_SUMMARIES_URL` e `AGENDA_SERVICE_TOKEN` para o receptor implementado na Agenda. Mutações tentam sincronizar em background; Tecnologia dispõe de sincronização manual auditada. O worker por CLI (`PYTHONPATH=backend`, `python -m app.infrastructure.outbox`) permite retentar sem tráfego. O fluxo segue Map → Agenda → Plataforma → Portal, sem dados pessoais. A Plataforma deve consumir a nova exportação antes de atualizar o mapa público.

@@ -38,6 +38,12 @@ export type Action = {
   status: string;
   locais: Location[];
   beneficiarios: number;
+  pessoas_contempladas: number;
+  integracao?: {
+    status: string;
+    enviado_em: string | null;
+    erro: string | null;
+  } | null;
   atualizado_em: string;
   historico?: { operacao: string; criado_em: string }[];
 };
@@ -61,7 +67,6 @@ export function dateLabel(value: string | null) {
     : "Não informada";
 }
 export const statusLabels: Record<string, string> = {
-  rascunho: "Rascunho",
   em_revisao: "Em revisão",
   validada: "Validada",
   publicada: "Publicada",

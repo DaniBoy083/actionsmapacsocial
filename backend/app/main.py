@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import BackgroundTasks, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.import_files import router as import_router
 from app.api.routes import router
+from app.infrastructure.outbox import dispatch_safely
 
 app = FastAPI(title="AC Actions Map — AC Social", version="0.1.0")
 app.include_router(router)
@@ -29,6 +30,16 @@ async def private_responses(request: Request, call_next):
             chunks.append(chunk)
         request._body = b"".join(chunks)
     response = await call_next(request)
+    if (
+        request.method in {"POST", "PATCH", "PUT", "DELETE"}
+        and response.status_code < 300
+        and request.url.path.startswith(("/api/v1/acoes", "/api/v1/importacoes"))
+    ):
+        tasks = BackgroundTasks()
+        if response.background:
+            tasks.add_task(response.background)
+        tasks.add_task(dispatch_safely)
+        response.background = tasks
     response.headers["Cache-Control"] = "no-store"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "no-referrer"

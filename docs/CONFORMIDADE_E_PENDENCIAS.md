@@ -18,8 +18,8 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 | Importação por arquivos | PDF/CSV/JSON, prévia privada, revisão manual, rotação, lote idempotente e storage temporário cifrado; OCR não é presumido, conciliação entre fontes continua pendente |
 | PDF real | 50 fichas aprovadas pelo responsável e importadas; municípios ausentes preenchidos com Mamanguape por orientação expressa; nenhuma ficha pendente; prévia e transcrições privadas fora do Git |
 | Persistência PostgreSQL institucional | Schema `actions_map`, dez tabelas, Alembic até `0003_private_file_import`, sessão distribuída e credencial restrita |
-| Aprovação e preview editorial | Rascunho → revisão → validada; edição retira aprovação; publicação permanece bloqueada |
-| Pipeline sem dados pessoais | DTO e outbox transacional implementados, envio/ACK/backoff testados com transporte simulado; receptor e fluxo externo pendentes |
+| Aprovação e preview editorial | Cadastro direto em revisão → validada → publicada; estado antigo removido da aplicação e bloqueado por constraint SQL; edição retira aprovação |
+| Pipeline sem dados pessoais | Contrato 1.1, outbox/ACK/backoff e receptor na Agenda implementados; envia pessoas contempladas, quantidade de ações e municípios; consumo pela Plataforma/Portal pendente |
 | Tokens e rotação | Exibe somente alias/escopo/status; provisionamento/rotação reforçados no secret manager ainda precisam de integração |
 | Visão geral e indicadores | Única página de métricas, ações distintas/participações/municípios/revisões; filtros analíticos avançados e pessoas únicas pendentes |
 | Not found e error page | `not-found.tsx`, `error.tsx` e `global-error.tsx`, português e recuperação sem detalhes internos |

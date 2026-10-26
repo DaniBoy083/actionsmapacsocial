@@ -44,7 +44,7 @@ def test_historical_load_is_idempotent_encrypted_and_does_not_merge_names(api_cl
         assert count(session, ImportBatch) == 1
         assert count(session, Outbox) == 2
         action = session.get(Action, data.action_id)
-        assert action.status == "rascunho" and action.inicio_em is None
+        assert action.status == "em_revisao" and action.inicio_em is None
         for beneficiary in session.scalars(select(Beneficiary)):
             assert "Pessoa" not in beneficiary.dados_cifrados
             assert json.loads(cipher().decrypt(beneficiary.dados_cifrados.encode())) == {

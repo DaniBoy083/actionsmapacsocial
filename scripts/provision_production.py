@@ -173,7 +173,7 @@ def main() -> int:
         assert connection.scalar(text("SELECT 1")) == 1
         assert (
             connection.scalar(text("SELECT version_num FROM actions_map.alembic_version"))
-            == "0003_private_file_import"
+            == "0004_remove_drafts"
         )
         assert connection.scalar(text("SELECT count(*) FROM actions_map.acoes_map_acoes")) == 0
     print(
