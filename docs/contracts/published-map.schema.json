@@ -1,0 +1,190 @@
+{
+  "$defs": {
+    "MapMunicipality": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "action_count": {
+          "title": "Action Count",
+          "type": "integer"
+        },
+        "unallocated_action_count": {
+          "title": "Unallocated Action Count",
+          "type": "integer"
+        },
+        "single_municipality_participations": {
+          "title": "Single Municipality Participations",
+          "type": "integer"
+        },
+        "single_municipality_people": {
+          "title": "Single Municipality People",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "code",
+        "name",
+        "action_count",
+        "unallocated_action_count",
+        "single_municipality_participations",
+        "single_municipality_people"
+      ],
+      "title": "MapMunicipality",
+      "type": "object"
+    },
+    "MapSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "action_count": {
+          "title": "Action Count",
+          "type": "integer"
+        },
+        "participation_count": {
+          "title": "Participation Count",
+          "type": "integer"
+        },
+        "people_count": {
+          "title": "People Count",
+          "type": "integer"
+        },
+        "municipality_count": {
+          "title": "Municipality Count",
+          "type": "integer"
+        },
+        "undated_action_count": {
+          "title": "Undated Action Count",
+          "type": "integer"
+        },
+        "unallocated": {
+          "$ref": "#/$defs/MapTotals"
+        }
+      },
+      "required": [
+        "action_count",
+        "participation_count",
+        "people_count",
+        "municipality_count",
+        "undated_action_count",
+        "unallocated"
+      ],
+      "title": "MapSummary",
+      "type": "object"
+    },
+    "MapTotals": {
+      "additionalProperties": false,
+      "properties": {
+        "action_count": {
+          "title": "Action Count",
+          "type": "integer"
+        },
+        "participation_count": {
+          "title": "Participation Count",
+          "type": "integer"
+        },
+        "people_count": {
+          "title": "People Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "action_count",
+        "participation_count",
+        "people_count"
+      ],
+      "title": "MapTotals",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "enum": [
+        "available",
+        "empty",
+        "unavailable",
+        "not_configured",
+        "unauthorized",
+        "contract_unavailable"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "checked_at": {
+      "title": "Checked At",
+      "type": "string"
+    },
+    "refresh_after_seconds": {
+      "title": "Refresh After Seconds",
+      "type": "integer"
+    },
+    "generation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Generation"
+    },
+    "captured_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Captured At"
+    },
+    "expires_at": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Expires At"
+    },
+    "summary": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MapSummary"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "municipalities": {
+      "items": {
+        "$ref": "#/$defs/MapMunicipality"
+      },
+      "title": "Municipalities",
+      "type": "array"
+    }
+  },
+  "required": [
+    "status",
+    "checked_at",
+    "refresh_after_seconds",
+    "generation",
+    "captured_at",
+    "expires_at",
+    "summary",
+    "municipalities"
+  ],
+  "title": "PublishedMap",
+  "type": "object"
+}

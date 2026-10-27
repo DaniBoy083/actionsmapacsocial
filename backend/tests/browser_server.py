@@ -21,10 +21,13 @@ os.environ.update(
         "ACTIONS_STORAGE_URL": "sqlite:///" + (directory / "test.sqlite3").as_posix(),
         "SESSION_SECRET": secrets.token_urlsafe(48),
         "BENEFICIARIES_KEY": Fernet.generate_key().decode(),
-        "FRONTEND_ORIGIN": "http://localhost:3100",
+        "FRONTEND_ORIGIN": "http://localhost:"
+        + os.environ.get("ACTIONS_E2E_FRONTEND_PORT", "3310"),
         "AGENDA_WEB_URL": "https://agenda.example.invalid",
         "AGENDA_SUMMARIES_URL": "",
         "AGENDA_SERVICE_TOKEN": "",
+        "CONSOLIDATED_ANALYTICS_API_BASE_URL": "",
+        "CONSOLIDATED_ANALYTICS_API_TOKEN": "",
     }
 )
 from app.domain.contracts import Professional
@@ -67,4 +70,9 @@ imports.SOURCE = pdf
 app.dependency_overrides[identities] = BrowserIdentities
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8100, access_log=False)
+    uvicorn.run(
+        app,
+        host="127.0.0.1",
+        port=int(os.environ.get("ACTIONS_E2E_BACKEND_PORT", "8310")),
+        access_log=False,
+    )

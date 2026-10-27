@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     agenda_web_url: str = ""
     agenda_summaries_url: str = ""
     agenda_service_token: SecretStr = SecretStr("")
+    consolidated_analytics_api_base_url: str = ""
+    consolidated_analytics_api_token: SecretStr = SecretStr("")
 
     @property
     def production(self) -> bool:

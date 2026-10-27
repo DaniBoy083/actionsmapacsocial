@@ -1203,6 +1203,24 @@
           }
         }
       }
+    },
+    "/api/v1/mapa-acoes": {
+      "get": {
+        "summary": "Published Map",
+        "operationId": "published_map_api_v1_mapa_acoes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedMap"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1755,6 +1773,194 @@
           "password"
         ],
         "title": "Login"
+      },
+      "MapMunicipality": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "action_count": {
+            "type": "integer",
+            "title": "Action Count"
+          },
+          "unallocated_action_count": {
+            "type": "integer",
+            "title": "Unallocated Action Count"
+          },
+          "single_municipality_participations": {
+            "type": "integer",
+            "title": "Single Municipality Participations"
+          },
+          "single_municipality_people": {
+            "type": "integer",
+            "title": "Single Municipality People"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "action_count",
+          "unallocated_action_count",
+          "single_municipality_participations",
+          "single_municipality_people"
+        ],
+        "title": "MapMunicipality"
+      },
+      "MapSummary": {
+        "properties": {
+          "action_count": {
+            "type": "integer",
+            "title": "Action Count"
+          },
+          "participation_count": {
+            "type": "integer",
+            "title": "Participation Count"
+          },
+          "people_count": {
+            "type": "integer",
+            "title": "People Count"
+          },
+          "municipality_count": {
+            "type": "integer",
+            "title": "Municipality Count"
+          },
+          "undated_action_count": {
+            "type": "integer",
+            "title": "Undated Action Count"
+          },
+          "unallocated": {
+            "$ref": "#/components/schemas/MapTotals"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action_count",
+          "participation_count",
+          "people_count",
+          "municipality_count",
+          "undated_action_count",
+          "unallocated"
+        ],
+        "title": "MapSummary"
+      },
+      "MapTotals": {
+        "properties": {
+          "action_count": {
+            "type": "integer",
+            "title": "Action Count"
+          },
+          "participation_count": {
+            "type": "integer",
+            "title": "Participation Count"
+          },
+          "people_count": {
+            "type": "integer",
+            "title": "People Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action_count",
+          "participation_count",
+          "people_count"
+        ],
+        "title": "MapTotals"
+      },
+      "PublishedMap": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "empty",
+              "unavailable",
+              "not_configured",
+              "unauthorized",
+              "contract_unavailable"
+            ],
+            "title": "Status"
+          },
+          "checked_at": {
+            "type": "string",
+            "title": "Checked At"
+          },
+          "refresh_after_seconds": {
+            "type": "integer",
+            "title": "Refresh After Seconds"
+          },
+          "generation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation"
+          },
+          "captured_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captured At"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MapSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "municipalities": {
+            "items": {
+              "$ref": "#/components/schemas/MapMunicipality"
+            },
+            "type": "array",
+            "title": "Municipalities"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "checked_at",
+          "refresh_after_seconds",
+          "generation",
+          "captured_at",
+          "expires_at",
+          "summary",
+          "municipalities"
+        ],
+        "title": "PublishedMap"
       },
       "ServiceHealth": {
         "properties": {

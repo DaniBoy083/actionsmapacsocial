@@ -39,7 +39,7 @@ test("Tecnologia cria, copia, rotaciona e revoga token de leitura", async ({
         (window as Window & { copiedIntegrationText: string })
           .copiedIntegrationText,
     ),
-  ).toBe("http://localhost:3100/api/integracoes/v1/acoes/resumos");
+  ).toBe(new URL("/api/integracoes/v1/acoes/resumos", page.url()).href);
   await page
     .getByRole("button", {
       name: "Copiar cURL — Resumos de ações",
@@ -91,7 +91,7 @@ test("Tecnologia cria, copia, rotaciona e revoga token de leitura", async ({
         .copiedIntegrationText,
   );
   expect(command).toContain(
-    "http://localhost:3100/api/integracoes/v1/acoes/resumos",
+    new URL("/api/integracoes/v1/acoes/resumos", page.url()).href,
   );
   expect(command).toContain(`Authorization: Bearer ${raw}`);
   expect(

@@ -4,7 +4,9 @@ Primeira entrega de desenvolvimento para gestão de ações institucionais e reg
 
 Inclui login institucional, autorização no backend, Visão geral com indicadores, CRUD de ações com N locais da Paraíba, beneficiários cifrados, importação revisada por PDF/CSV/JSON, outbox e diagnóstico exclusivo de Tecnologia, páginas 404/erro e documentação de integração.
 
-**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI na Vercel, PostgreSQL em schema próprio e credencial restrita. As 50 fichas da Melhor Visão foram aprovadas/importadas e municípios ausentes receberam Mamanguape por orientação expressa. Receptor e exportação de ações implementados na Agenda; o consumo pela Plataforma/Portal continua pendente. Consulte [deploy](docs/DEPLOY_PRODUCAO.md) e [conformidade](docs/CONFORMIDADE_E_PENDENCIAS.md).
+**27/10/2026 — Mapa consolidado:** nova página autenticada `/mapa-acoes`, com leitura exclusiva da Plataforma Consolidada, malha dos 223 municípios, totais/subtotais, atualização periódica e expiração. Requer `CONSOLIDATED_ANALYTICS_API_BASE_URL` e `CONSOLIDATED_ANALYTICS_API_TOKEN` privados no backend; sem credencial, informa configuração pendente. [Contrato, configuração e operação](docs/MAPA_CONSOLIDADO_ACTIONS_MAP.md) e [auditoria atual dos princípios](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md).
+
+**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI na Vercel, PostgreSQL em schema próprio e credencial restrita. As 50 fichas da Melhor Visão foram aprovadas/importadas e municípios ausentes receberam Mamanguape por orientação expressa. Receptor e exportação de ações implementados na Agenda. A nova consulta interna à Plataforma está preparada, mas sem credencial própria neste ambiente; homologação do fluxo completo e pendências institucionais estão na [auditoria atual](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md). Consulte também [deploy](docs/DEPLOY_PRODUCAO.md) e [conformidade](docs/CONFORMIDADE_E_PENDENCIAS.md).
 
 ## Rodar localmente no Windows
 
@@ -47,7 +49,7 @@ As ações são salvas diretamente **Em revisão**, depois validadas e publicada
 
 ## Verificação
 
-Validação da revisão de importações: **61 testes backend aprovados**; testes de navegador em desktop/celular, acessibilidade, lint, TypeScript, Ruff e build são registrados na [revisão dos princípios](docs/REVISAO_PRINCIPIOS_2026-10-26.md). A integração externa e a homologação institucional continuam pendentes.
+Validação local de 27/10/2026: **133 testes backend e 26 cenários de navegador aprovados**, incluindo desktop/celular e Axe; lint, TypeScript, Ruff, `pip check` e build aprovados. Evidências, correções e limitações na [auditoria atual](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md). A consulta real do novo consumidor e a homologação institucional continuam pendentes.
 
 ```powershell
 npm.cmd run lint
@@ -59,7 +61,7 @@ npx.cmd playwright install chromium
 npm.cmd run test:e2e
 ```
 
-Playwright inicia frontend compilado/backend próprios nas portas **3100/8100**; execute `npm.cmd run build` antes. Usa identidades sintéticas, documento sintético e SQLite temporário. Nenhum cadastro real é necessário e não há gravação institucional. Essas portas devem estar livres. O Chromium é baixado apenas na preparação do ambiente. Capturas/relatórios ficam ignorados em `artifacts/` e `test-results/`.
+Playwright inicia frontend compilado/backend próprios nas portas **3310/8310**; execute `npm.cmd run build` antes. Usa identidades sintéticas, documento sintético e SQLite temporário. Nenhum cadastro real é necessário e não há gravação institucional. Essas portas devem estar livres; use `ACTIONS_E2E_FRONTEND_PORT` e `ACTIONS_E2E_BACKEND_PORT` para escolher outras portas de teste. O Chromium é baixado apenas na preparação do ambiente. Capturas/relatórios ficam ignorados em `artifacts/` e `test-results/`.
 
 Para executar o frontend compilado, mantenha o backend aberto e use `npm.cmd run build`, depois `npm.cmd start`. Isso permite testar o build local; não significa que o sistema está homologado para produção.
 
@@ -78,6 +80,8 @@ A API local oferece documentação em **http://127.0.0.1:8000/docs**. O diagnós
 - [Deploy Next.js + FastAPI na mesma Vercel](docs/DEPLOY_PRODUCAO.md)
 - [Importação de PDF, CSV e JSON](docs/IMPORTACAO_ARQUIVOS.md)
 - [Revisão dos princípios e evidências](docs/REVISAO_PRINCIPIOS_2026-10-26.md)
+- [Mapa consolidado no Actions Map: contrato, configuração e rollback](docs/MAPA_CONSOLIDADO_ACTIONS_MAP.md)
+- [Auditoria atual da aplicação e princípios](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md)
 - [O que implementar na Agenda Digital](docs/AGENDA_DIGITAL_IMPLEMENTACAO.md)
 - [Publicação e fluxo das ações](docs/PUBLICACAO_E_FLUXO_DE_ACOES.md)
 - [Privacidade, retenção e plano de migração](docs/PRIVACIDADE_E_MIGRACAO.md)

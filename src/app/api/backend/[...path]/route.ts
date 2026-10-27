@@ -1,7 +1,12 @@
 import { NextRequest } from "next/server";
 import { backendUrl } from "@/lib/backend";
+const privateHeaders = {
+  "Cache-Control": "no-store",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
+};
 const permitted =
-  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|tecnologia\/(saude|sincronizar-agenda|tokens(?:\/[a-f0-9-]{36}\/(revogar|rotacionar))?)|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|arquivos|[a-zA-Z0-9-]+(?:\/(preparar|paginas\/\d+|partes\/\d+))?))$/;
+  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|mapa-acoes|tecnologia\/(saude|sincronizar-agenda|tokens(?:\/[a-f0-9-]{36}\/(revogar|rotacionar))?)|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|arquivos|[a-zA-Z0-9-]+(?:\/(preparar|paginas\/\d+|partes\/\d+))?))$/;
 async function proxy(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },
@@ -9,12 +14,18 @@ async function proxy(
   const { path } = await context.params;
   const targetPath = path.join("/");
   if (!permitted.test(targetPath))
-    return Response.json({ detail: "Rota não encontrada." }, { status: 404 });
+    return Response.json(
+      { detail: "Rota não encontrada." },
+      { status: 404, headers: privateHeaders },
+    );
   if (
     !["GET", "HEAD"].includes(request.method) &&
     request.headers.get("origin") !== request.nextUrl.origin
   )
-    return Response.json({ detail: "Origem não autorizada." }, { status: 403 });
+    return Response.json(
+      { detail: "Origem não autorizada." },
+      { status: 403, headers: privateHeaders },
+    );
   const headers = new Headers();
   for (const name of ["cookie", "content-type", "x-csrf-token", "origin"]) {
     const value = request.headers.get(name);
@@ -36,7 +47,7 @@ async function proxy(
           await reader.cancel();
           return Response.json(
             { detail: "Requisição muito grande." },
-            { status: 413 },
+            { status: 413, headers: privateHeaders },
           );
         }
         chunks.push(value);
@@ -57,10 +68,7 @@ async function proxy(
       redirect: "manual",
       signal: AbortSignal.timeout(30_000),
     });
-    const responseHeaders = new Headers({
-      "Cache-Control": "no-store",
-      "X-Content-Type-Options": "nosniff",
-    });
+    const responseHeaders = new Headers(privateHeaders);
     for (const name of ["content-type", "retry-after"]) {
       const value = upstream.headers.get(name);
       if (value) responseHeaders.set(name, value);
@@ -77,7 +85,7 @@ async function proxy(
         detail:
           "A API está indisponível. Confirme se o backend está em execução.",
       },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
+      { status: 503, headers: privateHeaders },
     );
   }
 }

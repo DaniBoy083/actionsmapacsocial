@@ -49,6 +49,8 @@ def api_client(tmp_path, monkeypatch):
     monkeypatch.setenv("FRONTEND_ORIGIN", "http://localhost:3000")
     monkeypatch.setenv("AGENDA_SUMMARIES_URL", "")
     monkeypatch.setenv("AGENDA_SERVICE_TOKEN", "")
+    monkeypatch.setenv("CONSOLIDATED_ANALYTICS_API_BASE_URL", "")
+    monkeypatch.setenv("CONSOLIDATED_ANALYTICS_API_TOKEN", "")
     get_settings.cache_clear()
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool

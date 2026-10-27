@@ -1,5 +1,7 @@
 # Verificação de conformidade e próximos incrementos
 
+**Revisão de 27/10/2026:** mapa consolidado interno implementado conforme adaptação autorizada do anexo. [Estado atual, evidências e pendências](AUDITORIA_APLICACAO_E_PRINCIPIOS.md); [contrato/configuração/operação](MAPA_CONSOLIDADO_ACTIONS_MAP.md). As contagens e descrições abaixo registram entregas anteriores. A nova consulta não está configurada com credencial própria e não comprova propagação real até o Portal.
+
 Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP institucional nem certificação de conformidade absoluta. A especificação específica do AC Actions Map prevalece sobre as decisões conflitantes do planejamento anterior.
 
 **Atualização de produção:** Services, binding privado, schema PostgreSQL `actions_map` e credencial restrita foram implementados. A carga das 50 fichas e o recebimento do resumo na Agenda foram conferidos; o relato está em [deploy de produção](DEPLOY_PRODUCAO.md). A gestão de tokens desta entrega exige aplicar até 0006 antes de seu deploy. Consumo pela Plataforma/Portal e homologações institucionais permanecem separados dessa entrega.

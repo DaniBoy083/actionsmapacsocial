@@ -1,5 +1,7 @@
 # Arquitetura da primeira entrega
 
+**Extensão de 27/10/2026:** consulta interna `/mapa-acoes`, protegida pela sessão institucional, consome apenas a API da Plataforma. Domínio `PublishedMapSource` → aplicação `ReadPublishedMap` → adaptador HTTP/contrato estrito → BFF/página MUI. Cache em memória por processo, sem tabela nova; nenhum fallback para o cadastro operacional. [Detalhes e limites](MAPA_CONSOLIDADO_ACTIONS_MAP.md).
+
 **Atualização de produção em 26/10/2026:** a hospedagem conjunta Next.js/FastAPI, o binding privado e a persistência PostgreSQL do módulo foram preparados conforme [deploy de produção](DEPLOY_PRODUCAO.md). As referências abaixo ao SQLite e à ausência de migração descrevem a entrega inicial local; a produção usa agora `actions_map`, Alembic e credencial restrita, sem criação de tabelas no startup.
 
 Next.js 16.4.3 / React 19.3 / TypeScript estrito / Tailwind 4. MUI 9 e Emotion com `AppRouterCacheProvider` da versão 16 e camadas CSS; React Icons, React Hot Toast, React Hook Form/Zod, Axios e TanStack Query. Sem React Router, credenciais no bundle ou fontes externas obrigatórias.
