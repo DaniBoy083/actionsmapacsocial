@@ -137,7 +137,7 @@ test("cadastrar, editar, registrar beneficiário e arquivar ação com vários l
     .fill("Pessoa Sintética");
   await page.getByRole("button", { name: "Salvar beneficiário" }).click();
   await expect(
-    page.getByRole("cell", { name: "Pessoa Sintética" }),
+    page.getByRole("cell", { name: "Pessoa Sintética", exact: true }),
   ).toBeVisible();
   await page.goto("/acoes");
   await page.getByLabel("Buscar por nome").fill(name);
@@ -241,7 +241,10 @@ test("CSV enviado exige revisão, preserva conferência e registra na ação", a
   await expect(page.getByText(/1 registro\(s\) incluído\(s\)/)).toBeVisible();
   await page.goto(`/acoes/${identifier}`);
   await expect(
-    page.getByRole("cell", { name: "Pessoa de teste por arquivo" }),
+    page.getByRole("cell", {
+      name: "Pessoa de teste por arquivo",
+      exact: true,
+    }),
   ).toBeVisible();
   await page.goto("/indicadores");
   await expect(

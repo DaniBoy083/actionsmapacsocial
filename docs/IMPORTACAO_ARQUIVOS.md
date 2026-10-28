@@ -1,12 +1,14 @@
 # Importação por arquivos
 
+**Atualização de 28/10/2026:** cadastro/importação agora aceitam os dados gerais completos da ficha, excluindo graus e dados oculares. A complementação dos 50 cadastros já existentes usa operação própria por origem exata, sem repetir a importação nem sobrescrever valores. [Campos, segunda via e resultado produtivo](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md).
+
 Decisão de produto de 26/10/2026: **Visão geral** reúne todos os indicadores. A página redundante `/indicadores` foi removida; a API de indicadores permanece para alimentar o painel. **Importar dados**, em `/importacoes`, substitui Dados iniciais. O endereço antigo `/dados-iniciais` redireciona permanentemente para o novo.
 
 ## Uso
 
 1. Abra **Importar dados** e selecione PDF, CSV ou JSON. O envio prepara uma prévia e ainda não cadastra beneficiários.
 2. Escolha uma ação existente ou cadastre uma nova. A busca encontra destinos além dos primeiros 100 resultados.
-3. Confira cada registro. PDF permite girar a página e transcrever somente nome e município de residência. CSV/JSON preenchem os campos para revisão; nomes repetidos geram aviso. Cada registro precisa ser selecionado após conferência.
+3. Confira cada registro. PDF permite girar a página e transcrever os campos gerais legíveis da ficha. CSV/JSON preenchem os mesmos campos para revisão; nomes repetidos geram aviso. Cada registro precisa ser selecionado após conferência. Não transcreva graus/dados oculares; ausência não autoriza inventar valor.
 4. Revise o lote e a ação de destino. Em produção, marque a autorização expressa antes de confirmar. A gravação é transacional: uma falha desfaz o lote inteiro.
 5. Confira incluídos, já associados e pendentes. É possível revisar outras páginas ou remover o arquivo temporário sem excluir beneficiários já cadastrados.
 
@@ -15,21 +17,20 @@ As transcrições são mantidas em memória enquanto se navega entre páginas; n
 ## Formatos e limites
 
 - Até **8 MiB** por arquivo, **200 páginas** de PDF ou **200 registros** estruturados. Planilhas Excel precisam ser exportadas como CSV UTF-8. Não há execução de fórmulas, macros ou OCR externo.
-- CSV UTF-8, com ou sem BOM, separado por vírgula ou ponto e vírgula. Cabeçalhos: `nome` obrigatório e `municipio_residencia_ibge` opcional. Outros campos são recusados. A tela oferece um modelo sintético para download.
-- JSON: lista de objetos com os mesmos dois campos. Nome entre 2 e 160 caracteres; município opcional, validado no catálogo IBGE da Paraíba. Valores ausentes não são inferidos.
+- CSV UTF-8, com ou sem BOM, separado por vírgula ou ponto e vírgula. `nome` obrigatório; opcionais: `telefone`, `cpf`, `cpf_documento`, `data_nascimento`, `data_ficha`, `municipio_ficha_ibge`, `municipio_residencia_ibge`, `responsavel`, `observacoes`, `recebimento_confirmado`. Datas `AAAA-MM-DD`; recebimento `sim`, `nao`/`não` ou vazio. Outros campos são recusados. A tela oferece modelo sintético atualizado.
+- JSON: lista de objetos com os mesmos campos gerais; recebimento é booleano ou `null`. Nome entre 2 e 160 caracteres; municípios opcionais, validados no catálogo IBGE da Paraíba. CPF exige verificadores válidos; `cpf_documento` preserva 11 dígitos documentais como pendentes, sem afirmar validade. Telefone não recebe DDD inventado. Valores ausentes não são inferidos. Campos oculares, assinatura e `local_indice` não são aceitos nos arquivos estruturados.
 - PDF: assinatura real `%PDF-`, parser isolado, limite de objetos e páginas, timeout e limites de CPU/memória no Linux. Documentos cifrados, anexos e ações/JavaScript são recusados. A prévia privada é JPEG com resolução limitada.
 - A imagem integral da ficha só aparece ao operador autorizado para revisão; campos clínicos não viram colunas do cadastro. O local da ação e a residência da pessoa continuam distintos.
 
 Exemplo exclusivamente sintético:
 
 ```csv
-nome;municipio_residencia_ibge
-Pessoa de exemplo;2508901
-Outra pessoa de exemplo;
+nome;telefone;cpf;cpf_documento;data_nascimento;data_ficha;municipio_ficha_ibge;municipio_residencia_ibge;responsavel;observacoes;recebimento_confirmado
+Pessoa de exemplo;;;;;;2508901;;;;
 ```
 
 ```json
-[{"nome":"Pessoa de exemplo","municipio_residencia_ibge":"2508901"}]
+[{"nome":"Pessoa de exemplo","municipio_ficha_ibge":"2508901","data_ficha":"2026-09-17","recebimento_confirmado":null}]
 ```
 
 O acervo original de aproximadamente 241 MB excede o limite da interface. Ele permanece local; sua carga assistida usa `scripts/import_historical_pdf.py`, manifesto privado revisado, hash da fonte, backup cifrado e confirmação explícita de produção. Não basta renomear ou dividir arquivos para preservar idempotência: fontes diferentes têm hashes diferentes e exigem conciliação humana. Não enviar o acervo para Git, `/public` ou serviços públicos de OCR.
@@ -64,7 +65,7 @@ Importação assistida do acervo local: prévia é o padrão; `--apply --confirm
 .\backend\.venv\Scripts\python.exe scripts/import_historical_pdf.py --manifest artifacts/private-import/manifesto-revisado.json --source docs/data/ilovepdf_merged.pdf --operator-email EMAIL_INSTITUCIONAL
 ```
 
-Os backups em `artifacts/private-import/backups/*.fernet` foram verificados por decifragem antes das operações administrativas. Preservar cópia protegida do banco e da chave em controles separados. Isso não equivale a um ensaio integral de restauração do serviço: esse ensaio, governança de retenção e correções nominais continuam sendo pendências documentadas.
+Os backups em `artifacts/private-import/backups/*.fernet` foram verificados por decifragem antes das operações administrativas. Preservar cópia protegida do banco e da chave em controles separados. Isso não equivale a um ensaio integral de restauração do serviço: esse ensaio e a governança de retenção continuam pendentes. Correções de cadastro agora podem ser feitas pela edição privada versionada.
 
 ## Contratos privados
 

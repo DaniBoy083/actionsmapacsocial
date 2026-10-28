@@ -6,10 +6,8 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "backend"))
-from app.domain.contracts import Summary
+from app.domain.contracts import BeneficiaryInput, BeneficiaryUpdate, Summary
 from app.domain.integrations import ExportPage
-from app.domain.published_map import PublishedMap
-from app.infrastructure.platform_contract import ActionsBlock
 from app.main import app
 
 destination = root / "docs/contracts"
@@ -18,8 +16,8 @@ for filename, document in [
     ("actions-map.openapi.json", app.openapi()),
     ("agenda-summary.schema.json", Summary.model_json_schema()),
     ("integration-export.schema.json", ExportPage.model_json_schema()),
-    ("published-map.schema.json", PublishedMap.model_json_schema()),
-    ("platform-actions-block.schema.json", ActionsBlock.model_json_schema()),
+    ("beneficiary-registration.schema.json", BeneficiaryInput.model_json_schema()),
+    ("beneficiary-update.schema.json", BeneficiaryUpdate.model_json_schema()),
 ]:
     (destination / filename).write_text(
         json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

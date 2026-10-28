@@ -6,7 +6,7 @@ const privateHeaders = {
   "Referrer-Policy": "no-referrer",
 };
 const permitted =
-  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|mapa-acoes|tecnologia\/(saude|sincronizar-agenda|tokens(?:\/[a-f0-9-]{36}\/(revogar|rotacionar))?)|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|arquivos|[a-zA-Z0-9-]+(?:\/(preparar|paginas\/\d+|partes\/\d+))?))$/;
+  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|tecnologia\/(saude|sincronizar-agenda|tokens(?:\/[a-f0-9-]{36}\/(revogar|rotacionar))?)|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios(?:\/[a-zA-Z0-9-]+(?:\/segunda-via)?)?|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|arquivos|[a-zA-Z0-9-]+(?:\/(preparar|paginas\/\d+|partes\/\d+))?))$/;
 async function proxy(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },

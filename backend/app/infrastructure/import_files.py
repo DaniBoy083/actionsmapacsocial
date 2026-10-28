@@ -84,7 +84,8 @@ def structured_records(content: bytes, kind: str) -> list[dict]:
             if (
                 not reader.fieldnames
                 or len(reader.fieldnames) != len(set(reader.fieldnames))
-                or not set(reader.fieldnames) <= {"nome", "municipio_residencia_ibge"}
+                or not set(reader.fieldnames)
+                <= set(BeneficiaryInput.model_fields) - {"local_indice"}
                 or "nome" not in reader.fieldnames
             ):
                 raise ValueError("CABECALHO_INVALIDO")
@@ -97,17 +98,25 @@ def structured_records(content: bytes, kind: str) -> list[dict]:
             raise ValueError("LIMITE_REGISTROS")
         result = []
         for index, row in enumerate(rows, 1):
-            if not isinstance(row, dict) or not set(row) <= {"nome", "municipio_residencia_ibge"}:
+            if not isinstance(row, dict) or not set(row) <= set(BeneficiaryInput.model_fields) - {
+                "local_indice"
+            }:
                 raise ValueError("CAMPOS_NAO_PERMITIDOS")
             row = {**row, "municipio_residencia_ibge": row.get("municipio_residencia_ibge") or None}
+            row = {key: value if value != "" else None for key, value in row.items()}
+            if kind == "csv" and row.get("recebimento_confirmado") is not None:
+                receipt = row["recebimento_confirmado"].strip().lower()
+                if receipt not in {"sim", "nao", "não"}:
+                    raise ValueError("RECEBIMENTO_INVALIDO")
+                row["recebimento_confirmado"] = receipt == "sim"
             data = BeneficiaryInput.model_validate(row)
             result.append({"pagina": index, **data.model_dump(), "revisado": False})
         return result
     except (ValueError, TypeError, csv.Error, UnicodeError, RecursionError):
         raise HTTPException(
             422,
-            "Arquivo inválido. Use UTF-8, até 200 registros, nome e município IBGE opcional; "
-            "outros campos não são aceitos.",
+            "Arquivo inválido. Use UTF-8, até 200 registros e os campos do modelo de cadastro, "
+            "sem graus ou dados oculares.",
         ) from None
 
 

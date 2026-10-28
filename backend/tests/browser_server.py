@@ -26,8 +26,6 @@ os.environ.update(
         "AGENDA_WEB_URL": "https://agenda.example.invalid",
         "AGENDA_SUMMARIES_URL": "",
         "AGENDA_SERVICE_TOKEN": "",
-        "CONSOLIDATED_ANALYTICS_API_BASE_URL": "",
-        "CONSOLIDATED_ANALYTICS_API_TOKEN": "",
     }
 )
 from app.domain.contracts import Professional

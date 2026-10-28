@@ -1,6 +1,7 @@
 import json
+import re
 import unicodedata
-from datetime import date
+from datetime import date, datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import Literal, Self
@@ -90,15 +91,102 @@ class Version(StrictModel):
     versao: int = Field(ge=1)
 
 
-class BeneficiaryInput(StrictModel):
+class BeneficiaryData(StrictModel):
     nome: str = Field(min_length=2, max_length=160)
+    telefone: str | None = Field(default=None, max_length=24)
+    cpf: str | None = Field(default=None, max_length=14)
+    cpf_documento: str | None = Field(default=None, max_length=14)
+    data_nascimento: date | None = None
+    data_ficha: date | None = None
+    municipio_ficha_ibge: str | None = None
+    responsavel: str | None = Field(default=None, max_length=160)
+    observacoes: str | None = Field(default=None, max_length=1000)
+    recebimento_confirmado: bool | None = Field(default=None, strict=True)
     municipio_residencia_ibge: str | None = None
-    local_indice: int | None = Field(default=None, ge=0)
 
-    @field_validator("municipio_residencia_ibge")
+    @field_validator("municipio_residencia_ibge", "municipio_ficha_ibge")
     @classmethod
     def municipality(cls, value: str | None) -> str | None:
         return Location.municipality(value) if value else None
+
+    @field_validator("responsavel", "observacoes", mode="before")
+    @classmethod
+    def optional_text(cls, value):
+        return value.strip() or None if isinstance(value, str) else value
+
+    @field_validator("cpf")
+    @classmethod
+    def valid_cpf(cls, value: str | None) -> str | None:
+        if not value:
+            return None
+        if not re.fullmatch(r"[0-9.\- ]+", value):
+            raise ValueError("Informe um CPF válido ou deixe o campo em branco.")
+        digits = re.sub(r"\D", "", value)
+        if len(digits) != 11 or len(set(digits)) == 1:
+            raise ValueError("Informe um CPF válido ou deixe o campo em branco.")
+        for size in (9, 10):
+            check = sum(int(digits[i]) * (size + 1 - i) for i in range(size)) * 10 % 11 % 10
+            if check != int(digits[size]):
+                raise ValueError("Informe um CPF válido ou deixe o campo em branco.")
+        return digits
+
+    @field_validator("cpf_documento")
+    @classmethod
+    def documentary_cpf(cls, value: str | None) -> str | None:
+        if not value:
+            return None
+        if not re.fullmatch(r"[0-9.\- ]+", value) or len(re.sub(r"\D", "", value)) != 11:
+            raise ValueError("Transcreva os 11 dígitos legíveis do documento ou deixe em branco.")
+        return re.sub(r"\D", "", value)
+
+    @field_validator("telefone")
+    @classmethod
+    def valid_phone(cls, value: str | None) -> str | None:
+        if not value:
+            return None
+        if not re.fullmatch(r"[+0-9() .\-]+", value):
+            raise ValueError("Transcreva o telefone informado, sem inventar DDD.")
+        digits = re.sub(r"\D", "", value)
+        if len(digits) in {12, 13} and digits.startswith("55"):
+            digits = digits[2:]
+        if not 7 <= len(digits) <= 13:
+            raise ValueError("Transcreva o telefone informado, sem inventar DDD.")
+        return digits
+
+    @field_validator("data_nascimento")
+    @classmethod
+    def valid_birth(cls, value: date | None) -> date | None:
+        if value and value > date.today():
+            raise ValueError("A data de nascimento não pode estar no futuro.")
+        return value
+
+    @model_validator(mode="after")
+    def dates_consistent(self) -> Self:
+        if self.data_nascimento and self.data_ficha and self.data_nascimento > self.data_ficha:
+            raise ValueError("A data da ficha não pode ser anterior ao nascimento.")
+        return self
+
+
+class BeneficiaryInput(BeneficiaryData):
+    local_indice: int | None = Field(default=None, ge=0)
+
+
+class BeneficiaryUpdate(BeneficiaryInput):
+    versao: int = Field(ge=1, strict=True)
+
+
+class BeneficiaryAction(StrictModel):
+    id: str
+    nome: str
+
+
+class BeneficiarySheet(BeneficiaryUpdate):
+    id: str
+    acao: BeneficiaryAction
+    municipio_ficha_nome: str | None
+    municipio_residencia_nome: str | None
+    segunda_via: bool
+    emitido_em: datetime | None
 
 
 class ImportRecord(BeneficiaryInput):

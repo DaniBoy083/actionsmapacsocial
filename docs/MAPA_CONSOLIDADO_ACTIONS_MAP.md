@@ -1,5 +1,7 @@
 # Mapa consolidado dentro do Actions Map — 27/10/2026
 
+> **Histórico — recurso removido em 28/10/2026.** Por solicitação posterior do responsável, foram excluídos página, navegação, API, adaptadores, configuração e contratos do mapa dentro desta aplicação. As instruções abaixo descrevem o commit anterior e não devem ser usadas para configurar ou reativar o recurso. [Estado atual](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md) e [auditoria](AUDITORIA_APLICACAO_E_PRINCIPIOS.md). O anexo original permanece preservado como referência.
+
 ## Decisão e escopo
 
 O responsável confirmou nesta revisão: **“Neste Actions Map: adaptar o escopo do documento”**.

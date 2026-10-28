@@ -49,6 +49,7 @@ def test_historical_load_is_idempotent_encrypted_and_does_not_merge_names(api_cl
             assert "Pessoa" not in beneficiary.dados_cifrados
             assert json.loads(cipher().decrypt(beneficiary.dados_cifrados.encode())) == {
                 "id": beneficiary.id,
+                "versao": 1,
                 "nome": "Pessoa sintética",
             }
         for message in session.scalars(select(Outbox)):

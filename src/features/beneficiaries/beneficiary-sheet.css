@@ -1,0 +1,115 @@
+.beneficiary-registration-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: calc(100dvh - 64px);
+}
+.beneficiary-sheet {
+  color: #251519;
+  background: white;
+  padding: 12px;
+}
+.beneficiary-sheet header {
+  border-bottom: 2px solid #b80d27;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+.beneficiary-sheet h1 {
+  font-size: 24px;
+  margin: 12px 0;
+}
+.beneficiary-sheet h2 {
+  font-size: 17px;
+}
+.beneficiary-sheet p {
+  line-height: 1.5;
+}
+.beneficiary-sheet-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.beneficiary-sheet-fields > div {
+  border-bottom: 1px solid #e0cdd1;
+  padding: 10px 0;
+  min-width: 0;
+  break-inside: avoid;
+}
+.beneficiary-sheet-fields dt {
+  font-size: 13px;
+  font-weight: 700;
+  color: #65111f;
+}
+.beneficiary-sheet-fields dd {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.beneficiary-receipt {
+  margin-top: 22px;
+  break-inside: avoid;
+}
+.beneficiary-signature {
+  border-top: 1px solid #251519;
+  margin-top: 48px;
+  text-align: center;
+  padding-top: 8px;
+}
+.beneficiary-sheet footer,
+.beneficiary-sheet-note {
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .beneficiary-sheet-fields {
+    grid-template-columns: 1fr;
+  }
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  html:has([data-beneficiary-print]),
+  body:has([data-beneficiary-print]) {
+    background: white !important;
+  }
+  body > :not(.MuiDialog-root:has([data-beneficiary-print])) {
+    display: none !important;
+  }
+  .MuiDialog-root:has([data-beneficiary-print]),
+  .MuiDialog-container:has([data-beneficiary-print]),
+  .MuiDialog-paper:has([data-beneficiary-print]),
+  .MuiPaper-root:has([data-beneficiary-print]) {
+    position: static !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .MuiBackdrop-root,
+  [data-print-controls] {
+    display: none !important;
+  }
+  .MuiDialogContent-root:has([data-beneficiary-print]) {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  .beneficiary-sheet {
+    padding: 0;
+    font-size: 10pt;
+  }
+  .beneficiary-sheet h1 {
+    font-size: 17pt;
+  }
+  .beneficiary-sheet-fields {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+  }
+}

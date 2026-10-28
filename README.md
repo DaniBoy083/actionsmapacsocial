@@ -4,9 +4,9 @@ Primeira entrega de desenvolvimento para gestão de ações institucionais e reg
 
 Inclui login institucional, autorização no backend, Visão geral com indicadores, CRUD de ações com N locais da Paraíba, beneficiários cifrados, importação revisada por PDF/CSV/JSON, outbox e diagnóstico exclusivo de Tecnologia, páginas 404/erro e documentação de integração.
 
-**27/10/2026 — Mapa consolidado:** nova página autenticada `/mapa-acoes`, com leitura exclusiva da Plataforma Consolidada, malha dos 223 municípios, totais/subtotais, atualização periódica e expiração. Requer `CONSOLIDATED_ANALYTICS_API_BASE_URL` e `CONSOLIDATED_ANALYTICS_API_TOKEN` privados no backend; sem credencial, informa configuração pendente. [Contrato, configuração e operação](docs/MAPA_CONSOLIDADO_ACTIONS_MAP.md) e [auditoria atual dos princípios](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md).
+**28/10/2026 — Cadastro e segunda via:** formulários, importação, edição e consulta privada incluem os campos gerais da ficha de referência, com CPF, telefone, datas, responsável e declaração de recebimento; graus e dados oculares são excluídos. A segunda via permite impressão A4. A página `/mapa-acoes`, sua API, navegação e dependências foram removidas por decisão posterior do responsável. [Campos, operação e resultado da complementação](docs/CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md) e [auditoria atual dos princípios](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md).
 
-**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI na Vercel, PostgreSQL em schema próprio e credencial restrita. As 50 fichas da Melhor Visão foram aprovadas/importadas e municípios ausentes receberam Mamanguape por orientação expressa. Receptor e exportação de ações implementados na Agenda. A nova consulta interna à Plataforma está preparada, mas sem credencial própria neste ambiente; homologação do fluxo completo e pendências institucionais estão na [auditoria atual](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md). Consulte também [deploy](docs/DEPLOY_PRODUCAO.md) e [conformidade](docs/CONFORMIDADE_E_PENDENCIAS.md).
+**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI na Vercel, PostgreSQL em schema próprio e credencial restrita. As 50 fichas da Melhor Visão foram importadas; a complementação autorizada preencheu 294 campos e a leitura posterior conferiu 294/294 valores. Campos ausentes/ilegíveis permanecem pendentes. Receptor e exportação agregada de ações estão implementados na Agenda. Este commit ainda precisa de deploy para disponibilizar os novos formulários e remover a página antiga no ambiente publicado. Homologação do fluxo institucional e demais pendências estão na [auditoria atual](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md). Consulte também [deploy](docs/DEPLOY_PRODUCAO.md) e [conformidade](docs/CONFORMIDADE_E_PENDENCIAS.md).
 
 ## Rodar localmente no Windows
 
@@ -49,7 +49,7 @@ As ações são salvas diretamente **Em revisão**, depois validadas e publicada
 
 ## Verificação
 
-Validação local de 27/10/2026: **133 testes backend e 26 cenários de navegador aprovados**, incluindo desktop/celular e Axe; lint, TypeScript, Ruff, `pip check` e build aprovados. Evidências, correções e limitações na [auditoria atual](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md). A consulta real do novo consumidor e a homologação institucional continuam pendentes.
+Validação desta revisão: **105 testes backend e 20 cenários de navegador aprovados**; os quatro cenários específicos de beneficiários foram repetidos após o ajuste de impressão. Lint, TypeScript, Ruff, `pip check` e build aprovados; inspeção visual da segunda via em uma página A4. Evidências na [auditoria atual](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md). A homologação institucional continua pendente. A contagem anterior incluía testes do mapa agora removido.
 
 ```powershell
 npm.cmd run lint
@@ -80,7 +80,7 @@ A API local oferece documentação em **http://127.0.0.1:8000/docs**. O diagnós
 - [Deploy Next.js + FastAPI na mesma Vercel](docs/DEPLOY_PRODUCAO.md)
 - [Importação de PDF, CSV e JSON](docs/IMPORTACAO_ARQUIVOS.md)
 - [Revisão dos princípios e evidências](docs/REVISAO_PRINCIPIOS_2026-10-26.md)
-- [Mapa consolidado no Actions Map: contrato, configuração e rollback](docs/MAPA_CONSOLIDADO_ACTIONS_MAP.md)
+- [Cadastro completo, segunda via e complementação do PDF](docs/CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md)
 - [Auditoria atual da aplicação e princípios](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md)
 - [O que implementar na Agenda Digital](docs/AGENDA_DIGITAL_IMPLEMENTACAO.md)
 - [Publicação e fluxo das ações](docs/PUBLICACAO_E_FLUXO_DE_ACOES.md)

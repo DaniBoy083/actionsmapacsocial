@@ -49,8 +49,6 @@ def api_client(tmp_path, monkeypatch):
     monkeypatch.setenv("FRONTEND_ORIGIN", "http://localhost:3000")
     monkeypatch.setenv("AGENDA_SUMMARIES_URL", "")
     monkeypatch.setenv("AGENDA_SERVICE_TOKEN", "")
-    monkeypatch.setenv("CONSOLIDATED_ANALYTICS_API_BASE_URL", "")
-    monkeypatch.setenv("CONSOLIDATED_ANALYTICS_API_TOKEN", "")
     get_settings.cache_clear()
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
@@ -62,6 +60,7 @@ def api_client(tmp_path, monkeypatch):
     monkeypatch.setattr("app.api.routes.get_engine", lambda: engine)
     monkeypatch.setattr("app.api.import_files.get_engine", lambda: engine)
     monkeypatch.setattr("app.api.integrations.get_engine", lambda: engine)
+    monkeypatch.setattr("app.api.beneficiaries.get_engine", lambda: engine)
     with TestClient(app, raise_server_exceptions=False) as client:
         yield client, engine, repo
     app.dependency_overrides.clear()

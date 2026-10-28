@@ -1,7 +1,6 @@
 """Adaptador operacional de carga local revisada, sem publicar o documento original."""
 
 import hashlib
-import json
 from datetime import UTC, datetime
 from typing import Literal, Self
 from uuid import NAMESPACE_URL, uuid5
@@ -20,6 +19,7 @@ from app.domain.contracts import (
     normalize,
 )
 from app.infrastructure.actions import add_beneficiary, audit, cipher, enqueue
+from app.infrastructure.beneficiary_data import same_beneficiary
 from app.infrastructure.models import Action, Beneficiary, ImportBatch, Participation
 
 
@@ -127,10 +127,8 @@ def import_history(
             ).first()
             if previous:
                 person, participation = previous
-                stored = json.loads(cipher().decrypt(person.dados_cifrados.encode()))
                 if (
-                    stored != {"id": person.id, "nome": data.nome}
-                    or person.municipio_residencia_ibge != data.municipio_residencia_ibge
+                    not same_beneficiary(person, data, cipher())
                     or participation.local_indice != data.local_indice
                 ):
                     raise HTTPException(

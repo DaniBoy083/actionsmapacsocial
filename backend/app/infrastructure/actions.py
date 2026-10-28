@@ -1,4 +1,3 @@
-import json
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -16,6 +15,7 @@ from app.domain.contracts import (
     Summary,
 )
 from app.domain.rules import can_transition
+from app.infrastructure.beneficiary_data import encode_beneficiary, same_beneficiary
 from app.infrastructure.models import Action, Audit, Beneficiary, Outbox, Participation
 
 
@@ -225,11 +225,9 @@ def add_beneficiary(
         previous = session.scalar(select(Participation).where(Participation.origem == source))
         if previous:
             person = session.get(Beneficiary, previous.beneficiario_id)
-            stored = json.loads(cipher().decrypt(person.dados_cifrados.encode()))
             if (
                 previous.acao_id != identifier
-                or stored != {"id": person.id, "nome": data.nome}
-                or person.municipio_residencia_ibge != data.municipio_residencia_ibge
+                or not same_beneficiary(person, data, cipher())
                 or previous.local_indice != data.local_indice
             ):
                 raise HTTPException(
@@ -237,11 +235,7 @@ def add_beneficiary(
                 )
             return "existente"
     beneficiary_id = str(uuid4())
-    encrypted = (
-        cipher()
-        .encrypt(json.dumps({"id": beneficiary_id, "nome": data.nome}, ensure_ascii=False).encode())
-        .decode()
-    )
+    encrypted = encode_beneficiary(beneficiary_id, data, 1, cipher())
     session.add(
         Beneficiary(
             id=beneficiary_id,

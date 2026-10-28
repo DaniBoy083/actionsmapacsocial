@@ -1,5 +1,7 @@
 # Descoberta e inventário — 26/10/2026
 
+**Estado atual — 28/10/2026:** o inventário abaixo é histórico. O responsável autorizou posteriormente o cadastro dos campos gerais do PDF, segunda via e a complementação produtiva: 50 cadastros, 294 campos, conferidos por leitura posterior. CPF/telefone/nascimento/responsável passaram a integrar o envelope privado cifrado; graus/dados oculares continuam excluídos. [Inventário vigente e pendências de leitura](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md). A página do mapa consolidado foi removida.
+
 A especificação `AC_ACTIONS_MAP_DOCUMENTACAO_AGENT.md` prevalece quando diverge do planejamento anterior: cadastro próprio de beneficiários, sem `usuario_id` clínico, sem tracking assistencial, N locais por ação. O pedido de desenvolvimento autoriza esta implementação local; não autoriza migrar/importar produção.
 
 **Atualização posterior:** o responsável autorizou o deploy conjunto, a persistência isolada e a carga inicial de 32 fichas do Programa Melhor Visão. Depois aprovou as 18 fichas restantes e definiu Mamanguape para os municípios ausentes: o lote final tem 50 registros e nenhum município em branco, com backup e auditoria. O preenchimento dos campos ausentes decorreu da orientação expressa do responsável. Os limites da descoberta inicial abaixo registram aquele momento, sem substituir essas autorizações posteriores. Consulte [deploy](DEPLOY_PRODUCAO.md) e [revisão atual](REVISAO_PRINCIPIOS_2026-10-26.md).

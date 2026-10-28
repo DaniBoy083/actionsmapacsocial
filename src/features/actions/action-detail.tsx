@@ -2,21 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Alert,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Pagination,
-  TextField,
-} from "@mui/material";
+import { Alert, Button, Chip, Pagination } from "@mui/material";
 import toast from "react-hot-toast";
 import {
   api,
@@ -28,17 +14,19 @@ import {
 } from "@/lib/api";
 import { useSession } from "@/components/session-context";
 import { ActionDialog } from "@/features/actions/action-dialog";
+import { BeneficiaryDialog } from "@/features/beneficiaries/beneficiary-dialog";
+import { BeneficiarySheet } from "@/features/beneficiaries/beneficiary-sheet";
 
-const personSchema = z.object({
-  nome: z.string().trim().min(2, "Informe o nome.").max(160),
-  municipio_residencia_ibge: z.string(),
-  local_indice: z.string(),
-});
 export function ActionDetail({ id }: { id: string }) {
   const session = useSession();
   const client = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [personOpen, setPersonOpen] = useState(false);
+  const [editingPerson, setEditingPerson] = useState<string | undefined>();
+  const [sheet, setSheet] = useState<{
+    id: string;
+    secondCopy: boolean;
+  } | null>(null);
   const [failure, setFailure] = useState("");
   const [busy, setBusy] = useState(false);
   const [page, setPage] = useState(1);
@@ -71,39 +59,6 @@ export function ActionDetail({ id }: { id: string }) {
       (await api.get<Municipality[]>("/localidades/pb")).data,
     staleTime: Infinity,
   });
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<z.infer<typeof personSchema>>({
-    resolver: zodResolver(personSchema),
-    defaultValues: {
-      nome: "",
-      municipio_residencia_ibge: "",
-      local_indice: "",
-    },
-  });
-  async function addPerson(data: z.infer<typeof personSchema>) {
-    setFailure("");
-    try {
-      await api.post(
-        `/acoes/${id}/beneficiarios`,
-        {
-          ...data,
-          municipio_residencia_ibge: data.municipio_residencia_ibge || null,
-          local_indice: data.local_indice ? Number(data.local_indice) : null,
-        },
-        { headers: { "X-CSRF-Token": session.csrf_token } },
-      );
-      await refresh();
-      setPersonOpen(false);
-      reset();
-      toast.success("Beneficiário registrado.");
-    } catch (error) {
-      setFailure(errorMessage(error));
-    }
-  }
   async function refresh() {
     await Promise.all([
       client.invalidateQueries({ queryKey: ["acoes"] }),
@@ -254,6 +209,7 @@ export function ActionDetail({ id }: { id: string }) {
             variant="contained"
             disabled={row.status === "arquivada"}
             onClick={() => {
+              setEditingPerson(undefined);
               setPersonOpen(true);
               setFailure("");
             }}
@@ -269,12 +225,21 @@ export function ActionDetail({ id }: { id: string }) {
           <p className="muted">Nenhum beneficiário registrado nesta ação.</p>
         ) : (
           <>
-            <div className="table-scroll">
+            <div
+              className="table-scroll"
+              role="region"
+              aria-label="Beneficiários cadastrados"
+              tabIndex={0}
+            >
               <table className="data-table">
+                <caption className="sr-only">
+                  Beneficiários da ação e suas fichas privadas
+                </caption>
                 <thead>
                   <tr>
                     <th>Nome</th>
                     <th>Município de residência</th>
+                    <th>Ficha e cadastro</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -285,6 +250,35 @@ export function ActionDetail({ id }: { id: string }) {
                         {municipalities.data?.find(
                           (p) => p.codigo === person.municipio_residencia_ibge,
                         )?.nome || "Não identificado / revisar"}
+                      </td>
+                      <td>
+                        <div className="actions-row">
+                          <Button
+                            aria-label={`Ver ficha de ${person.nome}`}
+                            onClick={() =>
+                              setSheet({ id: person.id, secondCopy: false })
+                            }
+                          >
+                            Ver ficha
+                          </Button>
+                          <Button
+                            aria-label={`Editar cadastro de ${person.nome}`}
+                            onClick={() => {
+                              setEditingPerson(person.id);
+                              setPersonOpen(true);
+                            }}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            aria-label={`Emitir segunda via de ${person.nome}`}
+                            onClick={() =>
+                              setSheet({ id: person.id, secondCopy: true })
+                            }
+                          >
+                            Segunda via
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -317,74 +311,24 @@ export function ActionDetail({ id }: { id: string }) {
       {editing && (
         <ActionDialog action={row} onClose={() => setEditing(false)} />
       )}
-      <Dialog
-        open={personOpen}
-        onClose={() => {
-          if (!isSubmitting) setPersonOpen(false);
-        }}
-        fullWidth
-        maxWidth="sm"
-        aria-labelledby="person-title"
-      >
-        <form onSubmit={handleSubmit(addPerson)} noValidate>
-          <DialogTitle id="person-title">Registrar beneficiário</DialogTitle>
-          <DialogContent>
-            <p className="muted">
-              Informe somente os dados gerais necessários. Município de
-              residência pode ser diferente do local da ação.
-            </p>
-            {failure && <Alert severity="error">{failure}</Alert>}
-            <div className="form-grid">
-              <TextField
-                label="Nome"
-                autoFocus
-                required
-                {...register("nome")}
-                error={!!errors.nome}
-                helperText={errors.nome?.message}
-              />
-              <TextField
-                select
-                label="Município de residência (opcional)"
-                defaultValue=""
-                {...register("municipio_residencia_ibge")}
-              >
-                <MenuItem value="">Não identificado / revisar</MenuItem>
-                {municipalities.data?.map((p) => (
-                  <MenuItem key={p.codigo} value={p.codigo}>
-                    {p.nome}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <TextField
-                select
-                label="Local da participação (opcional)"
-                defaultValue=""
-                {...register("local_indice")}
-              >
-                <MenuItem value="">Não identificado / revisar</MenuItem>
-                {row.locais.map((p, index) => (
-                  <MenuItem key={index} value={String(index)}>
-                    {p.municipio_nome}
-                    {p.nome_local ? ` · ${p.nome_local}` : ""}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </div>
-          </DialogContent>
-          <DialogActions sx={{ p: 3 }}>
-            <Button
-              disabled={isSubmitting}
-              onClick={() => setPersonOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" variant="contained" disabled={isSubmitting}>
-              {isSubmitting ? "Salvando…" : "Salvar beneficiário"}
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+      {personOpen && (
+        <BeneficiaryDialog
+          actionId={id}
+          personId={editingPerson}
+          municipalities={municipalities.data || []}
+          locations={row.locais}
+          onClose={() => setPersonOpen(false)}
+          onSaved={refresh}
+        />
+      )}
+      {sheet && (
+        <BeneficiarySheet
+          actionId={id}
+          personId={sheet.id}
+          secondCopy={sheet.secondCopy}
+          onClose={() => setSheet(null)}
+        />
+      )}
     </>
   );
 }

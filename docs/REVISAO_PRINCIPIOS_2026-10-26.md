@@ -1,6 +1,6 @@
 # Revisão dos princípios — 26/10/2026
 
-**Revisão posterior — 27/10/2026:** [auditoria atual](AUDITORIA_APLICACAO_E_PRINCIPIOS.md) e [mapa consolidado adaptado ao Actions Map](MAPA_CONSOLIDADO_ACTIONS_MAP.md). Este documento conserva a evidência histórica da entrega anterior; suas pendências não foram marcadas como resolvidas por mera implementação da nova consulta.
+**Revisão posterior — 28/10/2026:** [auditoria atual](AUDITORIA_APLICACAO_E_PRINCIPIOS.md) e [cadastro completo, segunda via e retirada do mapa](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md). Este documento conserva evidências históricas: a restrição anterior a nome/município foi substituída pela autorização dos campos gerais do PDF; edição de cadastro está implementada e o mapa consolidado foi removido. As demais pendências exigem evidência própria.
 
 Revisão contra a especificação específica do AC Actions Map, os anexos inspecionados e as decisões posteriores do responsável. O pedido atual prevalece sobre a proposta anterior de manter páginas separadas de Visão geral/Indicadores e um assistente limitado a uma fonte histórica fixa.
 

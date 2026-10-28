@@ -37,7 +37,6 @@ export function AppShell({
   const links = [
     { href: "/dashboard", label: "Visão geral", icon: FiGrid },
     { href: "/acoes", label: "Ações institucionais", icon: FiMapPin },
-    { href: "/mapa-acoes", label: "Mapa de ações", icon: FiMapPin },
     { href: "/importacoes", label: "Importar dados", icon: FiFilePlus },
     ...(session.equipe === "tecnologia"
       ? [

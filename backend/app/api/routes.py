@@ -1,5 +1,4 @@
 import hashlib
-import json
 import time
 from datetime import UTC, datetime
 from typing import Literal
@@ -30,6 +29,7 @@ from app.infrastructure.actions import (
     enqueue,
     snapshot,
 )
+from app.infrastructure.beneficiary_data import decode_beneficiary
 from app.infrastructure.database import get_engine, get_identity_engine
 from app.infrastructure.identity import IdentityRepository, verify_password
 from app.infrastructure.import_files import analyze_pdf, document_for
@@ -258,13 +258,11 @@ def beneficiaries(
         ).all()
         items = []
         for person, participation in rows:
-            data = json.loads(cipher().decrypt(person.dados_cifrados.encode()))
-            if data["id"] != person.id:
-                raise HTTPException(503, "Falha na integridade do cadastro.")
+            data, _ = decode_beneficiary(person, cipher())
             items.append(
                 {
                     "id": person.id,
-                    "nome": data["nome"],
+                    "nome": data.nome,
                     "municipio_residencia_ibge": person.municipio_residencia_ibge,
                     "local_indice": participation.local_indice,
                 }

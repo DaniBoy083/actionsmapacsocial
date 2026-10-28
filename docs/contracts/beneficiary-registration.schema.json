@@ -1,0 +1,156 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "nome": {
+      "maxLength": 160,
+      "minLength": 2,
+      "title": "Nome",
+      "type": "string"
+    },
+    "telefone": {
+      "anyOf": [
+        {
+          "maxLength": 24,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Telefone"
+    },
+    "cpf": {
+      "anyOf": [
+        {
+          "maxLength": 14,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cpf"
+    },
+    "cpf_documento": {
+      "anyOf": [
+        {
+          "maxLength": 14,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cpf Documento"
+    },
+    "data_nascimento": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Data Nascimento"
+    },
+    "data_ficha": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Data Ficha"
+    },
+    "municipio_ficha_ibge": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Municipio Ficha Ibge"
+    },
+    "responsavel": {
+      "anyOf": [
+        {
+          "maxLength": 160,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Responsavel"
+    },
+    "observacoes": {
+      "anyOf": [
+        {
+          "maxLength": 1000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Observacoes"
+    },
+    "recebimento_confirmado": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Recebimento Confirmado"
+    },
+    "municipio_residencia_ibge": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Municipio Residencia Ibge"
+    },
+    "local_indice": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Local Indice"
+    }
+  },
+  "required": [
+    "nome"
+  ],
+  "title": "BeneficiaryInput",
+  "type": "object"
+}

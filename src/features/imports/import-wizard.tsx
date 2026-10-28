@@ -100,7 +100,9 @@ export function ImportWizard() {
   function template() {
     const url = URL.createObjectURL(
       new Blob(
-        ["\uFEFFnome;municipio_residencia_ibge\nPessoa de exemplo;2508901\n"],
+        [
+          "\uFEFFnome;telefone;cpf;cpf_documento;data_nascimento;data_ficha;municipio_ficha_ibge;municipio_residencia_ibge;responsavel;observacoes;recebimento_confirmado\nPessoa de exemplo;;;;;;2508901;;;;\n",
+        ],
         { type: "text/csv;charset=utf-8" },
       ),
     );

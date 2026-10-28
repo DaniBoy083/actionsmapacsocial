@@ -1,6 +1,6 @@
 # Arquitetura da primeira entrega
 
-**Extensão de 27/10/2026:** consulta interna `/mapa-acoes`, protegida pela sessão institucional, consome apenas a API da Plataforma. Domínio `PublishedMapSource` → aplicação `ReadPublishedMap` → adaptador HTTP/contrato estrito → BFF/página MUI. Cache em memória por processo, sem tabela nova; nenhum fallback para o cadastro operacional. [Detalhes e limites](MAPA_CONSOLIDADO_ACTIONS_MAP.md).
+**Revisão de 28/10/2026:** página, API e dependências do mapa consolidado removidas por decisão do responsável. Cadastro geral ampliado, edição versionada e segunda via seguem `BeneficiaryData/BeneficiaryRepository` → `BeneficiaryService` → adaptador SQL/cifragem/auditoria → API/BFF → componentes MUI com RHF/Zod compartilhados. [Campos, operação e limites](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md).
 
 **Atualização de produção em 26/10/2026:** a hospedagem conjunta Next.js/FastAPI, o binding privado e a persistência PostgreSQL do módulo foram preparados conforme [deploy de produção](DEPLOY_PRODUCAO.md). As referências abaixo ao SQLite e à ausência de migração descrevem a entrega inicial local; a produção usa agora `actions_map`, Alembic e credencial restrita, sem criação de tabelas no startup.
 
@@ -11,16 +11,16 @@ Frontend → BFF Next (`/api/backend/*`, allowlist de caminhos, origem, limite d
 Camadas Python:
 
 - `domain`: DTOs estritos, regras de transição, catálogo IBGE e portas de persistência.
-- `application`: casos de uso de ações dependentes da porta `ActionRepository`.
+- `application`: casos de uso dependentes das portas `ActionRepository` e `BeneficiaryRepository`.
 - `infrastructure`: adaptadores SQLAlchemy, cifragem, leitura institucional, PDF e worker de outbox.
 - `security`: sessão opaca (somente hash persistido), CSRF, rate limit persistente e autorização.
-- `api`: composição, dependências e endpoints versionados. Fluxos de beneficiários/importação ainda são compostos nas rotas; a extração desses casos de uso para portas próprias integra o próximo incremento.
+- `api`: composição, dependências e endpoints versionados. Consulta individual/edição/segunda via de beneficiários usam serviço e porta próprios. Cadastro inicial e parte dos fluxos anteriores de importação ainda compõem adaptadores nas rotas; sua extração adicional permanece melhoria arquitetural.
 
 O SQLite em `backend/private/` serve exclusivamente ao desenvolvimento/testes. Não é fallback de falha do PostgreSQL. Em produção, PostgreSQL/TLS persiste as tabelas próprias no schema `actions_map`; a autenticação usa a consulta institucional delegada. Migrações Alembic e grants são operações administrativas separadas, sem criação de tabelas no startup. Nenhuma migração modifica as tabelas de profissionais ou Portal. Não há prontuário, `usuario_id` clínico ou criação de senha.
 
 As mutações gravam alteração, auditoria e snapshot de outbox na mesma transação. Ações novas e editadas ficam em revisão; o estado de rascunho foi removido por decisão posterior do responsável. Aprovação, publicação e arquivamento exigem versão atual. Publicação exige integração HTTPS autenticada configurada e resumo validado; a entrega só é confirmada por ACK da Agenda. Arquivamento preserva beneficiários e retira os totais publicados.
 
-Beneficiário mínimo: UUID próprio, nome cifrado com Fernet autenticado e vinculado ao ID no conteúdo, município de residência opcional. Participação aponta à ação e, quando informado, ao índice de um local. Enquanto houver participações localizadas, alteração da lista de locais é bloqueada para não remapear vínculos por acidente; substituição por entidades relacionais está prevista na migração PostgreSQL.
+Beneficiário: UUID próprio, dados gerais autorizados cifrados com Fernet autenticado e vinculados ao ID/versão no envelope existente. CPF validado e CPF documental pendente são distintos. Não há campos oculares, índice nominal, correlação clínica ou alteração estrutural do banco. Envelopes antigos ID/nome continuam legíveis. Compare-and-swap impede perda silenciosa de alterações concorrentes; consulta e edição são auditadas. Município de residência, município escrito na ficha e local da participação têm semânticas distintas. Participação aponta à ação e, quando informado, ao índice de um local. Enquanto houver participações localizadas, alteração da lista de locais é bloqueada para não remapear vínculos por acidente; substituição por entidades relacionais permanece evolução futura.
 
 Importação por arquivos: `/importacoes` recebe PDF/CSV/JSON, transmite partes binárias pela BFF e armazena temporariamente o conteúdo cifrado no schema próprio. Migração `0003_private_file_import`, ownership por profissional, quotas, expiração, parser isolado e confirmação produtiva explícita. Revisão nominal com RHF/Zod; nenhum OCR externo. Confirmação transacional/idempotente por hash do documento/página ou registro/ação; mesma página em outro destino exige decisão do operador. Não há deduplicação automática entre fontes diferentes. [Detalhes e operação](IMPORTACAO_ARQUIVOS.md).
 

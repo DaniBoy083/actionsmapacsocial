@@ -1,6 +1,6 @@
 # Verificação de conformidade e próximos incrementos
 
-**Revisão de 27/10/2026:** mapa consolidado interno implementado conforme adaptação autorizada do anexo. [Estado atual, evidências e pendências](AUDITORIA_APLICACAO_E_PRINCIPIOS.md); [contrato/configuração/operação](MAPA_CONSOLIDADO_ACTIONS_MAP.md). As contagens e descrições abaixo registram entregas anteriores. A nova consulta não está configurada com credencial própria e não comprova propagação real até o Portal.
+**Revisão de 28/10/2026:** cadastro geral ampliado, consulta privada, edição versionada e segunda via implementados. A complementação autorizada atualizou 50 cadastros/294 campos, conferidos após gravação. A página do mapa consolidado e suas dependências foram removidas. [Estado atual, evidências e pendências](AUDITORIA_APLICACAO_E_PRINCIPIOS.md); [campos e operação](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md). As contagens antigas abaixo são históricas; o novo código ainda precisa de deploy.
 
 Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP institucional nem certificação de conformidade absoluta. A especificação específica do AC Actions Map prevalece sobre as decisões conflitantes do planejamento anterior.
 
@@ -16,9 +16,9 @@ Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP in
 | Acesso administrativo + Administração/Tecnologia | Implementado; revalidação por requisição e revogação local ao perder o vínculo |
 | Tecnologia exclusiva, inclusive API direta | Implementado e testado; diagnóstico sanitizado sem exibição de tokens |
 | CRUD de ações e N locais PB | Implementado localmente; busca, filtros, paginação, versão/409, modal, edição e arquivamento confirmado |
-| Beneficiários gerais e auditoria | Cadastro/leitura local cifrados; edição, correção/remoção, associação de cadastro existente a outra ação e busca/deduplicação supervisionada ainda pendentes |
+| Beneficiários gerais e auditoria | Cadastro completo, consulta individual, edição/correção versionada e segunda via implementados, privados/cifrados/auditados. Remoção, associação de cadastro existente a outra ação e conciliação supervisionada entre fontes continuam pendentes |
 | Importação por arquivos | PDF/CSV/JSON, prévia privada, revisão manual, rotação, lote idempotente e storage temporário cifrado; OCR não é presumido, conciliação entre fontes continua pendente |
-| PDF real | 50 fichas aprovadas pelo responsável e importadas; municípios ausentes preenchidos com Mamanguape por orientação expressa; nenhuma ficha pendente; prévia e transcrições privadas fora do Git |
+| PDF real | 50 fichas importadas; complemento preencheu 294 campos sem alterar ação/participações/resumos. Persistem campos em branco, ilegíveis e dois séculos de nascimento sem confirmação; CPFs documentais inválidos ficam explicitamente pendentes. Fonte, transcrições e backups privados fora do Git |
 | Persistência PostgreSQL institucional | Produção registrada até 0004, dez tabelas próprias; revisão 0005 preparada acrescenta duas tabelas de integrações. Sessão distribuída e credencial restrita preservadas |
 | Aprovação e preview editorial | Cadastro direto em revisão → validada → publicada; estado antigo removido da aplicação e bloqueado por constraint SQL; edição retira aprovação |
 | Pipeline sem dados pessoais | Contrato 1.1, outbox/ACK/backoff e receptor na Agenda implementados; envia pessoas contempladas, quantidade de ações e municípios; consumo pela Plataforma/Portal pendente |
@@ -39,7 +39,7 @@ Executar: `npm.cmd run lint`, `npm.cmd run typecheck`, `npm.cmd run build`, `npm
 
 ## Próxima sequência
 
-1. Completar casos de uso de correção/remoção e associação de beneficiários existentes, conciliação entre fontes e evolução relacional dos locais. Persistência institucional e Alembic/grants já foram implementados.
+1. Implementar remoção e associação supervisionada de beneficiários existentes, conciliação entre fontes e evolução relacional dos locais. Correção/edição versionada, persistência institucional e Alembic/grants já foram implementados.
 2. Homologar revogação institucional, recuperação de acesso pela Agenda e eventual SSO. A sessão PostgreSQL distribuída, scrypt e revalidação de equipe/tipo já estão implementados.
 3. Agendar e monitorar o expurgo de arquivos e homologar retenção. As 50 fichas históricas já foram aprovadas pelo responsável e importadas. Upload privado, rotação, quotas e parser limitado estão implementados; OCR local continua opcional e não autoriza inferir nomes.
 4. Ativar o consumidor da Plataforma para a exportação já implementada na Agenda, conforme `AGENDA_DIGITAL_IMPLEMENTACAO.md`; homologar a governança editorial e métricas municipais/temporais.

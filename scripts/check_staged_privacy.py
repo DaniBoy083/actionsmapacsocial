@@ -21,7 +21,7 @@ bad_paths = [
         (Path(p).name.startswith(".env") and Path(p).name not in {".env.example", ".env.exemple"})
         or "/private/" in p
         or "/.venv/" in p
-        or p.endswith((".sqlite3", ".pdf"))
+        or p.endswith((".sqlite3", ".pdf", ".log"))
         or p.startswith(("tmp/", "artifacts/"))
     )
 ]
