@@ -1,5 +1,12 @@
 # Implementação necessária na Agenda Digital
 
+> **Novos campos de 30/10:** o roteiro coordenado para emenda/convênio, autor,
+> parceiros e logos está em [APIs e consumidoras](INTEGRACAO_NOVOS_METADADOS_E_CONSUMIDORES.md).
+> A seção 5.2 identifica arquivos e tarefas da Agenda; a seção 4 trata da evolução
+> 1.1 → proposta 1.2 e do envelope congelado. O contrato 1.1 abaixo continua sendo
+> o efetivamente implementado. Não acrescentar campos ao emissor sem atualizar
+> receptor, exportador e consumidores; JSONB não garante compatibilidade.
+
 > **Conferência de 30/10/2026:** a exportação congelada
 > `../agenda-digital/src/app/api/analytics/v2/acoes/route.ts` já existe no código
 > vizinho, com itens 1.1. O relato abaixo sobre a exportação antiga é histórico;

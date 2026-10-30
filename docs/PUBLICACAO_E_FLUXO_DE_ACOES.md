@@ -1,5 +1,11 @@
 # Publicação e fluxo das ações
 
+> **Evolução dos metadados de 30/10:** nome/número/autor da emenda ou convênio,
+> parceiros/logos e rankings ainda exigem mudanças coordenadas. O contrato
+> implementado abaixo permanece 1.1. Consulte
+> [tarefas por consumidora, versões e aceite das APIs](INTEGRACAO_NOVOS_METADADOS_E_CONSUMIDORES.md)
+> antes de alterar o emissor ou anunciar propagação ao Portal.
+
 Decisão do responsável: remover o estado de rascunho e publicar o resumo da ação na Agenda com número de pessoas contempladas, número de ações e município.
 
 ## Estados ativos

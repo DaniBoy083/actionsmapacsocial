@@ -102,6 +102,7 @@ A API local oferece documentação em **http://127.0.0.1:8000/docs**. O diagnós
 
 ## Documentação
 
+- [Novos metadados: tarefas nas consumidoras, contratos e implantação das APIs](docs/INTEGRACAO_NOVOS_METADADOS_E_CONSUMIDORES.md)
 - [Descoberta da ficha e auditoria da Fase 0 — 30/10](docs/FASE_0_DESCOBERTA_2026-10-30.md)
 - [Proposta de MVP, backlog, impressão e migração reversível](docs/PLANO_MVP_E_ACEITE_2026-10-30.md)
 - [Descoberta, fontes verificadas e inventário de campos](docs/DESCOBERTA_E_CAMPOS.md)

@@ -1,5 +1,11 @@
 # Plano de implementação — ações institucionais na Plataforma Consolidada
 
+> **Novos metadados de 30/10:** complementar este plano com
+> [APIs e aplicações consumidoras](INTEGRACAO_NOVOS_METADADOS_E_CONSUMIDORES.md),
+> especialmente as seções 5.3 (coleta/projeção), 7 (ranking sem dupla contagem)
+> e 8 (ordem de implantação). Nome/número/autor, parceiros e logos exigem contrato
+> novo; não existem nos itens 1.1. Não presumir pessoas únicas pela soma das ações.
+
 > **Atualização da descoberta em 30/10/2026:** a rota de exportação congelada v2
 > proposta abaixo foi localizada no código da Agenda Digital, em
 > `src/app/api/analytics/v2/acoes/route.ts`, com `domain/frozenExport.ts`.

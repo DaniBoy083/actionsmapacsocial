@@ -49,6 +49,11 @@ validados pelo responsável clínico antes de migrations/implementação.
 
 ## 2. Contrato agregado futuro sem identificação de pacientes
 
+O [roteiro das APIs e consumidoras](INTEGRACAO_NOVOS_METADADOS_E_CONSUMIDORES.md)
+detalha esta proposta por aplicação, incluindo contratos atuais, novos IDs
+administrativos propostos, negociação de versões, canonicalização, retirada e
+ordem de implantação. É um refinamento documental; não ativa o contrato 1.2.
+
 O item 1.1 atual e a exportação v2 da Agenda são contratos distintos: a v2 é
 envelope congelado, não uma autorização para mudar o schema dos itens 1.1.
 A Agenda aceita exatamente os campos antigos e rejeita extras.
