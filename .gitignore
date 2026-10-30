@@ -45,8 +45,13 @@ yarn-error.log*
 /test-results/
 /playwright-report/
 /backend/private/
-# Documentos de beneficiários permanecem privados e fora de novos commits.
-/docs/data/*.pdf
+# Fontes preenchidas de beneficiários permanecem privadas no disco.
+/docs/data/
+/docs/references/*.xlsx
+/docs/references/*.xls
+/docs/references/*.xlsm
+/docs/references/*.csv
+/docs/references/*.tsv
 
 # vercel
 .vercel

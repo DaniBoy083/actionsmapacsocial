@@ -1,5 +1,11 @@
 # Cadastro completo, segunda via e retirada do mapa — 28/10/2026
 
+> **Limite de “completo” em 30/10:** refere-se ao cadastro geral autorizado em
+> 28/10, não à ficha clínica do novo plano v2.1. A leitura da planilha identificou
+> campos adicionais e um bloco profissional distinto. Esta segunda via continua
+> sendo cadastro geral dos dados atuais; não é prescrição nem ficha clínica
+> versionada. [Matriz atual da fonte](FASE_0_DESCOBERTA_2026-10-30.md).
+
 ## Decisões do responsável
 
 Esta revisão atende à solicitação de coletar/exibir os dados gerais completos da

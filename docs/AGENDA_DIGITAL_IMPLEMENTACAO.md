@@ -1,5 +1,12 @@
 # Implementação necessária na Agenda Digital
 
+> **Conferência de 30/10/2026:** a exportação congelada
+> `../agenda-digital/src/app/api/analytics/v2/acoes/route.ts` já existe no código
+> vizinho, com itens 1.1. O relato abaixo sobre a exportação antiga é histórico;
+> implantação/configuração da v2 não foram verificadas nesta execução. O item
+> ainda não inclui emenda/convênio, autor ou logos. A evolução precisa ser
+> coordenada, pois o receptor rejeita extras. [Inventário atual](FASE_0_DESCOBERTA_2026-10-30.md).
+
 ## Estado e responsabilidade
 
 O receptor foi implementado na **Agenda Digital**, junto à exportação de ações para a Plataforma. As APIs existentes `/api/analytics` e `/api/analytics/atendimentos` permanecem separadas dos dados de ações. Código na Agenda: `src/modules/actions-map`, migração `202610260001` e documentação `docs/actions-map-summary.md`.

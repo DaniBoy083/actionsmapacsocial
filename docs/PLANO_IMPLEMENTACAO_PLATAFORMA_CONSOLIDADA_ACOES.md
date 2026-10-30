@@ -1,5 +1,12 @@
 # Plano de implementação — ações institucionais na Plataforma Consolidada
 
+> **Atualização da descoberta em 30/10/2026:** a rota de exportação congelada v2
+> proposta abaixo foi localizada no código da Agenda Digital, em
+> `src/app/api/analytics/v2/acoes/route.ts`, com `domain/frozenExport.ts`.
+> Portanto, “ainda não existente” descreve a elaboração de 26/10, não o código
+> atual inspecionado. Confirmar implantação/contrato antes do consumidor; não
+> criar uma rota duplicada. [Inventário e limites da conferência](FASE_0_DESCOBERTA_2026-10-30.md).
+
 **Data:** 26/10/2026 · **Versão:** 1.0
 
 **Workspace de destino:** `plataformaconsolidadadedados`

@@ -1,5 +1,12 @@
 # Arquitetura da primeira entrega
 
+> **Estado em 30/10/2026:** este texto descreve a implementação geral existente.
+> O MVP ocular do plano v2.1 é a evolução vigente e ainda não está implementado.
+> [Inventário real, fontes e fronteiras](FASE_0_DESCOBERTA_2026-10-30.md);
+> [modelo futuro e gates](PLANO_MVP_E_ACEITE_2026-10-30.md). Novo login local
+> avançado e assinatura eletrônica permanecem em standby. Schema isolado atual
+> não comprova a independência lógica do banco operacional exigida para a evolução.
+
 **Revisão de 28/10/2026:** página, API e dependências do mapa consolidado removidas por decisão do responsável. Cadastro geral ampliado, edição versionada e segunda via seguem `BeneficiaryData/BeneficiaryRepository` → `BeneficiaryService` → adaptador SQL/cifragem/auditoria → API/BFF → componentes MUI com RHF/Zod compartilhados. [Campos, operação e limites](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md).
 
 **Atualização de produção em 26/10/2026:** a hospedagem conjunta Next.js/FastAPI, o binding privado e a persistência PostgreSQL do módulo foram preparados conforme [deploy de produção](DEPLOY_PRODUCAO.md). As referências abaixo ao SQLite e à ausência de migração descrevem a entrega inicial local; a produção usa agora `actions_map`, Alembic e credencial restrita, sem criação de tabelas no startup.

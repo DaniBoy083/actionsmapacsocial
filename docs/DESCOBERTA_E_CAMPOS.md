@@ -1,5 +1,11 @@
 # Descoberta e inventário — 26/10/2026
 
+> **Inventário histórico:** nova leitura do XLSX original e do acervo, com matriz
+> por célula, hashes, permissões e diferenças de versões, em
+> [Fase 0 de 30/10](FASE_0_DESCOBERTA_2026-10-30.md). O escopo ocular do plano
+> v2.1 prevalece sobre a restrição antiga a cadastros gerais. Não interpretar o
+> inventário antigo do PDF como prova de completude da ficha XLSX.
+
 **Estado atual — 28/10/2026:** o inventário abaixo é histórico. O responsável autorizou posteriormente o cadastro dos campos gerais do PDF, segunda via e a complementação produtiva: 50 cadastros, 294 campos, conferidos por leitura posterior. CPF/telefone/nascimento/responsável passaram a integrar o envelope privado cifrado; graus/dados oculares continuam excluídos. [Inventário vigente e pendências de leitura](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md). A página do mapa consolidado foi removida.
 
 A especificação `AC_ACTIONS_MAP_DOCUMENTACAO_AGENT.md` prevalece quando diverge do planejamento anterior: cadastro próprio de beneficiários, sem `usuario_id` clínico, sem tracking assistencial, N locais por ação. O pedido de desenvolvimento autoriza esta implementação local; não autoriza migrar/importar produção.

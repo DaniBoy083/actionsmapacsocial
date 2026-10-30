@@ -1,4 +1,73 @@
-# Auditoria técnica da aplicação e princípios — 28/10/2026
+# Auditoria técnica da aplicação e princípios — 30/10/2026
+
+## Estado atual contra o plano v2.1
+
+**Conclusão: a aplicação NÃO está integralmente de acordo com o MVP ocular de
+30/10. O novo piloto NÃO está liberado.** O fluxo geral existente passou nas
+verificações locais; faltam funcionalidades e aceites da nova especificação.
+O `PROMPT_INICIAL_SOL.md` determina Fase 0, inventário e planejamento, sem
+implementação clínica. Não se apresenta documentação como sistema implementado.
+
+Entregáveis desta revisão:
+
+- [Descoberta e matriz literal da ficha](FASE_0_DESCOBERTA_2026-10-30.md): fontes,
+  hashes, páginas/aba/células, campos, esquema local em leitura, RBAC e contratos.
+- [Modelo proposto, backlog e aceite](PLANO_MVP_E_ACEITE_2026-10-30.md): prioridades,
+  contrato agregado futuro, migração/rollback e testes físicos ainda pendentes.
+- Correção de privacidade: fonte XLSX preenchida retirada do índice, mantida no
+  disco com hash idêntico; ignore para fontes, checagem Git com nomes Unicode/NUL,
+  modo `--tracked` no CI e nove casos sintéticos de regressão. Nenhum valor de
+  paciente foi incluído nos novos documentos/testes.
+
+| Requisito/princípio de 30/10 | Evidência atual | Estado |
+| --- | --- | --- |
+| Ler a ficha real antes de modelar | XLSX uma aba A1:X25 lido estruturalmente/renderizado com valores ocultos; PDF 50 páginas renderizado localmente, OCR só de rótulos e contatos mascarados | Fonte localizada; versão oficial/valores ilegíveis, inclusive página 34, pendentes |
+| Campos fiéis e minimização | Matriz separa mãe/responsável, CPF paciente/profissional, observação clínica/geral, município do termo/residência/evento | Documentado; nova coleta depende de aprovação |
+| Identidade e autorização no servidor | Tipo administrativo e equipes Admin/Tech revalidados; CSRF, sessão e acesso técnico exclusivo testados | Atende fluxo anterior; recepção/médico com escopo por ação/caso ainda ausentes |
+| Banco operacional independente | SQLite próprio local; código produtivo usa URL lógica comum com schema isolado e função delegada | Nova topologia/grants não homologados; nenhum acesso SQL produtivo nesta execução |
+| Três marcas em TOTAL/PARCIAL | Logo AC Social real no shell/login; não há upload governo/clínica no cadastro | Não implementado no novo fluxo; segunda via atual usa cabeçalho textual |
+| Nome/número/autor da emenda na ação e herança | Campos ausentes de ActionInput/Action, UI e contratos atuais | Não implementado; proposta com histórico/snapshot documentada |
+| Triagem, ficha clínica e atribuição | DTOs e persistência atuais são gerais; prévias históricas podem conter imagem de saúde | Não implementado; segregação operacional é gate de liberação |
+| Ficha + etiqueta, impressão conjunta/individual | Existe segunda via geral A4 dos dados atuais, com emissão auditada | Documento clínico/etiqueta/snapshot não implementados; impressão física pendente |
+| Contadores e analytics completo | Dashboard diferencia participações de pessoas únicas; escopo todo período/não arquivadas | Filtros novos, pessoas reconciliadas, fichas/etiquetas/entregas e emenda/autor pendentes |
+| Pipeline obrigatório sem PII de paciente | Item 1.1 allowlist, outbox/ACK, token/escopo e exportação testados; definições vizinhas lidas | Metadados novos exigem versão coordenada; E2E das quatro aplicações não executado |
+| Documentação corresponde ao código | Relatos anteriores preservados como histórico; inventário atual distingue código, proposta e deploy | Corrigido para esta revisão |
+| Fontes privadas fora de Git | XLSX preenchido estava rastreado; agora retirado do índice e protegido; original preservado | Corrigido no próximo estado versionado; histórico anterior ainda requer avaliação |
+| Assinatura digital e login local avançado | Não introduzidos; ambos permanecem em standby | Conforme decisão do MVP; acesso mínimo seguro continua obrigatório |
+| Retenção, restauração, governança e aceites | Lacunas documentadas, sem prazos/autorizações fabricados | Não homologado; impede alegação de 100% |
+
+### Verificações executadas em 30/10
+
+| Comando/verificação | Resultado observado |
+| --- | --- |
+| `npm.cmd run test:backend` | **114 aprovados**, 27,82s: 105 existentes e nove casos novos do gate Git; fontes/identidades sintéticas |
+| `npm.cmd run test:e2e` | **20 aprovados**, desktop/celular, saída 0, sem retries; geração dos PDFs sintéticos de segunda via e verificações Axe |
+| `npm.cmd run lint` | Aprovado |
+| `npm.cmd run typecheck` | Aprovado, tipos de rota gerados e tsc sem erro |
+| `npm.cmd run build` | Aprovado, 13 páginas geradas; nenhuma rota clínica/etiqueta foi adicionada |
+| `python -m ruff check --config backend/pyproject.toml backend/app backend/tests scripts` | Aprovado, incluindo o novo teste/script |
+| `python -m pip check` | Sem incompatibilidades instaladas |
+| `python scripts/check_staged_privacy.py --tracked` | Aprovado após retirar a fonte do índice; cobre caminhos rastreados, não classificação semântica de todo conteúdo |
+| Impressão digital da segunda via atual | PDFs sintéticos desktop/celular com uma página A4 cada; renderização desktop inspecionada, campos/declaração/assinatura em branco legíveis e sem navegação. Não é teste físico nem impressão da nova ficha clínica |
+| Fonte XLSX após retirada do índice | Arquivo local existente com SHA-256 idêntico ao inventário |
+| Metadados de SQLite | 12 tabelas, somente leitura; nenhum registro pessoal consultado |
+
+O pytest mantém um aviso de depreciação httpx/Starlette já existente. O Playwright
+concluiu os 20 cenários e aguardou encerramento dos servidores no Windows; foram
+encerrados somente os dois processos de teste identificados nesta execução, nas
+portas 3310/8310, permitindo o relatório final com saída 0.
+
+Não foram repetidas operações produtivas históricas nem executados deploy,
+importação, DDL, rotação de segredo, teste físico de impressão ou E2E com serviços
+institucionais reais. CI foi configurado, mas não se afirma execução remota.
+Testes verdes verificam os cenários existentes, não implementam os recursos que
+faltam. O gate de privacidade não saneia commits antigos nem substitui revisão
+de conteúdo/controle de acesso a anexos privados.
+
+## Histórico da auditoria — 28/10/2026
+
+As seções seguintes registram o escopo anterior. Afirmações de ausência de dados
+oculares estruturados descrevem o código atual antigo; não revogam o novo plano.
 
 ## Escopo e conclusão
 

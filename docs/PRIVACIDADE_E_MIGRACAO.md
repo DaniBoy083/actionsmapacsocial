@@ -1,5 +1,13 @@
 # Privacidade, retenção e migração
 
+> **30/10/2026:** o tratamento abaixo descreve o cadastro geral atual. A evolução
+> clínica exige segregação por finalidade/papel e política própria antes de
+> ativação; [modelo e gates futuros](PLANO_MVP_E_ACEITE_2026-10-30.md). Foi encontrada
+> uma ficha XLSX preenchida rastreada pelo Git; retirada do índice com preservação
+> local e gate para fontes privadas nesta revisão. O histórico anterior permanece
+> sujeito a avaliação institucional; não se afirma remoção de dados de commits
+> ou clones já existentes. [Evidências](FASE_0_DESCOBERTA_2026-10-30.md).
+
 ## Tratamento local
 
 Por decisão posterior do responsável, o módulo armazena os dados gerais da ficha: nome, telefone, CPF validado ou documental pendente, nascimento, data/município da ficha, responsável, observações gerais e confirmação de recebimento, além do município de residência e vínculo à ação. Os novos campos ficam no envelope cifrado existente; a listagem permanece resumida e a consulta completa é individual, privada e auditada. [Inventário, validação e complementação autorizada](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md). Nome/CPF não criam identidade compartilhada nem deduplicação automática. Não copiar prontuários, receitas, dados oculares, assinaturas ou chaves de outros sistemas. Auditoria guarda ator, operação, entidade e horário; não guarda o conteúdo pessoal. O pipeline contém só IDs técnicos de ações e totais.

@@ -1,5 +1,11 @@
 # AC Actions Map — AC Social
 
+> **Precedência em 30/10/2026:** `AGENTS.md`, `PROMPT_INICIAL_SOL.md` e o adendo
+> do plano v2.1 substituem as fronteiras conflitantes deste documento histórico.
+> O destino vigente inclui domínio ocular próprio; o código atual ainda é geral.
+> Login local avançado e assinatura eletrônica estão em standby.
+> [Descoberta atual e conflitos](FASE_0_DESCOBERTA_2026-10-30.md).
+
 **Documento de referência para o agente de desenvolvimento**  
 **Versão:** 1.0 — 26/10/2026  
 **Status:** especificação funcional/técnica proposta; conferir o repositório, os anexos e o banco real antes de implementar consultas, migrações e integrações.  

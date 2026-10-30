@@ -15,6 +15,7 @@ jobs:
       - run: npm.cmd ci
       - run: python -m venv backend/.venv
       - run: backend/.venv/Scripts/python.exe -m pip install -r backend/requirements-dev.txt
+      - run: backend/.venv/Scripts/python.exe scripts/check_staged_privacy.py --tracked
       - run: backend/.venv/Scripts/python.exe scripts/setup_local.py
       - run: npm.cmd run lint
       - run: npm.cmd run typecheck

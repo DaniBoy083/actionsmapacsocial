@@ -1,5 +1,14 @@
 # Verificação de conformidade e próximos incrementos
 
+> **30/10/2026:** a avaliação vigente está na
+> [auditoria atual](AUDITORIA_APLICACAO_E_PRINCIPIOS.md), contra o plano v2.1.
+> O MVP ocular não está integralmente implementado ou homologado. A tabela abaixo
+> descreve o escopo anterior; não comprova atendimento a ficha clínica, emenda,
+> três marcas, recepção/profissional por ação, etiqueta ou novos analytics.
+> [Descoberta](FASE_0_DESCOBERTA_2026-10-30.md) e
+> [backlog/aceite atual](PLANO_MVP_E_ACEITE_2026-10-30.md) substituem a sequência
+> antiga quando houver conflito.
+
 **Revisão de 28/10/2026:** cadastro geral ampliado, consulta privada, edição versionada e segunda via implementados. A complementação autorizada atualizou 50 cadastros/294 campos, conferidos após gravação. A página do mapa consolidado e suas dependências foram removidas. [Estado atual, evidências e pendências](AUDITORIA_APLICACAO_E_PRINCIPIOS.md); [campos e operação](CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md). As contagens antigas abaixo são históricas; o novo código ainda precisa de deploy.
 
 Esta é uma **primeira entrega de desenvolvimento**, não a conclusão do MVP institucional nem certificação de conformidade absoluta. A especificação específica do AC Actions Map prevalece sobre as decisões conflitantes do planejamento anterior.

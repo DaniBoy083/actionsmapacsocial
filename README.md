@@ -1,12 +1,29 @@
 # AC Actions Map — AC Social
 
-Primeira entrega de desenvolvimento para gestão de ações institucionais e registros gerais de beneficiários. Não contém prontuários ou tracking clínico. A especificação específica em `docs/AC_ACTIONS_MAP_DOCUMENTACAO_AGENT.md` prevalece sobre o planejamento anterior.
+Aplicação atual para gestão de ações institucionais e cadastros gerais de beneficiários.
+O fluxo clínico ocular definido em 30/10/2026 ainda não está implementado.
+Os requisitos vigentes são `AGENTS.md`, `PROMPT_INICIAL_SOL.md` e o adendo de 30/10
+de [PLANO_ACTIONS_MAP_GPT61_SOL.md](docs/PLANO_ACTIONS_MAP_GPT61_SOL.md), que prevalecem
+sobre as especificações históricas.
+
+**30/10/2026 — Fase 0:** [ficha real, campos, código/schema e permissões](docs/FASE_0_DESCOBERTA_2026-10-30.md)
+inventariados; [modelo proposto, backlog e testes de aceite](docs/PLANO_MVP_E_ACEITE_2026-10-30.md)
+documentados. A fonte XLSX preenchida foi retirada do índice Git, preservada no
+disco e protegida pelo gate de privacidade. Em novos clones, obtenha esse anexo por
+canal privado. **O novo MVP não está homologado nem integralmente implementado**;
+[auditoria atual e evidências](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md).
 
 Inclui login institucional, autorização no backend, Visão geral com indicadores, CRUD de ações com N locais da Paraíba, beneficiários cifrados, importação revisada por PDF/CSV/JSON, outbox e diagnóstico exclusivo de Tecnologia, páginas 404/erro e documentação de integração.
 
 **28/10/2026 — Cadastro e segunda via:** formulários, importação, edição e consulta privada incluem os campos gerais da ficha de referência, com CPF, telefone, datas, responsável e declaração de recebimento; graus e dados oculares são excluídos. A segunda via permite impressão A4. A página `/mapa-acoes`, sua API, navegação e dependências foram removidas por decisão posterior do responsável. [Campos, operação e resultado da complementação](docs/CADASTRO_BENEFICIARIOS_E_SEGUNDA_VIA.md) e [auditoria atual dos princípios](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md).
 
-**Estado:** desenvolvimento com SQLite isolado; produção com Next.js + FastAPI na Vercel, PostgreSQL em schema próprio e credencial restrita. As 50 fichas da Melhor Visão foram importadas; a complementação autorizada preencheu 294 campos e a leitura posterior conferiu 294/294 valores. Campos ausentes/ilegíveis permanecem pendentes. Receptor e exportação agregada de ações estão implementados na Agenda. Este commit ainda precisa de deploy para disponibilizar os novos formulários e remover a página antiga no ambiente publicado. Homologação do fluxo institucional e demais pendências estão na [auditoria atual](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md). Consulte também [deploy](docs/DEPLOY_PRODUCAO.md) e [conformidade](docs/CONFORMIDADE_E_PENDENCIAS.md).
+**Estado do código:** desenvolvimento com SQLite isolado; adaptador produtivo
+Next.js + FastAPI/PostgreSQL em schema próprio. Os relatos de carga das 50 fichas,
+complemento de 294 campos e recebimento na Agenda são evidências históricas de
+26–28/10, não reexecutadas nesta revisão. Estado atual do deploy, revisão aplicada
+e operação institucional não foram consultados. Campos ausentes/ilegíveis
+permanecem pendentes. Consulte [deploy histórico](docs/DEPLOY_PRODUCAO.md),
+[conformidade](docs/CONFORMIDADE_E_PENDENCIAS.md) e a auditoria atual.
 
 ## Rodar localmente no Windows
 
@@ -49,7 +66,11 @@ As ações são salvas diretamente **Em revisão**, depois validadas e publicada
 
 ## Verificação
 
-Validação desta revisão: **105 testes backend e 20 cenários de navegador aprovados**; os quatro cenários específicos de beneficiários foram repetidos após o ajuste de impressão. Lint, TypeScript, Ruff, `pip check` e build aprovados; inspeção visual da segunda via em uma página A4. Evidências na [auditoria atual](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md). A homologação institucional continua pendente. A contagem anterior incluía testes do mapa agora removido.
+Validação de 30/10: **114 testes backend e 20 cenários de navegador aprovados**,
+incluindo nove casos de privacidade Git. Lint, TypeScript, Ruff, `pip check` e build
+aprovados. Esses testes cobrem o fluxo existente; ficha clínica, etiqueta, novos
+papéis e impressão física continuam pendentes. Evidências na
+[auditoria atual](docs/AUDITORIA_APLICACAO_E_PRINCIPIOS.md).
 
 ```powershell
 npm.cmd run lint
@@ -59,7 +80,13 @@ npm.cmd run test:backend
 .\backend\.venv\Scripts\python.exe -m ruff check --config backend/pyproject.toml backend/app backend/tests scripts
 npx.cmd playwright install chromium
 npm.cmd run test:e2e
+.\backend\.venv\Scripts\python.exe scripts/check_staged_privacy.py --tracked
 ```
+
+Antes do commit, execute também `python scripts/check_staged_privacy.py` com o
+Python do ambiente virtual. A checagem recusa fontes privadas/tabulares e segredos
+locais conhecidos no staging; `--tracked` verifica caminhos de todo o índice,
+inclusive no CI. Não substitui revisão de conteúdo nem remove histórico antigo.
 
 Playwright inicia frontend compilado/backend próprios nas portas **3310/8310**; execute `npm.cmd run build` antes. Usa identidades sintéticas, documento sintético e SQLite temporário. Nenhum cadastro real é necessário e não há gravação institucional. Essas portas devem estar livres; use `ACTIONS_E2E_FRONTEND_PORT` e `ACTIONS_E2E_BACKEND_PORT` para escolher outras portas de teste. O Chromium é baixado apenas na preparação do ambiente. Capturas/relatórios ficam ignorados em `artifacts/` e `test-results/`.
 
@@ -75,6 +102,8 @@ A API local oferece documentação em **http://127.0.0.1:8000/docs**. O diagnós
 
 ## Documentação
 
+- [Descoberta da ficha e auditoria da Fase 0 — 30/10](docs/FASE_0_DESCOBERTA_2026-10-30.md)
+- [Proposta de MVP, backlog, impressão e migração reversível](docs/PLANO_MVP_E_ACEITE_2026-10-30.md)
 - [Descoberta, fontes verificadas e inventário de campos](docs/DESCOBERTA_E_CAMPOS.md)
 - [Arquitetura e limites desta entrega](docs/ARQUITETURA.md)
 - [Deploy Next.js + FastAPI na mesma Vercel](docs/DEPLOY_PRODUCAO.md)
