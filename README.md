@@ -2,6 +2,13 @@
 
 Aplicação atual para gestão de ações institucionais e cadastros gerais de beneficiários.
 O fluxo clínico ocular definido em 30/10/2026 ainda não está implementado.
+
+**03/11/2026 — AC-Core:** [diagnóstico, contratos pendentes e handoff técnico](docs/AC_CORE_PENDING_IMPLEMENTATIONS.md).
+O handoff disponível mantém a transição administrativa em proposta. Esta entrega
+documenta as dependências; não implementa nem ativa SSO, Management, Gateway ou
+Vault. O login institucional vigente e o pipeline com a Agenda permanecem ativos
+no código. Contratos reais e homologação são necessários antes de substituí-los.
+
 Os requisitos vigentes são `AGENTS.md`, `PROMPT_INICIAL_SOL.md` e o adendo de 30/10
 de [PLANO_ACTIONS_MAP_GPT61_SOL.md](docs/PLANO_ACTIONS_MAP_GPT61_SOL.md), que prevalecem
 sobre as especificações históricas.
@@ -102,6 +109,7 @@ A API local oferece documentação em **http://127.0.0.1:8000/docs**. O diagnós
 
 ## Documentação
 
+- [AC-Core: diagnóstico, dependências, aceite e rollback](docs/AC_CORE_PENDING_IMPLEMENTATIONS.md)
 - [Novos metadados: tarefas nas consumidoras, contratos e implantação das APIs](docs/INTEGRACAO_NOVOS_METADADOS_E_CONSUMIDORES.md)
 - [Descoberta da ficha e auditoria da Fase 0 — 30/10](docs/FASE_0_DESCOBERTA_2026-10-30.md)
 - [Proposta de MVP, backlog, impressão e migração reversível](docs/PLANO_MVP_E_ACEITE_2026-10-30.md)

@@ -1,5 +1,14 @@
 # Arquitetura da primeira entrega
 
+> **AC-Core — 03/11/2026:** [diagnóstico e handoff](AC_CORE_PENDING_IMPLEMENTATIONS.md).
+> O consumidor ainda não possui cliente Core/OIDC, integração Management,
+> Gateway ou Vault. A leitura institucional delegada, as sessões e as permissões
+> atuais foram preservadas. A substituição requer contratos homologados, vínculo
+> de IDs/grants, política de revogação e reautenticação das operações de tokens;
+> substituir somente o login não cobre essas operações. As APIs de negócio e o
+> pipeline Actions Map → Agenda → Plataforma → Portal permanecem independentes
+> dessa preparação. Nenhuma infraestrutura ou migração foi alterada nesta análise.
+
 > **Estado em 30/10/2026:** este texto descreve a implementação geral existente.
 > O MVP ocular do plano v2.1 é a evolução vigente e ainda não está implementado.
 > [Inventário real, fontes e fronteiras](FASE_0_DESCOBERTA_2026-10-30.md);
