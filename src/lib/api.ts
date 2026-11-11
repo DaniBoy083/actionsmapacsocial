@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Institutional } from "@/features/actions/institutional";
 export const api = axios.create({
   baseURL: "/api/backend",
   timeout: 30_000,
@@ -33,6 +34,8 @@ export type Action = {
   categoria: string;
   descricao: string;
   resumo_publico: string;
+  institucional: Institutional;
+  versoes_institucionais?: number[];
   inicio_em: string | null;
   fim_em: string | null;
   status: string;
@@ -51,6 +54,9 @@ export type Municipality = { codigo: string; nome: string };
 export type Indicators = {
   acoes: number;
   participacoes: number;
+  cadastros_distintos: number;
+  participacoes_sem_local: number;
+  acoes_sem_instrumento: number;
   municipios: number;
   em_revisao: number;
   por_municipio: { codigo: string; nome: string; acoes: number }[];

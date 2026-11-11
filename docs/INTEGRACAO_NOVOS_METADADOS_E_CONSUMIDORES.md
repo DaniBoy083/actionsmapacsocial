@@ -1,5 +1,11 @@
 # Novos metadados de ações — APIs e aplicações consumidoras
 
+> **Estado em 11/11/2026:** cadastro e histórico privados dos metadados institucionais
+> implementados no Actions Map, com comprovante geral e filtros internos.
+> [Entrega administrativa](IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).
+> Contrato 1.2, projeção pública e mudanças nas consumidoras abaixo continuam
+> propostas, sem emissão de campos extras no item 1.1 existente.
+
 Data: 30/10/2026. Estado: **documentação para implementação coordenada**.
 Base inspecionada do Actions Map: `c5fe90f`. Os caminhos dos outros projetos
 abaixo foram lidos no workspace, sem executar suas aplicações ou consultar produção.

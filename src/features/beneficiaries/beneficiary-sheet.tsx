@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
@@ -11,6 +12,7 @@ import {
 import { api, dateLabel, errorMessage } from "@/lib/api";
 import type { BeneficiarySheet as Sheet } from "./registration";
 import "./beneficiary-sheet.css";
+import { InstitutionalSummary } from "@/features/actions/institutional-summary";
 
 const shown = (value: string | null) => value || "Não informado";
 function receipt(value: boolean | null) {
@@ -31,6 +33,8 @@ export function BeneficiarySheet({
   secondCopy: boolean;
   onClose: () => void;
 }) {
+  const [loadedImages, setLoadedImages] = useState<string[]>([]);
+  const [imageFailure, setImageFailure] = useState(false);
   const query = useQuery({
     queryKey: ["beneficiary-sheet", actionId, personId, secondCopy],
     gcTime: 0,
@@ -45,6 +49,20 @@ export function BeneficiarySheet({
       ).data,
   });
   const data = query.data;
+  const requiredImages = data
+    ? [
+        "/logo-ac-social.png",
+        ...(["governo", "clinica"] as const).flatMap((slot) => {
+          const brand = data.acao.institucional[slot];
+          return brand.logo_id && brand.uso_autorizado
+            ? [`/api/backend/acoes/${actionId}/marcas/${brand.logo_id}`]
+            : [];
+        }),
+      ]
+    : [];
+  const imagesReady =
+    requiredImages.every((source) => loadedImages.includes(source)) &&
+    !imageFailure;
   const title = secondCopy
     ? "Segunda via da ficha de cadastro"
     : "Ficha de cadastro do beneficiário";
@@ -76,6 +94,25 @@ export function BeneficiarySheet({
                 <h1>{title}</h1>
                 <p>
                   Programa / ação: <strong>{data.acao.nome}</strong>
+                </p>
+                <InstitutionalSummary
+                  actionId={actionId}
+                  value={data.acao.institucional}
+                  onImageLoad={(source) =>
+                    setLoadedImages((previous) =>
+                      previous.includes(source)
+                        ? previous
+                        : [...previous, source],
+                    )
+                  }
+                  onImageError={() => setImageFailure(true)}
+                />
+                <p className="beneficiary-sheet-note">
+                  Identificação institucional da revisão {data.acao.versao}
+                  {secondCopy
+                    ? ", preservada desde a primeira emissão desta segunda via"
+                    : " (dados atuais)"}
+                  .
                 </p>
               </header>
               <dl className="beneficiary-sheet-fields">
@@ -167,11 +204,19 @@ export function BeneficiarySheet({
         )}
       </DialogContent>
       <DialogActions data-print-controls sx={{ p: 3 }}>
+        {imageFailure && (
+          <Alert severity="error">
+            Não foi possível carregar uma marca. Feche e reabra a ficha para
+            tentar novamente.
+          </Alert>
+        )}
         <Button onClick={onClose}>Fechar</Button>
         {secondCopy && (
           <Button
             variant="contained"
-            disabled={!data || query.isFetching || query.isError}
+            disabled={
+              !data || query.isFetching || query.isError || !imagesReady
+            }
             onClick={() => window.print()}
           >
             Imprimir segunda via

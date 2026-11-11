@@ -1,4 +1,28 @@
-# Auditoria técnica da aplicação e princípios — 30/10/2026
+# Auditoria técnica da aplicação e princípios
+
+## Revisão atual — 11/11/2026
+
+Conformidade global **PARCIAL**; o MVP clínico continua **NÃO LIBERADO**.
+[Evidências, campos, autorização, migração, testes e rollback desta entrega](IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).
+
+| Requisito | Estado em 11/11 |
+| --- | --- |
+| Main sincronizada antes de implementar | Fetch executado; árvore limpa e divergência 0/0 em dda4712 |
+| Metadados de emenda/convênio e apoio | Implementados na ação com validação estrita, versão e histórico; ausências explícitas |
+| Três marcas em TOTAL/PARCIAL | AC Social fixa; uploads opcionais privados/saneados em ambos e quando apoio é desconhecido; uso/divulgação separados |
+| Herança e histórico nos documentos | Implementados na segunda via geral, com snapshot administrativo desde a primeira emissão após 0007; documento clínico e etiqueta continuam ausentes |
+| Indicadores administrativos | Filtros por ação/início/município/local/instrumento/número/autor/órgão/clínica/apoio; contagem territorial por participação atribuída; cadastros distintos não são pessoas conciliadas |
+| Backend/RBAC | Equipes institucionais existentes continuam validadas; marcas/histórico privados, CSRF/IDOR testados; operação de recepção/profissional ainda não liberada |
+| Integração | Contrato 1.1 preservado sem novos campos ou PII; 1.2 e consumidoras aguardam homologação coordenada |
+| Ficha, atendimento, etiqueta, pessoas únicas e homologação física | Não implementados/homologados; dependências listadas no relatório atual |
+| AC Auth/AC Core | Excluídos desta implementação; adaptadores/sessões não substituídos |
+| Produção | Sem migração real, importação, configuração, deploy ou push; 0007 preparada e testada em ambientes descartáveis |
+
+## Levantamento histórico — 30/10/2026
+
+As seções seguintes registram a auditoria de 30/10 e seus testes daquela data.
+O estado atual dos itens administrativos é o da revisão acima; os relatos antigos
+não devem ser usados para afirmar que a nova implementação foi homologada.
 
 ## Estado atual contra o plano v2.1
 

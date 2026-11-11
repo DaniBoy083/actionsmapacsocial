@@ -3,6 +3,19 @@
 Aplicação atual para gestão de ações institucionais e cadastros gerais de beneficiários.
 O fluxo clínico ocular definido em 30/10/2026 ainda não está implementado.
 
+**11/11/2026 — Etapa administrativa implementada:** cadastro de apoio e emenda/convênio
+(nome, número textual e autor), órgão/clínica com duas logos opcionais e permissões
+separadas de uso/divulgação, histórico privado, cabeçalho com três marcas na
+segunda via geral, snapshot administrativo e filtros internos. Main foi conferida
+com `origin/main` antes das edições. **AC Auth e AC Core não foram alterados.**
+[Implementação, testes, limites e rollback](docs/IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).
+O banco existente precisa da migração aditiva **0007 antes de servir este código**;
+ela foi testada somente em bases descartáveis, sem aplicação real ou deploy.
+Para SQLite local, há prévia/atualização controlada em
+`scripts/migrate_institutional_metadata.py`; não é migração automática de startup.
+Ficha clínica, etiqueta, atribuição operacional e contrato 1.2 continuam pendentes.
+Não há declaração de conformidade absoluta nem liberação do piloto clínico.
+
 **03/11/2026 — AC-Core:** [diagnóstico, contratos pendentes e handoff técnico](docs/AC_CORE_PENDING_IMPLEMENTATIONS.md).
 O handoff disponível mantém a transição administrativa em proposta. Esta entrega
 documenta as dependências; não implementa nem ativa SSO, Management, Gateway ou

@@ -14,8 +14,10 @@ from app.domain.contracts import (
     Professional,
     Summary,
 )
+from app.domain.institutional import Institutional
 from app.domain.rules import can_transition
 from app.infrastructure.beneficiary_data import encode_beneficiary, same_beneficiary
+from app.infrastructure.institutional import persist_institutional, remember
 from app.infrastructure.models import Action, Audit, Beneficiary, Outbox, Participation
 
 
@@ -53,6 +55,7 @@ def snapshot(session: Session, row: Action) -> dict:
         "categoria": row.categoria,
         "descricao": row.descricao,
         "resumo_publico": row.resumo_publico,
+        "institucional": Institutional.model_validate(row.institucional).model_dump(mode="json"),
         "inicio_em": row.inicio_em,
         "fim_em": row.fim_em,
         "status": row.status,
@@ -124,12 +127,18 @@ def enqueue(session: Session, row: Action) -> None:
 def save_action(
     session: Session, data: ActionInput, professional: Professional, identifier: str | None = None
 ) -> dict:
-    values = data.model_dump(mode="json", exclude={"versao"})
+    values = data.model_dump(mode="json", exclude={"versao", "institucional"})
     if identifier:
         row = action_or_404(session, identifier)
         require_version(row, data.versao)
         if row.status == "arquivada":
             raise HTTPException(409, "Ação arquivada não pode ser editada.")
+        previous_institutional = row.institucional
+        values["institucional"] = (
+            persist_institutional(session, identifier, data.institucional)
+            if "institucional" in data.model_fields_set
+            else row.institucional
+        )
         if row.locais != values["locais"] and session.scalar(
             select(func.count())
             .select_from(Participation)
@@ -159,6 +168,9 @@ def save_action(
         )
         if changed.rowcount != 1:
             raise HTTPException(409, "Esta ação foi alterada. Recarregue antes de salvar.")
+        remember(
+            session, identifier, data.versao, previous_institutional, professional.profissional_id
+        )
         session.expire_all()
         row = session.get(Action, identifier)
     else:
@@ -167,6 +179,9 @@ def save_action(
         row = Action(**values, criado_por=professional.profissional_id)
         session.add(row)
         session.flush()
+        row.institucional = persist_institutional(session, row.id, data.institucional)
+    remember(session, row.id, row.versao, row.institucional, professional.profissional_id)
+    session.flush()
     audit(session, professional, "acoes.update" if identifier else "acoes.create", row.id)
     enqueue(session, row)
     return snapshot(session, row)

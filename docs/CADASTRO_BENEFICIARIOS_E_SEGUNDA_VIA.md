@@ -1,5 +1,12 @@
 # Cadastro completo, segunda via e retirada do mapa — 28/10/2026
 
+> **Atualização de 11/11/2026:** a segunda via geral herda identificação institucional
+> da ação e até três marcas autorizadas. Snapshot administrativo capturado na primeira
+> emissão após 0007; edições da ação não alteram essa identificação. Dados pessoais
+> continuam na revisão atual do cadastro; nenhum documento antigo foi reconstruído.
+> Ficha clínica/etiqueta não implementadas.
+> [Regras, migração, testes e rollback](IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).
+
 > **Limite de “completo” em 30/10:** refere-se ao cadastro geral autorizado em
 > 28/10, não à ficha clínica do novo plano v2.1. A leitura da planilha identificou
 > campos adicionais e um bloco profissional distinto. Esta segunda via continua

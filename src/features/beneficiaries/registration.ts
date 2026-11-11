@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Institutional } from "@/features/actions/institutional";
 
 const optionalDate = z.iso.date("Informe uma data válida.").or(z.literal(""));
 const municipality = z
@@ -102,7 +103,12 @@ export type BeneficiaryData = {
 export type BeneficiarySheet = BeneficiaryData & {
   id: string;
   versao: number;
-  acao: { id: string; nome: string };
+  acao: {
+    id: string;
+    nome: string;
+    versao: number;
+    institucional: Institutional;
+  };
   municipio_ficha_nome: string | null;
   municipio_residencia_nome: string | null;
   segunda_via: boolean;

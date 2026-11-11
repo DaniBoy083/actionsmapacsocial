@@ -1,0 +1,223 @@
+{
+  "$defs": {
+    "BrandInput": {
+      "additionalProperties": false,
+      "properties": {
+        "nome": {
+          "default": "",
+          "maxLength": 160,
+          "title": "Nome",
+          "type": "string"
+        },
+        "uso_autorizado": {
+          "default": false,
+          "title": "Uso Autorizado",
+          "type": "boolean"
+        },
+        "divulgacao_autorizada": {
+          "default": false,
+          "title": "Divulgacao Autorizada",
+          "type": "boolean"
+        },
+        "logo_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9-]{36}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Logo Id"
+        },
+        "conteudo_base64": {
+          "anyOf": [
+            {
+              "maxLength": 349528,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conteudo Base64"
+        }
+      },
+      "title": "BrandInput",
+      "type": "object"
+    },
+    "InstitutionalInput": {
+      "additionalProperties": false,
+      "properties": {
+        "apoio": {
+          "anyOf": [
+            {
+              "enum": [
+                "TOTAL",
+                "PARCIAL"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Apoio"
+        },
+        "instrumento": {
+          "$ref": "#/$defs/Instrument"
+        },
+        "governo": {
+          "$ref": "#/$defs/BrandInput"
+        },
+        "clinica": {
+          "$ref": "#/$defs/BrandInput"
+        }
+      },
+      "title": "InstitutionalInput",
+      "type": "object"
+    },
+    "Instrument": {
+      "additionalProperties": false,
+      "properties": {
+        "tipo": {
+          "default": "NAO_INFORMADO",
+          "enum": [
+            "EMENDA",
+            "CONVENIO",
+            "OUTRO",
+            "NAO_INFORMADO"
+          ],
+          "title": "Tipo",
+          "type": "string"
+        },
+        "nome": {
+          "default": "",
+          "maxLength": 160,
+          "title": "Nome",
+          "type": "string"
+        },
+        "numero": {
+          "default": "",
+          "maxLength": 80,
+          "title": "Numero",
+          "type": "string"
+        },
+        "autor": {
+          "default": "",
+          "maxLength": 160,
+          "title": "Autor",
+          "type": "string"
+        },
+        "divulgacao_autorizada": {
+          "default": false,
+          "title": "Divulgacao Autorizada",
+          "type": "boolean"
+        }
+      },
+      "title": "Instrument",
+      "type": "object"
+    },
+    "Location": {
+      "additionalProperties": false,
+      "properties": {
+        "municipio_ibge": {
+          "title": "Municipio Ibge",
+          "type": "string"
+        },
+        "nome_local": {
+          "default": "",
+          "maxLength": 160,
+          "title": "Nome Local",
+          "type": "string"
+        }
+      },
+      "required": [
+        "municipio_ibge"
+      ],
+      "title": "Location",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "nome": {
+      "maxLength": 160,
+      "minLength": 2,
+      "title": "Nome",
+      "type": "string"
+    },
+    "categoria": {
+      "default": "",
+      "maxLength": 80,
+      "title": "Categoria",
+      "type": "string"
+    },
+    "descricao": {
+      "default": "",
+      "maxLength": 4000,
+      "title": "Descricao",
+      "type": "string"
+    },
+    "resumo_publico": {
+      "default": "",
+      "maxLength": 1000,
+      "title": "Resumo Publico",
+      "type": "string"
+    },
+    "institucional": {
+      "$ref": "#/$defs/InstitutionalInput"
+    },
+    "inicio_em": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Inicio Em"
+    },
+    "fim_em": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fim Em"
+    },
+    "locais": {
+      "items": {
+        "$ref": "#/$defs/Location"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Locais",
+      "type": "array"
+    },
+    "versao": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Versao",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "nome",
+    "locais"
+  ],
+  "title": "ActionInput",
+  "type": "object"
+}

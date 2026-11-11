@@ -1,5 +1,12 @@
 # Verificação de conformidade e próximos incrementos
 
+> **11/11/2026:** implementados metadados de emenda/convênio, apoio, marcas privadas,
+> histórico/snapshot administrativo da segunda via e filtros internos.
+> [Estado atual e limites](IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).
+> Conformidade global parcial; fase clínica não liberada. Migração 0007 necessária
+> antes de servir o novo código, ainda sem aplicação real ou deploy.
+> As tabelas e números históricos abaixo permanecem referentes às datas indicadas.
+
 > **30/10/2026:** a avaliação vigente está na
 > [auditoria atual](AUDITORIA_APLICACAO_E_PRINCIPIOS.md), contra o plano v2.1.
 > O MVP ocular não está integralmente implementado ou homologado. A tabela abaixo

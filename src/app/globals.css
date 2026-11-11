@@ -662,3 +662,51 @@ a {
     overflow-wrap: anywhere;
   }
 }
+:root {
+  --institutional-border: #e0cdd1;
+}
+.institutional-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  border: 1px solid var(--institutional-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.institutional-fields legend {
+  font-weight: 700;
+  color: #65111f;
+}
+.institutional-logos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.institutional-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+}
+.institutional-details dt {
+  font-size: 13px;
+  font-weight: 700;
+  color: #65111f;
+}
+.institutional-details dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.logo-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (max-width: 600px) {
+  .institutional-details {
+    grid-template-columns: 1fr;
+  }
+}

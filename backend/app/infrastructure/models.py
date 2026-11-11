@@ -39,6 +39,7 @@ class Action(Base):
     categoria: Mapped[str] = mapped_column(String(80), default="")
     descricao: Mapped[str] = mapped_column(Text, default="")
     resumo_publico: Mapped[str] = mapped_column(Text, default="")
+    institucional: Mapped[dict] = mapped_column(JSON, default=dict, server_default="{}")
     inicio_em: Mapped[str | None] = mapped_column(String(10))
     fim_em: Mapped[str | None] = mapped_column(String(10))
     status: Mapped[str] = mapped_column(String(20), default="em_revisao", index=True)
@@ -57,6 +58,28 @@ class Beneficiary(Base):
     municipio_residencia_ibge: Mapped[str | None] = mapped_column(String(7))
 
 
+class ActionLogo(Base):
+    __tablename__ = "acoes_map_marcas"
+    __table_args__ = (CheckConstraint("slot IN ('governo','clinica')", name="ck_marca_slot"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    acao_id: Mapped[str] = mapped_column(ForeignKey(Action.id), index=True)
+    slot: Mapped[str] = mapped_column(String(10))
+    conteudo_base64: Mapped[str] = mapped_column(Text)
+    sha256: Mapped[str] = mapped_column(String(64))
+    largura: Mapped[int] = mapped_column(Integer)
+    altura: Mapped[int] = mapped_column(Integer)
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class InstitutionalRevision(Base):
+    __tablename__ = "acoes_map_revisoes_institucionais"
+    acao_id: Mapped[str] = mapped_column(ForeignKey(Action.id), primary_key=True)
+    versao: Mapped[int] = mapped_column(Integer, primary_key=True)
+    dados: Mapped[dict] = mapped_column(JSON)
+    criado_por: Mapped[str] = mapped_column(String(160))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 class Participation(Base):
     __tablename__ = "acoes_map_participacoes"
     __table_args__ = (UniqueConstraint("acao_id", "beneficiario_id"),)
@@ -65,6 +88,9 @@ class Participation(Base):
     beneficiario_id: Mapped[str] = mapped_column(ForeignKey(Beneficiary.id), index=True)
     local_indice: Mapped[int | None] = mapped_column(Integer)
     origem: Mapped[str | None] = mapped_column(String(64), unique=True)
+    documento_institucional: Mapped[dict | None] = mapped_column(
+        JSON(none_as_null=True), nullable=True
+    )
 
 
 class Audit(Base):

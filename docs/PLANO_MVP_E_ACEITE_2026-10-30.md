@@ -1,5 +1,13 @@
 # MVP ocular — proposta, backlog e aceite após a Fase 0
 
+> **Atualização de 11/11/2026:** ação com metadados de instrumento/apoio, marcas,
+> histórico, propagação para segunda via geral e filtros administrativos foram
+> implementados. [Entrega e aceite técnico](IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).
+> P1-02 está atendido no cadastro e comprovante geral; seu aceite clínico/etiqueta
+> permanece pendente. P2-01 tem apenas medidas gerais existentes, sem analytics
+> clínico nem pessoas conciliadas. O restante abaixo conserva o plano de 30/10;
+> não indica que triagem, etiqueta, contas locais ou integração 1.2 já existem.
+
 Data: 30/10/2026. **Proposta não executada**, derivada da
 [ficha e do código inspecionados](FASE_0_DESCOBERTA_2026-10-30.md).
 O prompt inicial limita esta entrega à Fase 0. Os nomes novos abaixo são

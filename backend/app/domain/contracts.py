@@ -6,7 +6,10 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
+
+from app.domain.base import StrictModel
+from app.domain.institutional import Institutional, InstitutionalInput
 
 MUNICIPALITIES: dict[str, str] = json.loads(
     Path(__file__).with_name("paraiba_municipalities.json").read_text(encoding="utf-8")
@@ -19,10 +22,6 @@ def normalize(value: str) -> str:
         for c in unicodedata.normalize("NFD", value.strip().lower())
         if unicodedata.category(c) != "Mn"
     )
-
-
-class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
 
 class Login(StrictModel):
@@ -70,6 +69,7 @@ class ActionInput(StrictModel):
     categoria: str = Field(default="", max_length=80)
     descricao: str = Field(default="", max_length=4000)
     resumo_publico: str = Field(default="", max_length=1000)
+    institucional: InstitutionalInput = Field(default_factory=InstitutionalInput)
     inicio_em: date | None = None
     fim_em: date | None = None
     locais: list[Location] = Field(min_length=1, max_length=100)
@@ -178,6 +178,8 @@ class BeneficiaryUpdate(BeneficiaryInput):
 class BeneficiaryAction(StrictModel):
     id: str
     nome: str
+    versao: int
+    institucional: Institutional
 
 
 class BeneficiarySheet(BeneficiaryUpdate):

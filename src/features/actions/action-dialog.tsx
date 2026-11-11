@@ -19,6 +19,8 @@ import { FiPlus, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { api, errorMessage, type Action, type Municipality } from "@/lib/api";
 import { useSession } from "@/components/session-context";
+import { emptyInstitutional, institutionalSchema } from "./institutional";
+import { InstitutionalFields } from "./institutional-fields";
 
 const schema = z
   .object({
@@ -26,6 +28,7 @@ const schema = z
     categoria: z.string().max(80),
     descricao: z.string().max(4000),
     resumo_publico: z.string().max(1000),
+    institucional: institutionalSchema,
     inicio_em: z.string(),
     fim_em: z.string(),
     locais: z
@@ -100,6 +103,7 @@ export function ActionDialog({
           categoria: "",
           descricao: "",
           resumo_publico: "",
+          institucional: emptyInstitutional(),
           inicio_em: "",
           fim_em: "",
           locais: [{ municipio_ibge: "", nome_local: "" }],
@@ -260,6 +264,23 @@ export function ActionDialog({
             >
               Adicionar local
             </Button>
+            <Controller
+              control={control}
+              name="institucional"
+              render={({ field }) => (
+                <InstitutionalFields
+                  value={field.value}
+                  onChange={field.onChange}
+                  actionId={action?.id}
+                />
+              )}
+            />
+            {errors.institucional && (
+              <Alert severity="error">
+                Confira os metadados e as autorizações de uso e divulgação das
+                marcas.
+              </Alert>
+            )}
           </div>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>

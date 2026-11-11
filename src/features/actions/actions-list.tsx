@@ -33,11 +33,16 @@ import {
 } from "@/lib/api";
 import { useSession } from "@/components/session-context";
 import { ActionDialog } from "@/features/actions/action-dialog";
+import {
+  emptyInstitutionalFilters,
+  InstitutionalFilters,
+} from "./institutional-filters";
 
 export function ActionsList() {
   const session = useSession();
   const client = useQueryClient();
   const [filters, setFilters] = useState({
+    ...emptyInstitutionalFilters,
     busca: "",
     municipio: "",
     status: "",
@@ -169,6 +174,10 @@ export function ActionsList() {
             slotProps={{ inputLabel: { shrink: true } }}
           />
         </div>
+        <details>
+          <summary>Filtrar por financiamento e parceiros</summary>
+          <InstitutionalFilters value={filters} onChange={filter} />
+        </details>
       </section>
       {query.isError ? (
         <Alert severity="error">
@@ -216,6 +225,14 @@ export function ActionsList() {
                       <td>
                         <strong>{row.nome}</strong>
                         <small>{row.categoria || "Sem categoria"}</small>
+                        {row.institucional.instrumento.nome && (
+                          <small>
+                            {row.institucional.instrumento.nome}
+                            {row.institucional.instrumento.numero
+                              ? ` · ${row.institucional.instrumento.numero}`
+                              : ""}
+                          </small>
+                        )}
                       </td>
                       <td>
                         {dateLabel(row.inicio_em)}

@@ -1,6 +1,7 @@
 """Servidor exclusivo de E2E. Identidades sintéticas não são carregadas pela aplicação."""
 
 import os
+import re
 import secrets
 import sys
 import tempfile
@@ -33,6 +34,24 @@ from app.infrastructure import imports
 from app.main import app
 from app.security.session import identities
 from conftest import HASH
+
+
+@app.middleware("http")
+async def isolated_synthetic_browser(request, call_next):
+    """Cada contexto Playwright representa um cliente distinto, só neste servidor.
+
+    Mantém o rate limit real dentro do cenário, sem acumular logins/reauthorizações
+    de toda a suíte como se fossem ataques do mesmo IP. Não é carregado no app.
+    """
+    browser = request.cookies.get("ac_e2e_browser", "")
+    fresh = not re.fullmatch(r"[a-f0-9]{32}", browser)
+    if fresh:
+        browser = secrets.token_hex(16)
+    request.scope["client"] = ("synthetic-browser:" + browser, 0)
+    response = await call_next(request)
+    if fresh:
+        response.set_cookie("ac_e2e_browser", browser, httponly=True, samesite="strict")
+    return response
 
 
 class BrowserIdentities:

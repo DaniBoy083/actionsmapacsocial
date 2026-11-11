@@ -5,6 +5,7 @@ import json
 import secrets
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from alembic import command
@@ -16,6 +17,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "backend"))
 PRIVATE = ROOT / "artifacts/production-config.env"
 ROLE = "ac_actions_map_runtime"
 ORIGIN = "https://actionsmapacsocial.vercel.app"
@@ -138,6 +140,9 @@ def main() -> int:
                 "GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA actions_map TO {}"
             ).format(sql.Identifier(ROLE))
         )
+        from app.infrastructure.institutional_grants import IMMUTABLE_INSTITUTIONAL_GRANTS
+
+        raw.execute(IMMUTABLE_INSTITUTIONAL_GRANTS)
         raw.execute(
             sql.SQL("REVOKE INSERT,UPDATE,DELETE ON actions_map.alembic_version FROM {}").format(
                 sql.Identifier(ROLE)

@@ -195,6 +195,76 @@
               "default": 10,
               "title": "Tamanho"
             }
+          },
+          {
+            "name": "instrumento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Instrumento"
+            }
+          },
+          {
+            "name": "numero_instrumento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "default": "",
+              "title": "Numero Instrumento"
+            }
+          },
+          {
+            "name": "autor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Autor"
+            }
+          },
+          {
+            "name": "orgao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Orgao"
+            }
+          },
+          {
+            "name": "clinica",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Clinica"
+            }
+          },
+          {
+            "name": "apoio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "",
+                "TOTAL",
+                "PARCIAL"
+              ],
+              "type": "string",
+              "default": "",
+              "title": "Apoio"
+            }
           }
         ],
         "responses": {
@@ -358,6 +428,98 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/acoes/{identifier}/marcas/{logo_id}": {
+      "get": {
+        "summary": "Private Logo",
+        "operationId": "private_logo_api_v1_acoes__identifier__marcas__logo_id__get",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Identifier"
+            }
+          },
+          {
+            "name": "logo_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Logo Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/acoes/{identifier}/institucional/versoes/{version}": {
+      "get": {
+        "summary": "Institutional Revision",
+        "operationId": "institutional_revision_api_v1_acoes__identifier__institucional_versoes__version__get",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Identifier"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Version"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -618,12 +780,161 @@
       "get": {
         "summary": "Indicators",
         "operationId": "indicators_api_v1_indicadores_get",
+        "parameters": [
+          {
+            "name": "acao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 36,
+              "default": "",
+              "title": "Acao"
+            }
+          },
+          {
+            "name": "municipio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 7,
+              "default": "",
+              "title": "Municipio"
+            }
+          },
+          {
+            "name": "local",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Local"
+            }
+          },
+          {
+            "name": "inicio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Inicio"
+            }
+          },
+          {
+            "name": "fim",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fim"
+            }
+          },
+          {
+            "name": "instrumento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Instrumento"
+            }
+          },
+          {
+            "name": "numero_instrumento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "default": "",
+              "title": "Numero Instrumento"
+            }
+          },
+          {
+            "name": "autor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Autor"
+            }
+          },
+          {
+            "name": "orgao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Orgao"
+            }
+          },
+          {
+            "name": "clinica",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Clinica"
+            }
+          },
+          {
+            "name": "apoio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "",
+                "TOTAL",
+                "PARCIAL"
+              ],
+              "type": "string",
+              "default": "",
+              "title": "Apoio"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -1385,6 +1696,9 @@
             "title": "Resumo Publico",
             "default": ""
           },
+          "institucional": {
+            "$ref": "#/components/schemas/InstitutionalInput"
+          },
           "inicio_em": {
             "anyOf": [
               {
@@ -1442,13 +1756,22 @@
           "nome": {
             "type": "string",
             "title": "Nome"
+          },
+          "versao": {
+            "type": "integer",
+            "title": "Versao"
+          },
+          "institucional": {
+            "$ref": "#/components/schemas/Institutional"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
-          "nome"
+          "nome",
+          "versao",
+          "institucional"
         ],
         "title": "BeneficiaryAction"
       },
@@ -1950,6 +2273,88 @@
         ],
         "title": "BeneficiaryUpdate"
       },
+      "Brand": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Nome",
+            "default": ""
+          },
+          "uso_autorizado": {
+            "type": "boolean",
+            "title": "Uso Autorizado",
+            "default": false
+          },
+          "divulgacao_autorizada": {
+            "type": "boolean",
+            "title": "Divulgacao Autorizada",
+            "default": false
+          },
+          "logo_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9-]{36}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Brand"
+      },
+      "BrandInput": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Nome",
+            "default": ""
+          },
+          "uso_autorizado": {
+            "type": "boolean",
+            "title": "Uso Autorizado",
+            "default": false
+          },
+          "divulgacao_autorizada": {
+            "type": "boolean",
+            "title": "Divulgacao Autorizada",
+            "default": false
+          },
+          "logo_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9-]{36}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Id"
+          },
+          "conteudo_base64": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 349528
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conteudo Base64"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "BrandInput"
+      },
       "CredentialAuthorization": {
         "properties": {
           "password": {
@@ -2428,6 +2833,109 @@
           "revisado"
         ],
         "title": "ImportRecord"
+      },
+      "Institutional": {
+        "properties": {
+          "apoio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "TOTAL",
+                  "PARCIAL"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Apoio"
+          },
+          "instrumento": {
+            "$ref": "#/components/schemas/Instrument"
+          },
+          "governo": {
+            "$ref": "#/components/schemas/Brand"
+          },
+          "clinica": {
+            "$ref": "#/components/schemas/Brand"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Institutional"
+      },
+      "InstitutionalInput": {
+        "properties": {
+          "apoio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "TOTAL",
+                  "PARCIAL"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Apoio"
+          },
+          "instrumento": {
+            "$ref": "#/components/schemas/Instrument"
+          },
+          "governo": {
+            "$ref": "#/components/schemas/BrandInput"
+          },
+          "clinica": {
+            "$ref": "#/components/schemas/BrandInput"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "InstitutionalInput"
+      },
+      "Instrument": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "EMENDA",
+              "CONVENIO",
+              "OUTRO",
+              "NAO_INFORMADO"
+            ],
+            "title": "Tipo",
+            "default": "NAO_INFORMADO"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Nome",
+            "default": ""
+          },
+          "numero": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Numero",
+            "default": ""
+          },
+          "autor": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Autor",
+            "default": ""
+          },
+          "divulgacao_autorizada": {
+            "type": "boolean",
+            "title": "Divulgacao Autorizada",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Instrument"
       },
       "IssuedCredential": {
         "properties": {

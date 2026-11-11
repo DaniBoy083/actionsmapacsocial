@@ -112,4 +112,17 @@
     grid-template-columns: 1fr 1fr;
     gap: 6px 16px;
   }
+  .institutional-details {
+    grid-template-columns: 1fr 1fr;
+    font-size: 9pt;
+    gap: 4px 12px;
+  }
+  .institutional-logos {
+    flex-wrap: nowrap;
+    break-inside: avoid;
+  }
+  .institutional-logos img {
+    width: 30mm;
+    height: 18mm;
+  }
 }

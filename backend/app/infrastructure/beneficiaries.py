@@ -5,6 +5,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.domain.contracts import MUNICIPALITIES, BeneficiaryUpdate, Professional
+from app.domain.institutional import Institutional
 from app.infrastructure.actions import action_or_404, audit, cipher
 from app.infrastructure.beneficiary_data import decode_beneficiary, encode_beneficiary
 from app.infrastructure.models import Beneficiary, Participation
@@ -31,12 +32,33 @@ class SqlBeneficiariesRepository:
     def sheet(self, action_id: str, person_id: str, second_copy: bool) -> dict:
         action, person, participation = self.find(action_id, person_id)
         data, version = decode_beneficiary(person, cipher())
+        administrative = {
+            "id": action.id,
+            "nome": action.nome,
+            "versao": action.versao,
+            "institucional": Institutional.model_validate(action.institucional).model_dump(
+                mode="json"
+            ),
+        }
+        if second_copy and participation.documento_institucional is None:
+            self.session.execute(
+                update(Participation)
+                .where(
+                    Participation.id == participation.id,
+                    Participation.documento_institucional.is_(None),
+                )
+                .values(documento_institucional=administrative)
+            )
+            self.session.refresh(participation)
+        # O snapshot é administrativo. O cadastro pessoal continua corrigível/versionado.
+        if second_copy and participation.documento_institucional is not None:
+            administrative = participation.documento_institucional
         return {
             "id": person.id,
             "versao": version,
             **data.model_dump(mode="json"),
             "local_indice": participation.local_indice,
-            "acao": {"id": action.id, "nome": action.nome},
+            "acao": administrative,
             "municipio_ficha_nome": MUNICIPALITIES.get(data.municipio_ficha_ibge or ""),
             "municipio_residencia_nome": MUNICIPALITIES.get(data.municipio_residencia_ibge or ""),
             "segunda_via": second_copy,

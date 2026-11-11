@@ -16,6 +16,8 @@ import { useSession } from "@/components/session-context";
 import { ActionDialog } from "@/features/actions/action-dialog";
 import { BeneficiaryDialog } from "@/features/beneficiaries/beneficiary-dialog";
 import { BeneficiarySheet } from "@/features/beneficiaries/beneficiary-sheet";
+import { InstitutionalSummary } from "./institutional-summary";
+import type { Institutional } from "./institutional";
 
 export function ActionDetail({ id }: { id: string }) {
   const session = useSession();
@@ -30,6 +32,19 @@ export function ActionDetail({ id }: { id: string }) {
   const [failure, setFailure] = useState("");
   const [busy, setBusy] = useState(false);
   const [page, setPage] = useState(1);
+  const [institutionalVersion, setInstitutionalVersion] = useState<
+    number | null
+  >(null);
+  const historical = useQuery({
+    queryKey: ["institucional", id, institutionalVersion],
+    enabled: institutionalVersion !== null,
+    queryFn: async () =>
+      (
+        await api.get<{ institucional: Institutional }>(
+          `/acoes/${id}/institucional/versoes/${institutionalVersion}`,
+        )
+      ).data,
+  });
   const action = useQuery({
     queryKey: ["acoes", id],
     queryFn: async () => (await api.get<Action>(`/acoes/${id}`)).data,
@@ -169,6 +184,43 @@ export function ActionDetail({ id }: { id: string }) {
             {local.nome_local ? ` · ${local.nome_local}` : ""}
           </p>
         ))}
+      </section>
+      <section className="panel">
+        <h2>Identificação institucional</h2>
+        <p className="muted">
+          Dados cadastrados pela Administração/Tecnologia para toda a ação.
+        </p>
+        <InstitutionalSummary actionId={id} value={row.institucional} />
+        {!!row.versoes_institucionais?.length && (
+          <details>
+            <summary>Consultar versões institucionais anteriores</summary>
+            <div className="actions-row">
+              {row.versoes_institucionais.map((version) => (
+                <Button
+                  key={version}
+                  onClick={() => setInstitutionalVersion(version)}
+                >
+                  Revisão {version}
+                </Button>
+              ))}
+            </div>
+            {institutionalVersion !== null && historical.isPending && (
+              <p role="status">Carregando versão…</p>
+            )}
+            {historical.isError && (
+              <Alert severity="error">{errorMessage(historical.error)}</Alert>
+            )}
+            {historical.data && (
+              <>
+                <h3>Revisão {institutionalVersion}</h3>
+                <InstitutionalSummary
+                  actionId={id}
+                  value={historical.data.institucional}
+                />
+              </>
+            )}
+          </details>
+        )}
       </section>
       <section className="panel">
         <h2>Prévia do resumo público</h2>

@@ -1,13 +1,15 @@
+import base64
 import hashlib
 import time
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
-from sqlalchemy import delete, func, select, text
+from sqlalchemy import and_, delete, func, or_, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from app.api.action_filters import filter_institutional, institutional_filters
 from app.application.actions import ActionService
 from app.config import get_settings
 from app.domain.contracts import (
@@ -19,6 +21,7 @@ from app.domain.contracts import (
     Professional,
     Status,
     Version,
+    normalize,
 )
 from app.infrastructure.actions import (
     SqlActionsRepository,
@@ -36,10 +39,12 @@ from app.infrastructure.import_files import analyze_pdf, document_for
 from app.infrastructure.imports import metadata, render_page
 from app.infrastructure.models import (
     Action,
+    ActionLogo,
     Audit,
     Beneficiary,
     ImportBatch,
     ImportDocument,
+    InstitutionalRevision,
     Outbox,
     Participation,
     SessionRecord,
@@ -137,10 +142,13 @@ def list_actions(
     fim: str = "",
     pagina: int = Query(1, ge=1),
     tamanho: int = Query(10, ge=1, le=100),
+    filtros: dict = Depends(institutional_filters),
     _professional: Professional = Depends(current_professional),
 ):
     with Session(get_engine()) as session:
-        query = select(Action).order_by(Action.criado_em.desc(), Action.id)
+        query = filter_institutional(select(Action), filtros).order_by(
+            Action.criado_em.desc(), Action.id
+        )
         if busca:
             query = query.where(Action.nome.icontains(busca, autoescape=True))
         if status:
@@ -183,10 +191,43 @@ def detail(identifier: str, professional: Professional = Depends(current_profess
         audit(session, professional, "acoes.read", identifier)
         return {
             **snapshot(session, row),
+            "versoes_institucionais": session.scalars(
+                select(InstitutionalRevision.versao)
+                .where(InstitutionalRevision.acao_id == identifier)
+                .order_by(InstitutionalRevision.versao.desc())
+            ).all(),
             "historico": [
                 {"operacao": item.operacao, "criado_em": item.criado_em} for item in history
             ],
         }
+
+
+@router.get("/acoes/{identifier}/marcas/{logo_id}")
+def private_logo(
+    identifier: str,
+    logo_id: str,
+    professional: Professional = Depends(current_professional),
+):
+    with Session(get_engine()) as session, session.begin():
+        logo = session.get(ActionLogo, logo_id)
+        if not logo or logo.acao_id != identifier:
+            raise HTTPException(404, "Marca não encontrada nesta ação.")
+        audit(session, professional, "marcas.read", logo.id)
+        return Response(base64.b64decode(logo.conteudo_base64), media_type="image/png")
+
+
+@router.get("/acoes/{identifier}/institucional/versoes/{version}")
+def institutional_revision(
+    identifier: str,
+    version: int,
+    professional: Professional = Depends(current_professional),
+):
+    with Session(get_engine()) as session, session.begin():
+        row = session.get(InstitutionalRevision, (identifier, version))
+        if not row:
+            raise HTTPException(404, "Versão institucional não encontrada.")
+        audit(session, professional, "institucional.read", identifier)
+        return {"acao_id": identifier, "versao": version, "institucional": row.dados}
 
 
 @router.patch("/acoes/{identifier}")
@@ -289,25 +330,85 @@ def beneficiary(
 
 
 @router.get("/indicadores")
-def indicators(_professional: Professional = Depends(current_professional)):
+def indicators(
+    acao: str = Query("", max_length=36),
+    municipio: str = Query("", max_length=7),
+    local: str = Query("", max_length=160),
+    inicio: date | None = None,
+    fim: date | None = None,
+    filtros: dict = Depends(institutional_filters),
+    _professional: Professional = Depends(current_professional),
+):
+    if municipio and municipio not in MUNICIPALITIES:
+        raise HTTPException(422, "Selecione um município válido da Paraíba.")
+    if inicio and fim and inicio > fim:
+        raise HTTPException(422, "Confira o período informado.")
     with Session(get_engine()) as session:
-        rows = session.scalars(select(Action).where(Action.status != "arquivada")).all()
+        query = filter_institutional(select(Action).where(Action.status != "arquivada"), filtros)
+        if acao:
+            query = query.where(Action.id == acao)
+        if inicio:
+            query = query.where(Action.inicio_em >= inicio.isoformat())
+        if fim:
+            query = query.where(Action.inicio_em <= fim.isoformat())
+        rows = session.scalars(query).all()
+        indices = {
+            row.id: [
+                index
+                for index, place in enumerate(row.locais)
+                if (not municipio or place["municipio_ibge"] == municipio)
+                and (not local or normalize(local) in normalize(place["nome_local"]))
+            ]
+            for row in rows
+        }
+        rows = [row for row in rows if indices[row.id]]
         ids = [row.id for row in rows]
+        participation_scope = Participation.acao_id.in_(ids)
+        if municipio or local:
+            participation_scope = (
+                and_(
+                    participation_scope,
+                    or_(
+                        *[
+                            and_(
+                                Participation.acao_id == row.id,
+                                Participation.local_indice.in_(indices[row.id]),
+                            )
+                            for row in rows
+                        ]
+                    ),
+                )
+                if rows
+                else Participation.acao_id.in_([])
+            )
         count = (
             session.scalar(
-                select(func.count())
-                .select_from(Participation)
-                .where(Participation.acao_id.in_(ids))
+                select(func.count()).select_from(Participation).where(participation_scope)
             )
             or 0
         )
         municipalities = {}
         for row in rows:
-            for code in {p["municipio_ibge"] for p in row.locais}:
+            for code in {row.locais[index]["municipio_ibge"] for index in indices[row.id]}:
                 municipalities[code] = municipalities.get(code, 0) + 1
         return {
             "acoes": len(rows),
             "participacoes": count,
+            "cadastros_distintos": session.scalar(
+                select(func.count(func.distinct(Participation.beneficiario_id))).where(
+                    participation_scope
+                )
+            )
+            or 0,
+            "participacoes_sem_local": session.scalar(
+                select(func.count())
+                .select_from(Participation)
+                .where(Participation.acao_id.in_(ids), Participation.local_indice.is_(None))
+            )
+            or 0,
+            "acoes_sem_instrumento": sum(
+                not row.institucional.get("instrumento", {}).get("nome") for row in rows
+            ),
             "municipios": len(municipalities),
             "em_revisao": sum(row.status == "em_revisao" for row in rows),
             "por_municipio": [
@@ -315,7 +416,15 @@ def indicators(_professional: Professional = Depends(current_professional)):
                 for code, total in sorted(municipalities.items(), key=lambda p: -p[1])
             ],
             "atualizado_em": datetime.now(UTC),
-            "escopo": "ações não arquivadas, todo o período",
+            "escopo": "ações não arquivadas; filtros aplicados ao início da ação e ao local do evento",
+            "filtros": {
+                **filtros,
+                "acao": acao,
+                "municipio": municipio,
+                "local": local,
+                "inicio": inicio,
+                "fim": fim,
+            },
         }
 
 

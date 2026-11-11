@@ -6,7 +6,7 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "backend"))
-from app.domain.contracts import BeneficiaryInput, BeneficiaryUpdate, Summary
+from app.domain.contracts import ActionInput, BeneficiaryInput, BeneficiaryUpdate, Summary
 from app.domain.integrations import ExportPage
 from app.main import app
 
@@ -14,6 +14,7 @@ destination = root / "docs/contracts"
 destination.mkdir(parents=True, exist_ok=True)
 for filename, document in [
     ("actions-map.openapi.json", app.openapi()),
+    ("action-registration.schema.json", ActionInput.model_json_schema()),
     ("agenda-summary.schema.json", Summary.model_json_schema()),
     ("integration-export.schema.json", ExportPage.model_json_schema()),
     ("beneficiary-registration.schema.json", BeneficiaryInput.model_json_schema()),
