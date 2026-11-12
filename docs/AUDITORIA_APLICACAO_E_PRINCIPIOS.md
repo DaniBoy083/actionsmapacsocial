@@ -1,5 +1,15 @@
 # Auditoria técnica da aplicação e princípios
 
+## Revisão atual — plano consolidado de 12/11/2026
+
+[Implementação, evidências, matriz AM-01–AM-09 e gates](IMPLEMENTACAO_PLANO_2026-11-12.md).
+A versão de código 0.3.0 acrescenta instituições/papéis N, busca interna com
+escolha explícita de logo, designação clínica individual e paginação SQL.
+Conformidade global **PARCIAL**, sem homologação de piloto, identidade operacional,
+laudo/etiqueta ou aprovação de produção. Migração 0010 é pré-requisito da versão.
+As seções de 11/11 e anteriores registram entregas históricas, não o estado final
+desta revisão nem autorização de deploy.
+
 ## Revisão atual — profissionais e campos clínicos, 11/11/2026
 
 [Entrega atual, fonte, permissões e limites](PROFISSIONAIS_E_CAMPOS_CLINICOS_2026-11-11.md).

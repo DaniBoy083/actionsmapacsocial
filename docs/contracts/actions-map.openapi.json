@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "AC Actions Map — AC Social",
-    "version": "0.1.0"
+    "version": "0.3.0"
   },
   "paths": {
     "/api/v1/health": {
@@ -264,6 +264,28 @@
               "type": "string",
               "default": "",
               "title": "Apoio"
+            }
+          },
+          {
+            "name": "contratante",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Contratante"
+            }
+          },
+          {
+            "name": "apoiador",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Apoiador"
             }
           }
         ],
@@ -916,6 +938,28 @@
               "type": "string",
               "default": "",
               "title": "Apoio"
+            }
+          },
+          {
+            "name": "contratante",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Contratante"
+            }
+          },
+          {
+            "name": "apoiador",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Apoiador"
             }
           }
         ],
@@ -2174,6 +2218,110 @@
         }
       }
     },
+    "/api/v1/acoes/{action_id}/beneficiarios/{person_id}/designacao-clinica": {
+      "get": {
+        "summary": "Read Designation",
+        "operationId": "read_designation_api_v1_acoes__action_id__beneficiarios__person_id__designacao_clinica_get",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          },
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Designate",
+        "operationId": "designate_api_v1_acoes__action_id__beneficiarios__person_id__designacao_clinica_put",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          },
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClinicalDesignationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/acoes/{action_id}/acesso-clinico": {
       "get": {
         "summary": "Clinical Access",
@@ -2321,6 +2469,127 @@
                 "schema": {
                   "$ref": "#/components/schemas/ClinicalView"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/instituicoes": {
+      "get": {
+        "summary": "Search Institutions",
+        "operationId": "search_institutions_api_v1_instituicoes_get",
+        "parameters": [
+          {
+            "name": "busca",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Busca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Institution",
+        "operationId": "create_institution_api_v1_instituicoes_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstitutionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/instituicoes/{institution_id}/marcas/{logo_id}": {
+      "get": {
+        "summary": "Logo",
+        "operationId": "logo_api_v1_instituicoes__institution_id__marcas__logo_id__get",
+        "parameters": [
+          {
+            "name": "institution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Institution Id"
+            }
+          },
+          {
+            "name": "logo_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Logo Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -3238,6 +3507,32 @@
         "type": "object",
         "title": "BrandInput"
       },
+      "ClinicalDesignationInput": {
+        "properties": {
+          "profissional_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Profissional Id"
+          },
+          "versao": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Versao",
+            "default": 0
+          },
+          "ativo": {
+            "type": "boolean",
+            "title": "Ativo",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "profissional_id"
+        ],
+        "title": "ClinicalDesignationInput"
+      },
       "ClinicalFields": {
         "properties": {
           "glicose": {
@@ -3920,6 +4215,205 @@
         ],
         "title": "ImportRecord"
       },
+      "InstitutionInput": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Nome"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "ORGAO_GOVERNAMENTAL",
+              "CLINICA",
+              "ORGANIZACAO_EMPRESA",
+              "OUTRO"
+            ],
+            "title": "Tipo"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Aliases"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nome",
+          "tipo"
+        ],
+        "title": "InstitutionInput"
+      },
+      "InstitutionLink": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Nome"
+          },
+          "uso_autorizado": {
+            "type": "boolean",
+            "title": "Uso Autorizado",
+            "default": false
+          },
+          "divulgacao_autorizada": {
+            "type": "boolean",
+            "title": "Divulgacao Autorizada",
+            "default": false
+          },
+          "logo_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9-]{36}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Id"
+          },
+          "instituicao_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instituicao Id"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "ORGAO_GOVERNAMENTAL",
+              "CLINICA",
+              "ORGANIZACAO_EMPRESA",
+              "OUTRO"
+            ],
+            "title": "Tipo"
+          },
+          "modalidade": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "TOTAL",
+                  "PARCIAL"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modalidade"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nome",
+          "tipo"
+        ],
+        "title": "InstitutionLink"
+      },
+      "InstitutionLinkInput": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Nome"
+          },
+          "uso_autorizado": {
+            "type": "boolean",
+            "title": "Uso Autorizado",
+            "default": false
+          },
+          "divulgacao_autorizada": {
+            "type": "boolean",
+            "title": "Divulgacao Autorizada",
+            "default": false
+          },
+          "logo_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9-]{36}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Id"
+          },
+          "conteudo_base64": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 349528
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conteudo Base64"
+          },
+          "instituicao_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instituicao Id"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "ORGAO_GOVERNAMENTAL",
+              "CLINICA",
+              "ORGANIZACAO_EMPRESA",
+              "OUTRO"
+            ],
+            "title": "Tipo"
+          },
+          "modalidade": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "TOTAL",
+                  "PARCIAL"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modalidade"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nome",
+          "tipo"
+        ],
+        "title": "InstitutionLinkInput"
+      },
       "Institutional": {
         "properties": {
           "apoio": {
@@ -3945,6 +4439,22 @@
           },
           "clinica": {
             "$ref": "#/components/schemas/Brand"
+          },
+          "contratantes": {
+            "items": {
+              "$ref": "#/components/schemas/InstitutionLink"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Contratantes"
+          },
+          "apoiadores": {
+            "items": {
+              "$ref": "#/components/schemas/InstitutionLink"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Apoiadores"
           }
         },
         "additionalProperties": false,
@@ -3976,6 +4486,38 @@
           },
           "clinica": {
             "$ref": "#/components/schemas/BrandInput"
+          },
+          "contratantes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/InstitutionLinkInput"
+                },
+                "type": "array",
+                "maxItems": 100,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contratantes"
+          },
+          "apoiadores": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/InstitutionLinkInput"
+                },
+                "type": "array",
+                "maxItems": 100,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Apoiadores"
           }
         },
         "additionalProperties": false,

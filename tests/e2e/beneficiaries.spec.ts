@@ -1,5 +1,6 @@
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { institutionalFixture } from "./action-fixtures";
 
 let cookies: Awaited<ReturnType<BrowserContext["cookies"]>> | undefined;
 async function login(page: Page) {
@@ -21,7 +22,7 @@ test("cadastro completo, correção, ficha privada e segunda via imprimível", a
   page,
 }, info) => {
   await login(page);
-  const id = await page.evaluate(async () => {
+  const id = await page.evaluate(async (institucional) => {
     const session = await (await fetch("/api/backend/auth/me")).json();
     const response = await fetch("/api/backend/acoes", {
       method: "POST",
@@ -31,11 +32,12 @@ test("cadastro completo, correção, ficha privada e segunda via imprimível", a
       },
       body: JSON.stringify({
         nome: "Ação para segunda via sintética",
+        institucional,
         locais: [{ municipio_ibge: "2508901" }],
       }),
     });
     return (await response.json()).id;
-  });
+  }, institutionalFixture);
   await page.goto(`/acoes/${id}`);
   await page
     .getByRole("button", { name: "Registrar beneficiário", exact: true })

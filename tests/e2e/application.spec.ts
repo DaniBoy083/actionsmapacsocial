@@ -1,6 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import path from "node:path";
+import {
+  fillInstitutionalLinks,
+  institutionalFixture,
+} from "./action-fixtures";
 
 async function login(page: Page, admin = false) {
   await page.goto("/login");
@@ -97,6 +101,7 @@ test("cadastrar, editar, registrar beneficiário e arquivar ação com vários l
     .click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Nome da ação", { exact: false }).fill(name);
+  await fillInstitutionalLinks(page, dialog);
   await dialog.getByLabel("Município do local 1").click();
   await page.getByRole("option", { name: "João Pessoa", exact: true }).click();
   await dialog.getByLabel("Nome do local 1").fill("Unidade A");
@@ -175,21 +180,25 @@ test("Administração não acessa diagnóstico técnico", async ({ page }) => {
 });
 
 async function createDestination(page: Page, name: string) {
-  return page.evaluate(async (name) => {
-    const session = await (await fetch("/api/backend/auth/me")).json();
-    const response = await fetch("/api/backend/acoes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-Token": session.csrf_token,
-      },
-      body: JSON.stringify({
-        nome: name,
-        locais: [{ municipio_ibge: "2508901" }],
-      }),
-    });
-    return (await response.json()).id;
-  }, name);
+  return page.evaluate(
+    async ({ name, institucional }) => {
+      const session = await (await fetch("/api/backend/auth/me")).json();
+      const response = await fetch("/api/backend/acoes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": session.csrf_token,
+        },
+        body: JSON.stringify({
+          nome: name,
+          institucional,
+          locais: [{ municipio_ibge: "2508901" }],
+        }),
+      });
+      return (await response.json()).id;
+    },
+    { name, institucional: institutionalFixture },
+  );
 }
 
 test("CSV enviado exige revisão, preserva conferência e registra na ação", async ({

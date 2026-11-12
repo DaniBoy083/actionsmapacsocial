@@ -3,13 +3,34 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.domain.clinical import ClinicalInput, ClinicalView
+from app.domain.clinical import ClinicalDesignationInput, ClinicalInput, ClinicalView
 from app.domain.contracts import Professional
 from app.infrastructure.clinical import SqlClinicalRepository
 from app.infrastructure.database import get_engine
 from app.security.session import current_professional, writer
 
 router = APIRouter(prefix="/api/v1/acoes/{action_id}")
+
+
+@router.get("/beneficiarios/{person_id}/designacao-clinica")
+def read_designation(
+    action_id: UUID, person_id: UUID, actor: Professional = Depends(current_professional)
+):
+    with Session(get_engine()) as session, session.begin():
+        return SqlClinicalRepository(session, actor).designation(str(action_id), str(person_id))
+
+
+@router.put("/beneficiarios/{person_id}/designacao-clinica")
+def designate(
+    action_id: UUID,
+    person_id: UUID,
+    data: ClinicalDesignationInput,
+    actor: Professional = Depends(writer),
+):
+    with Session(get_engine()) as session, session.begin():
+        return SqlClinicalRepository(session, actor).designation(
+            str(action_id), str(person_id), data
+        )
 
 
 @router.get("/acesso-clinico")

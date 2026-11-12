@@ -1,15 +1,16 @@
 import json
 
 import pytest
-from app.config import get_settings
-from app.infrastructure.local_migrations import add_local_clinical
-from app.infrastructure.models import Base, ClinicalRecord, ClinicalRevision, Outbox
 from conftest import PASSWORD
 from cryptography.fernet import Fernet
 from sqlalchemy import create_engine, inspect, select
 from sqlalchemy.orm import Session
 from test_actions import ACTION, create
 from test_staff import MEDIC, assign, register
+
+from app.config import get_settings
+from app.infrastructure.local_migrations import add_local_clinical
+from app.infrastructure.models import Base, ClinicalRecord, ClinicalRevision, Outbox
 
 FIELDS = {
     "glicose": "",
@@ -58,7 +59,16 @@ def setup_clinical(authenticated, monkeypatch, scope=None):
     action = client.get(f"/api/v1/acoes/{action['id']}").json()
     staff = eligible(client, repo)
     assignment = assign(client, action, staff, locais_indices=scope)
+    designate(client, action["id"], person_id, staff["id"])
     return client, engine, repo, action, staff, assignment, person_id
+
+
+def designate(client, action_id, person_id, staff_id):
+    response = client.put(
+        f"/api/v1/acoes/{action_id}/beneficiarios/{person_id}/designacao-clinica",
+        json={"profissional_id": staff_id},
+    )
+    assert response.status_code == 200, response.text
 
 
 def test_clinical_fields_encrypted_versioned_and_not_exported(authenticated, monkeypatch):
@@ -184,13 +194,13 @@ def test_other_professional_cannot_read_or_overwrite_claimed_case(authenticated,
     login_as(client, repo, "other-synthetic-professional")
     other = eligible(client, repo, registro_numero="456")
     assign(client, action, other)
-    assert client.get(url).status_code == 404
-    assert client.get(url, params={"versao": 1}).status_code == 404
-    assert client.put(url, json={"campos": FIELDS, "versao": 1}).status_code == 404
+    assert client.get(url).status_code == 403
+    assert client.get(url, params={"versao": 1}).status_code == 403
+    assert client.put(url, json={"campos": FIELDS, "versao": 1}).status_code == 403
 
 
 def test_clinical_context_preserved_and_ciphertext_bound_to_case(authenticated, monkeypatch):
-    client, engine, _, action, _, _, person_id = setup_clinical(authenticated, monkeypatch)
+    client, engine, _, action, staff, _, person_id = setup_clinical(authenticated, monkeypatch)
     url = f"/api/v1/acoes/{action['id']}/beneficiarios/{person_id}/clinica"
     first = client.put(url, json={"campos": FIELDS}).json()
     assert (
@@ -202,6 +212,7 @@ def test_clinical_context_preserved_and_ciphertext_bound_to_case(authenticated, 
     )
     assert client.get(url).json()["contexto"] == first["contexto"]
     another = person(client, action["id"], name="Pessoa de outro registro")
+    designate(client, action["id"], another, staff["id"])
     assert client.put(url.replace(person_id, another), json={"campos": FIELDS}).status_code == 200
     with Session(engine) as session, session.begin():
         original = session.get(ClinicalRecord, first["id"])
@@ -272,8 +283,8 @@ def test_rebinding_same_staff_record_does_not_transfer_existing_case(authenticat
         == 200
     )
     assert client.get(f"/api/v1/acoes/{action['id']}/acesso-clinico").json()["permitido"]
-    assert client.get(url).status_code == 404
-    assert client.get(url, params={"versao": 1}).status_code == 404
+    assert client.get(url).status_code == 403
+    assert client.get(url, params={"versao": 1}).status_code == 403
 
 
 def test_cannot_bind_another_identity_or_grant_reception_clinical_capability(authenticated):

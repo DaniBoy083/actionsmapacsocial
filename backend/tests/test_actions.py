@@ -1,10 +1,12 @@
 import json
 
 import pytest
-from app.infrastructure.models import Audit, Beneficiary, ImportBatch, Outbox
 from conftest import PASSWORD
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from synthetic_institutions import INSTITUTIONAL
+
+from app.infrastructure.models import Audit, Beneficiary, ImportBatch, Outbox
 
 ACTION = {
     "nome": "Ação de teste",
@@ -16,7 +18,9 @@ ACTION = {
 
 
 def create(client, **values):
-    response = client.post("/api/v1/acoes", json={**ACTION, **values})
+    payload = {**ACTION, **values}
+    payload["institucional"] = {**INSTITUTIONAL, **payload.get("institucional", {})}
+    response = client.post("/api/v1/acoes", json=payload)
     assert response.status_code == 201, response.text
     return response.json()
 

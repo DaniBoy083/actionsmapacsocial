@@ -53,10 +53,28 @@ def sanitize_logo(encoded: str) -> tuple[str, str, int, int]:
     return base64.b64encode(content).decode(), hashlib.sha256(content).hexdigest(), width, height
 
 
-def persist_institutional(session: Session, action_id: str, data: InstitutionalInput) -> dict:
+def persist_institutional(
+    session: Session, action_id: str, data: InstitutionalInput, actor: str = "migration"
+) -> dict:
+    from app.infrastructure.institutions import persist_links
+    from app.infrastructure.models import Action
+
     result = data.model_dump(
-        exclude={"governo": {"conteudo_base64"}, "clinica": {"conteudo_base64"}}
+        exclude={
+            "governo": {"conteudo_base64"},
+            "clinica": {"conteudo_base64"},
+            "contratantes": True,
+            "apoiadores": True,
+        }
     )
+    previous = session.get(Action, action_id).institucional or {}
+    for field, role in (("contratantes", "CONTRATANTE"), ("apoiadores", "APOIADOR")):
+        links = getattr(data, field)
+        result[field] = (
+            persist_links(session, action_id, role, links, actor)
+            if links is not None
+            else previous.get(field, [])
+        )
     for slot in ("governo", "clinica"):
         brand = getattr(data, slot)
         if brand.conteudo_base64 is not None:

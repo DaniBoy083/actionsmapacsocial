@@ -3,15 +3,17 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from conftest import PASSWORD
+from sqlalchemy import MetaData, create_engine, func, inspect, select
+from sqlalchemy.orm import Session
+from synthetic_institutions import INSTITUTIONAL
+from test_actions import create
+
 from app.domain.contracts import ActionInput
 from app.domain.integrations import CredentialInput
 from app.infrastructure.actions import change_status, save_action
 from app.infrastructure.integrations import SqlCredentialRepository
 from app.infrastructure.models import Audit, IntegrationCredential, IntegrationExport
-from conftest import PASSWORD
-from sqlalchemy import MetaData, create_engine, func, inspect, select
-from sqlalchemy.orm import Session
-from test_actions import create
 
 BASE = "/api/v1/tecnologia/tokens"
 EXPORT = "/api/v1/integracoes/acoes/resumos"
@@ -203,6 +205,7 @@ def test_multiple_pages_are_frozen_and_totals_do_not_repeat(authenticated):
             row = save_action(
                 session,
                 ActionInput(
+                    institucional=INSTITUTIONAL,
                     nome=f"Ação sintética {index}",
                     resumo_publico="Resumo sintético aprovado.",
                     locais=[{"municipio_ibge": "2508901", "nome_local": ""}],
@@ -290,10 +293,11 @@ def test_never_expiring_tokens_count_toward_active_limit(authenticated):
 
 
 def test_existing_sqlite_migration_preserves_credentials(tmp_path):
+    from cryptography.fernet import Fernet
+
     from app.domain.contracts import Professional
     from app.infrastructure.local_migrations import allow_nonexpiring_local_tokens
     from app.infrastructure.models import Base
-    from cryptography.fernet import Fernet
 
     engine = create_engine("sqlite:///" + (tmp_path / "legacy.sqlite3").as_posix())
     legacy = IntegrationCredential.__table__.to_metadata(MetaData())

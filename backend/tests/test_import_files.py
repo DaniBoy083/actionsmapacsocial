@@ -5,10 +5,12 @@ from types import SimpleNamespace
 
 import pymupdf
 import pytest
-from app.infrastructure.import_files import CHUNK_SIZE
-from app.infrastructure.models import Beneficiary, ImportBatch, ImportChunk, ImportDocument
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+from synthetic_institutions import INSTITUTIONAL
+
+from app.infrastructure.import_files import CHUNK_SIZE
+from app.infrastructure.models import Beneficiary, ImportBatch, ImportChunk, ImportDocument
 
 
 def start(client, content, kind="csv", **changes):
@@ -64,7 +66,12 @@ def test_csv_upload_private_review_commit_idempotency_and_removal(authenticated,
         assert "Pessoa" not in document.conteudo_cifrado
         assert session.scalar(select(func.count()).select_from(ImportChunk)) == 0
     action = client.post(
-        "/api/v1/acoes", json={"nome": "Ação sintética", "locais": [{"municipio_ibge": "2508901"}]}
+        "/api/v1/acoes",
+        json={
+            "nome": "Ação sintética",
+            "locais": [{"municipio_ibge": "2508901"}],
+            "institucional": INSTITUTIONAL,
+        },
     ).json()
     data = {
         "acao_id": action["id"],

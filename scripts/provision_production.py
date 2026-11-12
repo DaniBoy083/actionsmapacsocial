@@ -60,7 +60,8 @@ def main() -> int:
             .all()
         )
         role_exists = connection.scalar(
-            text("SELECT EXISTS(SELECT 1 FROM pg_roles WHERE rolname=:role)"), {"role": ROLE}
+            text("SELECT EXISTS(SELECT 1 FROM pg_roles WHERE rolname=:role)"),
+            {"role": ROLE},
         )
     print(
         json.dumps(
@@ -117,7 +118,9 @@ def main() -> int:
                 ).format(sql.Identifier(ROLE), sql.Literal(runtime_password))
             )
         raw.execute(
-            sql.SQL("GRANT USAGE ON SCHEMA public, actions_map TO {}").format(sql.Identifier(ROLE))
+            sql.SQL("GRANT USAGE ON SCHEMA public, actions_map TO {}").format(
+                sql.Identifier(ROLE)
+            )
         )
         raw.execute(
             sql.SQL(
@@ -140,7 +143,9 @@ def main() -> int:
                 "GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA actions_map TO {}"
             ).format(sql.Identifier(ROLE))
         )
-        from app.infrastructure.institutional_grants import IMMUTABLE_INSTITUTIONAL_GRANTS
+        from app.infrastructure.institutional_grants import (
+            IMMUTABLE_INSTITUTIONAL_GRANTS,
+        )
 
         raw.execute(IMMUTABLE_INSTITUTIONAL_GRANTS)
         from app.infrastructure.staff_grants import STAFF_GRANTS
@@ -149,25 +154,28 @@ def main() -> int:
         from app.infrastructure.clinical_grants import CLINICAL_GRANTS
 
         raw.execute(CLINICAL_GRANTS)
+        from app.infrastructure.operational_grants import OPERATIONAL_GRANTS
+
+        raw.execute(OPERATIONAL_GRANTS)
         raw.execute(
-            sql.SQL("REVOKE INSERT,UPDATE,DELETE ON actions_map.alembic_version FROM {}").format(
-                sql.Identifier(ROLE)
-            )
+            sql.SQL(
+                "REVOKE INSERT,UPDATE,DELETE ON actions_map.alembic_version FROM {}"
+            ).format(sql.Identifier(ROLE))
         )
         raw.execute(
-            sql.SQL("REVOKE UPDATE,DELETE ON actions_map.acoes_map_auditoria FROM {}").format(
-                sql.Identifier(ROLE)
-            )
+            sql.SQL(
+                "REVOKE UPDATE,DELETE ON actions_map.acoes_map_auditoria FROM {}"
+            ).format(sql.Identifier(ROLE))
         )
         raw.execute(
-            sql.SQL("REVOKE DELETE ON actions_map.acoes_map_credenciais_integracao FROM {}").format(
-                sql.Identifier(ROLE)
-            )
+            sql.SQL(
+                "REVOKE DELETE ON actions_map.acoes_map_credenciais_integracao FROM {}"
+            ).format(sql.Identifier(ROLE))
         )
         raw.execute(
-            sql.SQL("REVOKE UPDATE ON actions_map.acoes_map_exportacoes_integracao FROM {}").format(
-                sql.Identifier(ROLE)
-            )
+            sql.SQL(
+                "REVOKE UPDATE ON actions_map.acoes_map_exportacoes_integracao FROM {}"
+            ).format(sql.Identifier(ROLE))
         )
         updated = (
             connection.execute(
@@ -182,7 +190,9 @@ def main() -> int:
             "Estrutura compartilhada divergiu."
         )
         assert not connection.scalar(
-            text("SELECT has_table_privilege(:role,'public.profissionais_cadastrados','INSERT')"),
+            text(
+                "SELECT has_table_privilege(:role,'public.profissionais_cadastrados','INSERT')"
+            ),
             {"role": ROLE},
         )
     runtime_engine = create_engine(
@@ -193,10 +203,15 @@ def main() -> int:
     with runtime_engine.connect() as connection:
         assert connection.scalar(text("SELECT 1")) == 1
         assert (
-            connection.scalar(text("SELECT version_num FROM actions_map.alembic_version"))
+            connection.scalar(
+                text("SELECT version_num FROM actions_map.alembic_version")
+            )
             == "0006_nonexpiring_tokens"
         )
-        assert connection.scalar(text("SELECT count(*) FROM actions_map.acoes_map_acoes")) == 0
+        assert (
+            connection.scalar(text("SELECT count(*) FROM actions_map.acoes_map_acoes"))
+            == 0
+        )
     print(
         "MIGRATION_OK: schema isolado; identidade preservada; credencial sem escrita nos profissionais."
     )

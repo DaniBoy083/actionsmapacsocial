@@ -81,6 +81,51 @@ class InstitutionalRevision(Base):
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class Institution(Base):
+    __tablename__ = "acoes_map_instituicoes"
+    __table_args__ = (
+        UniqueConstraint("nome_normalizado", "tipo", name="uq_instituicao_nome_tipo"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    nome: Mapped[str] = mapped_column(String(160))
+    nome_normalizado: Mapped[str] = mapped_column(String(160), index=True)
+    tipo: Mapped[str] = mapped_column(String(30))
+    aliases: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class InstitutionLogo(Base):
+    __tablename__ = "acoes_map_instituicoes_marcas"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    instituicao_id: Mapped[str] = mapped_column(ForeignKey(Institution.id), index=True)
+    conteudo_base64: Mapped[str] = mapped_column(Text)
+    sha256: Mapped[str] = mapped_column(String(64))
+    largura: Mapped[int] = mapped_column(Integer)
+    altura: Mapped[int] = mapped_column(Integer)
+    origem: Mapped[str] = mapped_column(String(40), default="UPLOAD_INSTITUCIONAL")
+    registrado_por: Mapped[str] = mapped_column(String(160))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ActionInstitution(Base):
+    __tablename__ = "acoes_map_acao_instituicoes"
+    __table_args__ = (
+        UniqueConstraint("acao_id", "instituicao_id", "papel", name="uq_acao_instituicao_papel"),
+        CheckConstraint("papel IN ('CONTRATANTE','APOIADOR')", name="ck_instituicao_papel"),
+        CheckConstraint(
+            "(papel = 'CONTRATANTE' AND modalidade IS NULL) OR "
+            "(papel = 'APOIADOR' AND modalidade IS NOT NULL AND modalidade IN ('TOTAL','PARCIAL'))",
+            name="ck_instituicao_modalidade",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    acao_id: Mapped[str] = mapped_column(ForeignKey(Action.id), index=True)
+    instituicao_id: Mapped[str] = mapped_column(ForeignKey(Institution.id), index=True)
+    papel: Mapped[str] = mapped_column(String(15))
+    modalidade: Mapped[str | None] = mapped_column(String(10))
+    ordem: Mapped[int] = mapped_column(Integer)
+    snapshot: Mapped[dict] = mapped_column(JSON)
+
+
 class Participation(Base):
     __tablename__ = "acoes_map_participacoes"
     __table_args__ = (UniqueConstraint("acao_id", "beneficiario_id"),)
@@ -175,6 +220,17 @@ class StaffRevision(Base):
     dados: Mapped[dict] = mapped_column(JSON)
     registrado_por: Mapped[str] = mapped_column(String(160))
     registrado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ClinicalDesignation(Base):
+    __tablename__ = "acoes_map_designacoes_clinicas"
+    participacao_id: Mapped[str] = mapped_column(ForeignKey(Participation.id), primary_key=True)
+    profissional_id: Mapped[str] = mapped_column(ForeignKey(StaffRecord.id), index=True)
+    identidade_id: Mapped[str] = mapped_column(String(160))
+    versao: Mapped[int] = mapped_column(Integer, default=1)
+    ativo: Mapped[bool] = mapped_column(Boolean, default=True)
+    atualizado_por: Mapped[str] = mapped_column(String(160))
+    atualizado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
 class ClinicalRecord(Base):

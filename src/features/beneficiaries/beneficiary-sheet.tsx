@@ -13,6 +13,7 @@ import { api, dateLabel, errorMessage } from "@/lib/api";
 import type { BeneficiarySheet as Sheet } from "./registration";
 import "./beneficiary-sheet.css";
 import { InstitutionalSummary } from "@/features/actions/institutional-summary";
+import { institutionalImages } from "@/features/actions/institutional";
 
 const shown = (value: string | null) => value || "Não informado";
 function receipt(value: boolean | null) {
@@ -50,15 +51,9 @@ export function BeneficiarySheet({
   });
   const data = query.data;
   const requiredImages = data
-    ? [
-        "/logo-ac-social.png",
-        ...(["governo", "clinica"] as const).flatMap((slot) => {
-          const brand = data.acao.institucional[slot];
-          return brand.logo_id && brand.uso_autorizado
-            ? [`/api/backend/acoes/${actionId}/marcas/${brand.logo_id}`]
-            : [];
-        }),
-      ]
+    ? institutionalImages(actionId, data.acao.institucional).map(
+        (image) => image.source,
+      )
     : [];
   const imagesReady =
     requiredImages.every((source) => loadedImages.includes(source)) &&

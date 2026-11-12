@@ -69,6 +69,10 @@ class StaffData(StrictModel):
             not all(registration) or self.registro_conselho != "CRM"
         ):
             raise ValueError("Cadastro médico exige CRM, número e UF.")
+        if self.categoria == "OPTOMETRISTA" and not all(registration):
+            raise ValueError(
+                "Optometrista exige órgão, número e UF do registro aceito pela instituição."
+            )
         if self.categoria != "MEDICO" and (self.registro_conselho == "CRM" or self.rqe):
             raise ValueError("CRM e RQE são campos exclusivos do cadastro médico.")
         if self.categoria == "RECEPCAO" and (

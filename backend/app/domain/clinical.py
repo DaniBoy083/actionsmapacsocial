@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import Literal
+from uuid import UUID
 
 from pydantic import Field, field_validator
 
@@ -38,6 +39,12 @@ class ClinicalFields(StrictModel):
 class ClinicalInput(StrictModel):
     versao: int = Field(default=0, ge=0, strict=True)
     campos: ClinicalFields
+
+
+class ClinicalDesignationInput(StrictModel):
+    profissional_id: UUID
+    versao: int = Field(default=0, ge=0, strict=True)
+    ativo: bool = Field(default=True, strict=True)
 
 
 class ClinicalView(ClinicalInput):

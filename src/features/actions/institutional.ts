@@ -19,6 +19,34 @@ const brandSchema = z
       });
   });
 
+export const institutionTypes = {
+  ORGAO_GOVERNAMENTAL: "Órgão governamental",
+  CLINICA: "Clínica",
+  ORGANIZACAO_EMPRESA: "Organização/empresa",
+  OUTRO: "Outro",
+};
+export const institutionLinkSchema = brandSchema.safeExtend({
+  instituicao_id: z.string().uuid().nullable(),
+  nome: z.string().trim().min(2, "Informe a instituição.").max(160),
+  tipo: z.enum([
+    "ORGAO_GOVERNAMENTAL",
+    "CLINICA",
+    "ORGANIZACAO_EMPRESA",
+    "OUTRO",
+  ]),
+  modalidade: z.enum(["TOTAL", "PARCIAL"]).nullable(),
+});
+export type InstitutionLink = z.infer<typeof institutionLinkSchema>;
+export const emptyLink = (): InstitutionLink => ({
+  instituicao_id: null,
+  nome: "",
+  tipo: "OUTRO",
+  modalidade: null,
+  uso_autorizado: false,
+  divulgacao_autorizada: false,
+  logo_id: null,
+});
+
 export const institutionalSchema = z
   .object({
     apoio: z.enum(["TOTAL", "PARCIAL"]).nullable(),
@@ -31,8 +59,18 @@ export const institutionalSchema = z
     }),
     governo: brandSchema,
     clinica: brandSchema,
+    contratantes: z.array(institutionLinkSchema).min(1).max(100),
+    apoiadores: z.array(institutionLinkSchema).min(1).max(100),
   })
-  .superRefine(({ instrumento }, ctx) => {
+  .superRefine(({ instrumento, contratantes, apoiadores }, ctx) => {
+    if (
+      apoiadores.some((item) => !item.modalidade) ||
+      contratantes.some((item) => item.modalidade)
+    )
+      ctx.addIssue({
+        code: "custom",
+        message: "Informe a modalidade de cada apoiador.",
+      });
     if (
       instrumento.tipo === "NAO_INFORMADO" &&
       (instrumento.nome ||
@@ -55,6 +93,8 @@ export const institutionalSchema = z
 
 export type Institutional = z.infer<typeof institutionalSchema>;
 export const emptyInstitutional = (): Institutional => ({
+  contratantes: [emptyLink()],
+  apoiadores: [emptyLink()],
   apoio: null,
   instrumento: {
     tipo: "NAO_INFORMADO",
@@ -86,3 +126,35 @@ export const instrumentLabels: Record<
   OUTRO: "Outro",
   NAO_INFORMADO: "Não informado",
 };
+
+export function institutionalImages(actionId: string, value: Institutional) {
+  const images = [
+    { source: "/logo-ac-social.png", alt: "AC Social" },
+    ...(["governo", "clinica"] as const).flatMap((slot) => {
+      const brand = value[slot];
+      return brand.logo_id && brand.uso_autorizado
+        ? [
+            {
+              source: `/api/backend/acoes/${actionId}/marcas/${brand.logo_id}`,
+              alt: brand.nome,
+            },
+          ]
+        : [];
+    }),
+    ...[...(value.contratantes || []), ...(value.apoiadores || [])].flatMap(
+      (link) =>
+        link.logo_id && link.instituicao_id && link.uso_autorizado
+          ? [
+              {
+                source: `/api/backend/instituicoes/${link.instituicao_id}/marcas/${link.logo_id}`,
+                alt: link.nome,
+              },
+            ]
+          : [],
+    ),
+  ];
+  return images.filter(
+    (item, index) =>
+      images.findIndex((other) => other.source === item.source) === index,
+  );
+}

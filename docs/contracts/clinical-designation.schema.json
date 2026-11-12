@@ -1,0 +1,26 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "profissional_id": {
+      "format": "uuid",
+      "title": "Profissional Id",
+      "type": "string"
+    },
+    "versao": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Versao",
+      "type": "integer"
+    },
+    "ativo": {
+      "default": true,
+      "title": "Ativo",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "profissional_id"
+  ],
+  "title": "ClinicalDesignationInput",
+  "type": "object"
+}

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { institutionalFixture } from "./action-fixtures";
 
 test("cadastrar profissional, atribuir local, registrar campos clínicos, consultar versão e revogar", async ({
   page,
@@ -17,9 +18,11 @@ test("cadastrar profissional, atribuir local, registrar campos clínicos, consul
     .getByRole("button", { name: "Cadastrar profissional", exact: true })
     .click();
   let dialog = page.getByRole("dialog");
-  await dialog.getByLabel("Nome profissional", { exact: false }).fill(name);
+  await dialog.getByLabel("Nome do profissional", { exact: false }).fill(name);
   await dialog.getByLabel("Categoria profissional").click();
-  await page.getByRole("option", { name: "Médico", exact: true }).click();
+  await page
+    .getByRole("option", { name: "Oftalmologista", exact: true })
+    .click();
   await dialog
     .getByLabel("Número do registro", { exact: false })
     .fill(`000${Date.now()}`);
@@ -60,6 +63,7 @@ test("cadastrar profissional, atribuir local, registrar campos clínicos, consul
         { municipio_ibge: "2504009", nome_local: "Local sintético B" },
       ],
       institucional: {
+        ...institutionalFixture,
         instrumento: {
           tipo: "EMENDA",
           nome: "Instrumento sintético clínico",
@@ -93,6 +97,19 @@ test("cadastrar profissional, atribuir local, registrar campos clínicos, consul
     .check();
   await dialog
     .getByRole("button", { name: "Salvar atribuição", exact: true })
+    .click();
+  await expect(dialog).not.toBeVisible();
+  await page
+    .getByRole("button", {
+      name: `Designar atendimento de ${personName}`,
+      exact: true,
+    })
+    .click();
+  dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Profissional responsável pelo atendimento").click();
+  await page.getByRole("option").filter({ hasText: name }).click();
+  await dialog
+    .getByRole("button", { name: "Salvar designação", exact: true })
     .click();
   await expect(dialog).not.toBeVisible();
   const clinicalButton = page.getByRole("button", {

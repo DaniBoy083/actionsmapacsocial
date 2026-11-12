@@ -4,13 +4,15 @@ import json
 import sqlite3
 
 import pytest
-from app.infrastructure.local_migrations import add_local_institutional_metadata
-from app.infrastructure.models import ActionLogo, Base, InstitutionalRevision, Outbox, Participation
 from cryptography.fernet import Fernet
 from PIL import Image
 from sqlalchemy import create_engine, func, inspect, select, text
 from sqlalchemy.orm import Session
+from synthetic_institutions import INSTITUTIONAL
 from test_actions import ACTION, create
+
+from app.infrastructure.local_migrations import add_local_institutional_metadata
+from app.infrastructure.models import ActionLogo, Base, InstitutionalRevision, Outbox, Participation
 
 
 def png(size=(96, 96)):
@@ -21,6 +23,8 @@ def png(size=(96, 96)):
 
 def institutional(support="TOTAL"):
     return {
+        **INSTITUTIONAL,
+        "apoiadores": [{**INSTITUTIONAL["apoiadores"][0], "modalidade": support or "PARCIAL"}],
         "apoio": support,
         "instrumento": {
             "tipo": "EMENDA",

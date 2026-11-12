@@ -131,6 +131,7 @@ export function ActionDialog({
       else await api.post("/acoes", payload, options);
       await client.invalidateQueries({ queryKey: ["acoes"] });
       await client.invalidateQueries({ queryKey: ["indicadores"] });
+      await client.invalidateQueries({ queryKey: ["instituicoes"] });
       toast.success(action ? "Ação atualizada." : "Ação cadastrada.");
       onClose();
     } catch (error) {
@@ -277,8 +278,8 @@ export function ActionDialog({
             />
             {errors.institucional && (
               <Alert severity="error">
-                Confira os metadados e as autorizações de uso e divulgação das
-                marcas.
+                Informe ao menos um contratante e um apoiador. Confira os nomes,
+                tipos, modalidades de apoio e autorizações de uso das marcas.
               </Alert>
             )}
           </div>

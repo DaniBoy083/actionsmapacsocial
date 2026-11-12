@@ -93,7 +93,7 @@ export function StaffDialog({
             <TextField
               autoFocus
               required
-              label="Nome profissional"
+              label="Nome do profissional"
               value={data.nome}
               onChange={(event) => change({ nome: event.target.value })}
               slotProps={{ htmlInput: { minLength: 2, maxLength: 160 } }}
@@ -131,7 +131,7 @@ export function StaffDialog({
                 <div className="form-two">
                   <TextField
                     label="Conselho/órgão de registro"
-                    required={data.categoria === "MEDICO"}
+                    required
                     value={data.registro_conselho || ""}
                     disabled={data.categoria === "MEDICO"}
                     onChange={(event) =>
@@ -141,7 +141,7 @@ export function StaffDialog({
                   />
                   <TextField
                     label="Número do registro"
-                    required={data.categoria === "MEDICO"}
+                    required
                     value={data.registro_numero || ""}
                     onChange={(event) =>
                       change({ registro_numero: event.target.value || null })
@@ -154,7 +154,7 @@ export function StaffDialog({
                     select
                     label="UF do registro"
                     value={data.registro_uf || ""}
-                    required={data.categoria === "MEDICO"}
+                    required
                     onChange={(event) =>
                       change({ registro_uf: event.target.value || null })
                     }
@@ -203,7 +203,7 @@ export function StaffDialog({
                   onChange={(event) =>
                     change({ habilitacao_referencia: event.target.value })
                   }
-                  helperText="Identificador do documento ou registro de conferência. Não inclua dados de pacientes."
+                  helperText="Informe o registro aceito e a referência de conferência pela instituição. Optometrista não utiliza CRM. Não inclua dados de pacientes."
                   slotProps={{ htmlInput: { maxLength: 200 } }}
                 />
               </>

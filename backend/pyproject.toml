@@ -15,7 +15,7 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
 testpaths = ["tests"]
 [project]
 name = "ac-actions-map-api"
-version = "0.2.0"
+version = "0.3.0"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "fastapi==0.162.0", "uvicorn==0.54.0", "SQLAlchemy==2.1.6",

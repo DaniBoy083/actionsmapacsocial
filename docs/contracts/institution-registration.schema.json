@@ -1,0 +1,35 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "nome": {
+      "maxLength": 160,
+      "minLength": 2,
+      "title": "Nome",
+      "type": "string"
+    },
+    "tipo": {
+      "enum": [
+        "ORGAO_GOVERNAMENTAL",
+        "CLINICA",
+        "ORGANIZACAO_EMPRESA",
+        "OUTRO"
+      ],
+      "title": "Tipo",
+      "type": "string"
+    },
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Aliases",
+      "type": "array"
+    }
+  },
+  "required": [
+    "nome",
+    "tipo"
+  ],
+  "title": "InstitutionInput",
+  "type": "object"
+}

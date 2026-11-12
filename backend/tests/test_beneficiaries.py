@@ -1,17 +1,24 @@
 import json
 
 import pytest
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+from synthetic_institutions import INSTITUTIONAL
+
 from app.domain.contracts import BeneficiaryData
 from app.infrastructure.actions import cipher
 from app.infrastructure.beneficiary_completion import CompletionManifest, complete_missing
 from app.infrastructure.models import Audit, Beneficiary, ImportBatch, Outbox, Participation
-from sqlalchemy import func, select
-from sqlalchemy.orm import Session
 
 
 def create(client, **values):
     action = client.post(
-        "/api/v1/acoes", json={"nome": "Ação sintética", "locais": [{"municipio_ibge": "2508901"}]}
+        "/api/v1/acoes",
+        json={
+            "nome": "Ação sintética",
+            "locais": [{"municipio_ibge": "2508901"}],
+            "institucional": INSTITUTIONAL,
+        },
     ).json()
     base = f"/api/v1/acoes/{action['id']}/beneficiarios"
     assert client.post(base, json={"nome": "Pessoa Sintética", **values}).status_code == 201
@@ -77,7 +84,12 @@ def test_complete_registration_is_private_encrypted_and_excluded_from_integratio
 def test_invalid_or_ocular_data_is_rejected_without_echo(authenticated, changes):
     client, _, _ = authenticated
     action = client.post(
-        "/api/v1/acoes", json={"nome": "Ação sintética", "locais": [{"municipio_ibge": "2508901"}]}
+        "/api/v1/acoes",
+        json={
+            "nome": "Ação sintética",
+            "locais": [{"municipio_ibge": "2508901"}],
+            "institucional": INSTITUTIONAL,
+        },
     ).json()
     result = client.post(
         f"/api/v1/acoes/{action['id']}/beneficiarios", json={"nome": "Pessoa Sintética", **changes}
@@ -156,7 +168,11 @@ def test_ciphertext_cannot_be_moved_to_another_beneficiary(authenticated):
 def imported_record(client, engine, operator):
     action = client.post(
         "/api/v1/acoes",
-        json={"nome": "Ação histórica sintética", "locais": [{"municipio_ibge": "2508901"}]},
+        json={
+            "nome": "Ação histórica sintética",
+            "locais": [{"municipio_ibge": "2508901"}],
+            "institucional": INSTITUTIONAL,
+        },
     ).json()
     with Session(engine) as session, session.begin():
         batch = ImportBatch(hash_arquivo="b" * 64, paginas=2, autor_id=operator.profissional_id)

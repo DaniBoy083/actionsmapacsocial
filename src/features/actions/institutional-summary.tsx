@@ -1,7 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { instrumentLabels, type Institutional } from "./institutional";
+import {
+  institutionalImages,
+  instrumentLabels,
+  institutionTypes,
+  type Institutional,
+} from "./institutional";
 
 export function InstitutionalSummary({
   actionId,
@@ -15,20 +20,7 @@ export function InstitutionalSummary({
   onImageError?: () => void;
 }) {
   const instrument = value.instrumento;
-  const images = [
-    { source: "/logo-ac-social.png", alt: "AC Social" },
-    ...(["governo", "clinica"] as const).flatMap((slot) => {
-      const brand = value[slot];
-      return brand.logo_id && brand.uso_autorizado
-        ? [
-            {
-              source: `/api/backend/acoes/${actionId}/marcas/${brand.logo_id}`,
-              alt: brand.nome,
-            },
-          ]
-        : [];
-    }),
-  ];
+  const images = institutionalImages(actionId, value);
   return (
     <div className="institutional-summary">
       <div className="institutional-logos">
@@ -47,16 +39,39 @@ export function InstitutionalSummary({
         ))}
       </div>
       <dl className="institutional-details">
-        <div>
-          <dt>Apoio</dt>
-          <dd>
-            {value.apoio === "TOTAL"
-              ? "Total"
-              : value.apoio === "PARCIAL"
-                ? "Parcial"
-                : "Não informado"}
-          </dd>
-        </div>
+        {(["contratantes", "apoiadores"] as const).map((role) => (
+          <div key={role}>
+            <dt>{role === "contratantes" ? "Contratantes" : "Apoiadores"}</dt>
+            <dd>
+              {value[role]?.length ? (
+                <ul>
+                  {value[role].map((link, index) => (
+                    <li key={index}>
+                      {link.nome} · {institutionTypes[link.tipo]}
+                      {link.modalidade
+                        ? ` · apoio ${link.modalidade === "TOTAL" ? "total" : "parcial"}`
+                        : ""}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                "Legado pendente de revisão dos papéis"
+              )}
+            </dd>
+          </div>
+        ))}
+        {value.apoio && (
+          <div>
+            <dt>Apoio (cadastro anterior)</dt>
+            <dd>
+              {value.apoio === "TOTAL"
+                ? "Total"
+                : value.apoio === "PARCIAL"
+                  ? "Parcial"
+                  : "Não informado"}
+            </dd>
+          </div>
+        )}
         <div>
           <dt>Instrumento</dt>
           <dd>{instrumentLabels[instrument.tipo]}</dd>
@@ -73,14 +88,18 @@ export function InstitutionalSummary({
           <dt>Autor da emenda</dt>
           <dd>{instrument.autor || "Não informado / não se aplica"}</dd>
         </div>
-        <div>
-          <dt>Órgão governamental</dt>
-          <dd>{value.governo.nome || "Não informado"}</dd>
-        </div>
-        <div>
-          <dt>Clínica parceira</dt>
-          <dd>{value.clinica.nome || "Não informada"}</dd>
-        </div>
+        {value.governo.nome && (
+          <div>
+            <dt>Órgão governamental</dt>
+            <dd>{value.governo.nome || "Não informado"}</dd>
+          </div>
+        )}
+        {value.clinica.nome && (
+          <div>
+            <dt>Clínica parceira</dt>
+            <dd>{value.clinica.nome || "Não informada"}</dd>
+          </div>
+        )}
       </dl>
     </div>
   );

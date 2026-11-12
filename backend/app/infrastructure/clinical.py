@@ -8,12 +8,13 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.domain.clinical import ClinicalFields, ClinicalInput
+from app.domain.clinical import ClinicalDesignationInput, ClinicalFields, ClinicalInput
 from app.domain.contracts import Professional
 from app.domain.institutional import Institutional
 from app.infrastructure.actions import audit
 from app.infrastructure.models import (
     Action,
+    ClinicalDesignation,
     ClinicalRecord,
     ClinicalRevision,
     Participation,
@@ -94,6 +95,13 @@ class SqlClinicalRepository:
             and participation.local_indice not in assignment.locais_indices
         ):
             raise HTTPException(404, "Cadastro não encontrado no escopo profissional.")
+        designation = self.session.get(ClinicalDesignation, participation.id)
+        if not designation or not (
+            designation.ativo
+            and designation.profissional_id == staff.id
+            and designation.identidade_id == self.actor.profissional_id
+        ):
+            raise HTTPException(403, "Atendimento não designado a este profissional.")
         row = self.session.scalar(
             select(ClinicalRecord)
             .where(ClinicalRecord.participacao_id == participation.id)
@@ -105,6 +113,107 @@ class SqlClinicalRepository:
         ):
             raise HTTPException(404, "Registro não disponível para este profissional.")
         return action, staff, participation, row, cipher
+
+    def designation(
+        self, action_id: str, person_id: str, data: ClinicalDesignationInput | None = None
+    ):
+        # Gestão administrativa existente; não concede login nem habilitação clínica.
+        action = self.session.scalar(select(Action).where(Action.id == action_id).with_for_update())
+        if not action or action.status == "arquivada":
+            raise HTTPException(403, "Ação indisponível para designação clínica.")
+        participation = self.session.scalar(
+            select(Participation)
+            .where(Participation.acao_id == action_id, Participation.beneficiario_id == person_id)
+            .with_for_update()
+        )
+        if not participation:
+            raise HTTPException(404, "Atendimento não encontrado nesta ação.")
+        row = self.session.get(ClinicalDesignation, participation.id)
+        if data is not None:
+            if data.versao != (row.versao if row else 0):
+                raise HTTPException(409, "Designação alterada. Recarregue antes de salvar.")
+            if not data.ativo:
+                if not row or row.profissional_id != str(data.profissional_id):
+                    raise HTTPException(422, "Selecione a designação existente para revogar.")
+                row.ativo = False
+                row.versao += 1
+                row.atualizado_por = self.actor.profissional_id
+                row.atualizado_em = datetime.now(UTC)
+                audit(self.session, self.actor, "clinica.revogar", participation.id)
+                self.session.flush()
+                return {
+                    "versao": row.versao,
+                    "profissional_id": row.profissional_id,
+                    "ativo": False,
+                }
+            staff = self.session.scalar(
+                select(StaffRecord)
+                .where(StaffRecord.id == str(data.profissional_id))
+                .with_for_update()
+            )
+            assignment = self.session.scalar(
+                select(StaffAssignment)
+                .where(
+                    StaffAssignment.acao_id == action_id,
+                    StaffAssignment.profissional_id == str(data.profissional_id),
+                    StaffAssignment.ativo.is_(True),
+                    StaffAssignment.papel == "PROFISSIONAL",
+                )
+                .with_for_update()
+            )
+            if data.ativo and not (
+                staff
+                and staff.ativo
+                and staff.categoria in {"MEDICO", "OPTOMETRISTA"}
+                and staff.habilitacao_validada
+                and staff.registro_clinico_autorizado
+                and staff.identidade_institucional_id
+                and assignment
+                and (
+                    assignment.locais_indices is None
+                    or participation.local_indice in assignment.locais_indices
+                )
+            ):
+                raise HTTPException(
+                    422, "Selecione profissional autorizado para esta ação e local."
+                )
+            if not staff or not staff.identidade_institucional_id:
+                raise HTTPException(422, "Profissional sem vínculo individual válido.")
+            record = self.session.scalar(
+                select(ClinicalRecord).where(ClinicalRecord.participacao_id == participation.id)
+            )
+            if record and (
+                record.autor_profissional_id != staff.id
+                or record.autor_identidade_id != staff.identidade_institucional_id
+            ):
+                raise HTTPException(
+                    409,
+                    "Ficha existente conserva sua autoria; transferência exige revisão específica.",
+                )
+            if row is None:
+                row = ClinicalDesignation(participacao_id=participation.id, versao=1)
+                self.session.add(row)
+            else:
+                row.versao += 1
+            row.profissional_id = staff.id
+            row.identidade_id = staff.identidade_institucional_id
+            row.ativo = data.ativo
+            row.atualizado_por = self.actor.profissional_id
+            row.atualizado_em = datetime.now(UTC)
+            audit(
+                self.session,
+                self.actor,
+                "clinica.designar" if data.ativo else "clinica.revogar",
+                participation.id,
+            )
+            self.session.flush()
+        else:
+            audit(self.session, self.actor, "clinica.designacao.read", participation.id)
+        return {
+            "versao": row.versao if row else 0,
+            "profissional_id": row.profissional_id if row else None,
+            "ativo": row.ativo if row else False,
+        }
 
     def context(self, action, staff) -> dict:
         return {

@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
+import AxeBuilder from "@axe-core/playwright";
+import { fillInstitutionalLinks } from "./action-fixtures";
 
 async function login(page: Page) {
   await page.goto("/login");
@@ -39,11 +41,13 @@ for (const support of ["Total", "Parcial"]) {
     await form
       .getByLabel("Autor da emenda (quando aplicável)")
       .fill("Autoria sintética");
-    for (const brand of ["órgão governamental", "clínica parceira"]) {
-      await form.getByLabel(`Nome: ${brand}`).fill(`${brand} sintético`);
+    for (const brand of ["contratante 1", "apoiador 1"]) {
+      await form
+        .getByRole("textbox", { name: `Instituição ${brand}`, exact: false })
+        .fill(`${brand} sintético`);
       await form.getByLabel(`Uso da marca de ${brand} autorizado`).check();
       await form
-        .getByLabel(`Logo de ${brand}`, { exact: true })
+        .getByLabel(`Enviar outra logo de ${brand}`, { exact: true })
         .setInputFiles(path.resolve("public/logo-ac-social.png"));
       await expect(
         form.getByAltText(`Prévia da marca: ${brand} sintético`),
@@ -89,11 +93,9 @@ for (const support of ["Total", "Parcial"]) {
     ).toBeEnabled();
     await expect(sheet.locator(".institutional-logos img")).toHaveCount(3);
     await page.emulateMedia({ media: "print" });
-    await sheet
-      .locator("[data-beneficiary-print]")
-      .screenshot({
-        path: `artifacts/institutional-${support}-${info.project.name}.png`,
-      });
+    await sheet.locator("[data-beneficiary-print]").screenshot({
+      path: `artifacts/institutional-${support}-${info.project.name}.png`,
+    });
     await page.emulateMedia({ media: "screen" });
     await sheet.getByRole("button", { name: "Fechar", exact: true }).click();
     await page
@@ -103,7 +105,7 @@ for (const support of ["Total", "Parcial"]) {
       .getByLabel("Nome/título da emenda ou convênio")
       .fill("Identificação nova");
     await form
-      .getByRole("button", { name: "Remover logo de órgão governamental" })
+      .getByRole("button", { name: "Remover logo de contratante 1" })
       .click();
     await form
       .getByRole("button", { name: "Salvar ação", exact: true })
@@ -158,4 +160,114 @@ test("filtros institucionais no painel e erro de período recuperável", async (
   await expect(
     page.getByRole("heading", { name: "O alcance começa com uma ação" }),
   ).toBeVisible();
+});
+
+test("vários contratantes e apoiadores, remoção preserva os demais e busca interna exige escolha", async ({
+  page,
+}, info) => {
+  await login(page);
+  await page.goto("/acoes");
+  await page
+    .getByRole("button", { name: "Cadastrar nova ação", exact: true })
+    .first()
+    .click();
+  const form = page.getByRole("dialog");
+  const name = `Instituições múltiplas ${info.project.name} ${Date.now()}`;
+  const unique = `Parceiro exclusivo ${info.project.name} ${Date.now()}`;
+  await form.getByLabel("Nome da ação", { exact: false }).fill(name);
+  await form.getByLabel("Município do local 1").click();
+  await page.getByRole("option", { name: "João Pessoa", exact: true }).click();
+  await fillInstitutionalLinks(page, form);
+  await form
+    .getByRole("textbox", { name: "Instituição contratante 1" })
+    .fill(unique);
+  await form.getByLabel("Uso da marca de contratante 1 autorizado").check();
+  await form
+    .getByLabel("Enviar outra logo de contratante 1", { exact: true })
+    .setInputFiles(path.resolve("public/logo-ac-social.png"));
+  await form
+    .getByRole("button", { name: "Adicionar contratante", exact: true })
+    .click();
+  await form
+    .getByRole("textbox", { name: "Instituição contratante 2" })
+    .fill("Segundo contratante sintético");
+  await form
+    .getByRole("button", { name: "Adicionar apoiador", exact: true })
+    .click();
+  await form
+    .getByRole("textbox", { name: "Instituição apoiador 2" })
+    .fill("Segundo apoiador sintético");
+  await form.getByLabel("Modalidade de apoio 2").click();
+  await page.getByRole("option", { name: "Total", exact: true }).click();
+  await form.getByRole("button", { name: "Salvar ação", exact: true }).click();
+  await expect(form).not.toBeVisible();
+  await page.getByLabel("Buscar por nome").fill(name);
+  await page
+    .getByRole("button", { name: `Editar ${name}`, exact: true })
+    .click();
+  await expect(
+    form.getByRole("textbox", { name: "Instituição contratante 2" }),
+  ).toHaveValue("Segundo contratante sintético");
+  await expect(
+    form.getByRole("textbox", { name: "Instituição apoiador 2" }),
+  ).toHaveValue("Segundo apoiador sintético");
+  await form
+    .getByRole("button", { name: "Remover contratante 2", exact: true })
+    .click();
+  await form
+    .getByRole("button", { name: "Remover apoiador 2", exact: true })
+    .click();
+  await expect(
+    form.getByRole("textbox", { name: "Instituição contratante 1" }),
+  ).toHaveValue(unique);
+  await form.getByRole("button", { name: "Salvar ação", exact: true }).click();
+  await expect(form).not.toBeVisible();
+  await page
+    .getByRole("button", { name: "Cadastrar nova ação", exact: true })
+    .first()
+    .click();
+  await form
+    .getByRole("textbox", { name: "Instituição contratante 1" })
+    .fill(unique);
+  await expect(
+    form.getByAltText(`Sugestão de logo de ${unique}`),
+  ).toBeVisible();
+  await expect(form.getByAltText(`Prévia da marca: ${unique}`)).toHaveCount(0);
+  await form
+    .getByRole("button", {
+      name: `Selecionar instituição ${unique}`,
+      exact: true,
+    })
+    .click();
+  await expect(
+    form.getByRole("button", {
+      name: `Usar logo sugerida de ${unique}`,
+      exact: true,
+    }),
+  ).toBeDisabled();
+  await form.getByLabel("Uso da marca de contratante 1 autorizado").check();
+  await form
+    .getByRole("button", {
+      name: `Usar logo sugerida de ${unique}`,
+      exact: true,
+    })
+    .click();
+  await expect(form.getByAltText(`Prévia da marca: ${unique}`)).toBeVisible();
+  await form
+    .getByRole("textbox", { name: "Instituição apoiador 1" })
+    .fill("Nenhuma correspondência institucional xyz987654321");
+  await expect(
+    form.getByText(/Nenhuma correspondência\. Continue/),
+  ).toBeVisible();
+  const accessibility = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(accessibility.violations).toEqual([]);
+  await form
+    .getByRole("textbox", { name: "Instituição contratante 1" })
+    .scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: `artifacts/institution-links-${info.project.name}.png`,
+    fullPage: true,
+  });
 });

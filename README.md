@@ -3,6 +3,16 @@
 Aplicação para gestão de ações institucionais, beneficiários e registro clínico segregado
 com liberação controlada. O fluxo completo de exame/documentos/etiqueta ainda não está concluído.
 
+**12/11/2026 — Plano consolidado, API interna 0.3.0:** N contratantes e N apoiadores
+separados, modalidade por apoiador, catálogo interno reutilizável, busca de nomes/
+aliases e logos com escolha explícita, designação individual de atendimentos,
+Oftalmologista e registro de optometrista, filtros e paginação SQL sem N+1.
+**Exige a migração aditiva `0010_institutions_and_cases` antes de servir esta versão.**
+Nenhuma migração, configuração ou publicação de produção foi executada nesta
+entrega. Autenticação operacional, emissão clínica/etiqueta homologada, logos
+externas e contrato público novo continuam com gates próprios. Conformidade
+global **parcial**. [Implementação, auditoria, testes e reversão](docs/IMPLEMENTACAO_PLANO_2026-11-12.md).
+
 **11/11/2026 — Ativação em produção autorizada:** migrações `0007`–`0009` aplicadas,
 chave clínica sensível própria e `CLINICAL_FIELDS_ENABLED=true` configuradas somente
 em produção. O commit `7a9aadf` foi republicado e o domínio público está no deployment

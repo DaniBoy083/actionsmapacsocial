@@ -1,5 +1,11 @@
 # Verificação de conformidade e próximos incrementos
 
+> **12/11/2026:** a revisão vigente está em
+> [Implementação do plano consolidado](IMPLEMENTACAO_PLANO_2026-11-12.md).
+> Inclui N instituições por papel, busca interna de logos e designação de caso.
+> Migração 0010 necessária; sem execução em produção. Conformidade global parcial;
+> os relatos abaixo permanecem históricos.
+
 > **Incremento atual em 11/11/2026:** profissionais, atribuições por local e campos
 > clínicos privados em preenchimento implementados. [Evidências atuais](PROFISSIONAIS_E_CAMPOS_CLINICOS_2026-11-11.md).
 > Ativação clínica permanece desligada; migrações até 0009 são necessárias antes

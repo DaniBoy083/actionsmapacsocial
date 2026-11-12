@@ -5,7 +5,7 @@ from datetime import UTC, date, datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
-from sqlalchemy import and_, delete, func, or_, select, text
+from sqlalchemy import JSON, and_, cast, delete, func, or_, select, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -31,6 +31,7 @@ from app.infrastructure.actions import (
     cipher,
     enqueue,
     snapshot,
+    snapshots,
 )
 from app.infrastructure.beneficiary_data import decode_beneficiary
 from app.infrastructure.database import get_engine, get_identity_engine
@@ -69,7 +70,7 @@ router = APIRouter(prefix="/api/v1")
 
 @router.get("/health")
 def health() -> dict:
-    return {"status": "API_OK", "versao": "0.1.0"}
+    return {"status": "API_OK", "versao": "0.3.0"}
 
 
 @router.post("/auth/login", status_code=204)
@@ -159,16 +160,31 @@ def list_actions(
             query = query.where(Action.inicio_em >= inicio)
         if fim:
             query = query.where(Action.inicio_em <= fim)
-        rows = session.scalars(query).all()
         if municipio:
-            rows = [
-                row for row in rows if any(p["municipio_ibge"] == municipio for p in row.locais)
-            ]
-        total = len(rows)
+            if municipio not in MUNICIPALITIES:
+                raise HTTPException(422, "Selecione um município válido da Paraíba.")
+            postgres = session.bind.dialect.name == "postgresql"
+            places = (
+                (
+                    func.json_array_elements(Action.locais)
+                    if postgres
+                    else func.json_each(Action.locais)
+                )
+                .table_valued("value")
+                .alias("action_place")
+            )
+            code = (
+                cast(places.c.value, JSON)["municipio_ibge"].as_string()
+                if postgres
+                else func.json_extract(places.c.value, "$.municipio_ibge")
+            )
+            query = query.where(
+                select(1).select_from(places).where(code == municipio).correlate(Action).exists()
+            )
+        total = session.scalar(select(func.count()).select_from(query.order_by(None).subquery()))
+        rows = session.scalars(query.offset((pagina - 1) * tamanho).limit(tamanho)).all()
         return {
-            "items": [
-                snapshot(session, row) for row in rows[(pagina - 1) * tamanho : pagina * tamanho]
-            ],
+            "items": snapshots(session, rows),
             "total": total,
             "pagina": pagina,
             "tamanho": tamanho,

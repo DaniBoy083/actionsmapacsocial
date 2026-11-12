@@ -1,4 +1,4 @@
-"""Testa revisões 0007–0009 em PostgreSQL descartável local; não usa bancos existentes."""
+"""Testa revisões 0007–0010 em PostgreSQL descartável local; não usa bancos existentes."""
 
 import argparse
 import base64
@@ -28,7 +28,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 
 from app.api.action_filters import filter_institutional
 from app.config import get_settings
-from app.domain.clinical import ClinicalInput
+from app.domain.clinical import ClinicalDesignationInput, ClinicalInput
 from app.domain.contracts import ActionInput, Professional
 from app.domain.staff import AssignmentInput, AssignmentUpdate, StaffInput
 from app.infrastructure.actions import save_action
@@ -48,6 +48,8 @@ from app.infrastructure.models import (
     StaffRecord,
     StaffRevision,
 )
+from app.infrastructure.operational_grants import OPERATIONAL_GRANTS
+from app.infrastructure.operational_migration import TABLES
 from app.infrastructure.staff import SqlStaffRepository
 from app.infrastructure.staff_grants import STAFF_GRANTS
 
@@ -122,6 +124,7 @@ def main():
                     for table in Base.metadata.sorted_tables
                     if table
                     not in {
+                        *TABLES,
                         ActionLogo.__table__,
                         InstitutionalRevision.__table__,
                         StaffRecord.__table__,
@@ -173,6 +176,8 @@ def main():
             command.upgrade(config, "0008_staff_assignments")
             command.upgrade(config, "0009_clinical_fields")
             command.upgrade(config, "0009_clinical_fields")
+            command.upgrade(config, "0010_institutions_and_cases")
+            command.upgrade(config, "0010_institutions_and_cases")
             # Simula a concessão geral do provisionamento e aplica sua regra de restrição.
             connection.execute(
                 text(
@@ -182,11 +187,12 @@ def main():
             connection.execute(text(IMMUTABLE_INSTITUTIONAL_GRANTS))
             connection.execute(text(STAFF_GRANTS))
             connection.execute(text(CLINICAL_GRANTS))
+            connection.execute(text(OPERATIONAL_GRANTS))
             assert (
                 connection.scalar(
                     text("SELECT version_num FROM actions_map.alembic_version")
                 )
-                == "0009_clinical_fields"
+                == "0010_institutions_and_cases"
             )
         image = io.BytesIO()
         Image.new("RGB", (96, 96), "red").save(image, "PNG")
@@ -194,6 +200,14 @@ def main():
             nome="Ação sintética",
             locais=[{"municipio_ibge": "2507507"}],
             institucional={
+                "contratantes": [{"nome": "Contratante sintético", "tipo": "OUTRO"}],
+                "apoiadores": [
+                    {
+                        "nome": "Apoiador sintético",
+                        "tipo": "CLINICA",
+                        "modalidade": "PARCIAL",
+                    }
+                ],
                 "instrumento": {"tipo": "EMENDA", "numero": "0007", "nome": "Teste"},
                 "governo": {
                     "nome": "Órgão teste",
@@ -229,6 +243,22 @@ def main():
                 session.scalar(filter_institutional(select(Action.id), filters))
                 == created["id"]
             )
+        from app.api import routes
+
+        routes.get_engine = lambda: engine
+        page = routes.list_actions(
+            busca="",
+            municipio="2507507",
+            status="",
+            categoria="",
+            inicio="",
+            fim="",
+            pagina=1,
+            tamanho=10,
+            filtros=filters,
+            _professional=professional,
+        )
+        assert page["total"] == 1 and page["items"][0]["id"] == created["id"]
         os.environ.update(
             {
                 "CLINICAL_FIELDS_ENABLED": "true",
@@ -280,6 +310,11 @@ def main():
             )
             session.flush()
             clinical = SqlClinicalRepository(session, professional)
+            clinical.designation(
+                created["id"],
+                person_id,
+                ClinicalDesignationInput(profissional_id=staff["id"]),
+            )
             result = clinical.save(
                 created["id"],
                 person_id,
@@ -342,6 +377,8 @@ def main():
             "acoes_map_revisoes_institucionais",
             "acoes_map_profissionais_historico",
             "acoes_map_fichas_clinicas_versoes",
+            "acoes_map_instituicoes",
+            "acoes_map_instituicoes_marcas",
         ):
             for operation in ("DELETE", "UPDATE"):
                 with engine.begin() as connection:
@@ -363,7 +400,7 @@ def main():
                         )
                     connection.rollback()
         print(
-            "POSTGRES_INSTITUTIONAL_OK: revisões 0007/0008/0009 idempotentes, CRUD/CAS, escopo, clínica cifrada, revogação concorrente e grants imutáveis."
+            "POSTGRES_INSTITUTIONAL_OK: revisões 0007–0010 idempotentes, CRUD/CAS, escopo, clínica cifrada, revogação concorrente e grants imutáveis."
         )
     finally:
         if engine:
@@ -379,4 +416,8 @@ if __name__ == "__main__":
         main()
     except Exception as error:  # noqa: BLE001 -- ambiente sintético; não imprimir credenciais.
         print("POSTGRES_INSTITUTIONAL_FAILED: " + type(error).__name__)
+        if isinstance(error, RuntimeError) and str(error).startswith(
+            "Falha no executável local "
+        ):
+            print(str(error))
         raise SystemExit(1) from None

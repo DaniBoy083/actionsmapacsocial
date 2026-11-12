@@ -49,6 +49,98 @@
       "title": "BrandInput",
       "type": "object"
     },
+    "InstitutionLinkInput": {
+      "additionalProperties": false,
+      "properties": {
+        "nome": {
+          "maxLength": 160,
+          "minLength": 2,
+          "title": "Nome",
+          "type": "string"
+        },
+        "uso_autorizado": {
+          "default": false,
+          "title": "Uso Autorizado",
+          "type": "boolean"
+        },
+        "divulgacao_autorizada": {
+          "default": false,
+          "title": "Divulgacao Autorizada",
+          "type": "boolean"
+        },
+        "logo_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9-]{36}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Logo Id"
+        },
+        "conteudo_base64": {
+          "anyOf": [
+            {
+              "maxLength": 349528,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conteudo Base64"
+        },
+        "instituicao_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Instituicao Id"
+        },
+        "tipo": {
+          "enum": [
+            "ORGAO_GOVERNAMENTAL",
+            "CLINICA",
+            "ORGANIZACAO_EMPRESA",
+            "OUTRO"
+          ],
+          "title": "Tipo",
+          "type": "string"
+        },
+        "modalidade": {
+          "anyOf": [
+            {
+              "enum": [
+                "TOTAL",
+                "PARCIAL"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Modalidade"
+        }
+      },
+      "required": [
+        "nome",
+        "tipo"
+      ],
+      "title": "InstitutionLinkInput",
+      "type": "object"
+    },
     "InstitutionalInput": {
       "additionalProperties": false,
       "properties": {
@@ -76,6 +168,40 @@
         },
         "clinica": {
           "$ref": "#/$defs/BrandInput"
+        },
+        "contratantes": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/InstitutionLinkInput"
+              },
+              "maxItems": 100,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contratantes"
+        },
+        "apoiadores": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/InstitutionLinkInput"
+              },
+              "maxItems": 100,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Apoiadores"
         }
       },
       "title": "InstitutionalInput",

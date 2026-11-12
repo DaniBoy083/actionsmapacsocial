@@ -118,8 +118,8 @@
     gap: 4px 12px;
   }
   .institutional-logos {
-    flex-wrap: nowrap;
-    break-inside: avoid;
+    flex-wrap: wrap;
+    gap: 4mm;
   }
   .institutional-logos img {
     width: 30mm;

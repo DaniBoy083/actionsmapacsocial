@@ -9,6 +9,8 @@ export const emptyInstitutionalFilters = {
   orgao: "",
   clinica: "",
   apoio: "",
+  contratante: "",
+  apoiador: "",
 };
 
 export function InstitutionalFilters({
@@ -30,6 +32,8 @@ export function InstitutionalFilters({
           ["autor", "Autor da emenda"],
           ["orgao", "Órgão governamental"],
           ["clinica", "Clínica parceira"],
+          ["contratante", "Contratante"],
+          ["apoiador", "Apoiador"],
         ] as const
       ).map(([key, label]) => (
         <TextField

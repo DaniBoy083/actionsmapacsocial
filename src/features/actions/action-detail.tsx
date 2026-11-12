@@ -20,6 +20,7 @@ import { InstitutionalSummary } from "./institutional-summary";
 import type { Institutional } from "./institutional";
 import { ActionAssignments } from "@/features/staff/action-assignments";
 import { ClinicalDialog } from "@/features/clinical/clinical-dialog";
+import { DesignationDialog } from "@/features/clinical/designation-dialog";
 
 export function ActionDetail({ id }: { id: string }) {
   const session = useSession();
@@ -35,6 +36,10 @@ export function ActionDetail({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const [page, setPage] = useState(1);
   const [clinicalPerson, setClinicalPerson] = useState<{
+    id: string;
+    nome: string;
+  } | null>(null);
+  const [designationPerson, setDesignationPerson] = useState<{
     id: string;
     nome: string;
   } | null>(null);
@@ -319,6 +324,13 @@ export function ActionDetail({ id }: { id: string }) {
                       </td>
                       <td>
                         <div className="actions-row">
+                          <Button
+                            disabled={row.status === "arquivada"}
+                            aria-label={`Designar atendimento de ${person.nome}`}
+                            onClick={() => setDesignationPerson(person)}
+                          >
+                            Designar profissional
+                          </Button>
                           {clinicalAccess.data?.permitido && (
                             <Button
                               aria-label={`Campos clínicos de ${person.nome}`}
@@ -388,6 +400,14 @@ export function ActionDetail({ id }: { id: string }) {
           personId={clinicalPerson.id}
           personName={clinicalPerson.nome}
           onClose={() => setClinicalPerson(null)}
+        />
+      )}
+      {designationPerson && (
+        <DesignationDialog
+          actionId={id}
+          personId={designationPerson.id}
+          personName={designationPerson.nome}
+          onClose={() => setDesignationPerson(null)}
         />
       )}
       {editing && (

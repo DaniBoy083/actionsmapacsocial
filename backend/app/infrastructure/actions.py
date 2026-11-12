@@ -48,12 +48,20 @@ def require_version(row: Action, version: int) -> None:
         raise HTTPException(409, "Esta ação foi alterada. Recarregue antes de salvar.")
 
 
-def snapshot(session: Session, row: Action) -> dict:
-    count = session.scalar(
-        select(func.count()).select_from(Participation).where(Participation.acao_id == row.id)
+def snapshot(session: Session, row: Action, *, counts=None, deliveries=None) -> dict:
+    count = (
+        counts.get(row.id, 0)
+        if counts is not None
+        else session.scalar(
+            select(func.count()).select_from(Participation).where(Participation.acao_id == row.id)
+        )
     )
-    delivery = session.scalar(
-        select(Outbox).where(Outbox.idempotency_key == f"acao:{row.id}:v{row.versao}")
+    delivery = (
+        deliveries.get(row.id)
+        if deliveries is not None
+        else session.scalar(
+            select(Outbox).where(Outbox.idempotency_key == f"acao:{row.id}:v{row.versao}")
+        )
     )
     return {
         "id": row.id,
@@ -70,12 +78,8 @@ def snapshot(session: Session, row: Action) -> dict:
             {**p, "municipio_nome": MUNICIPALITIES[p["municipio_ibge"]]} for p in row.locais
         ],
         "beneficiarios": count,
-        "pessoas_contempladas": session.scalar(
-            select(func.count(func.distinct(Participation.beneficiario_id))).where(
-                Participation.acao_id == row.id
-            )
-        )
-        or 0,
+        # UNIQUE(acao_id, beneficiario_id): cada participação da ação corresponde a um cadastro.
+        "pessoas_contempladas": count or 0,
         "integracao": {
             "status": delivery.status,
             "enviado_em": delivery.enviado_em,
@@ -88,6 +92,25 @@ def snapshot(session: Session, row: Action) -> dict:
         "aprovado_por": row.aprovado_por,
         "publicado_por": row.publicado_por,
     }
+
+
+def snapshots(session: Session, rows: list[Action]) -> list[dict]:
+    if not rows:
+        return []
+    counts = dict(
+        session.execute(
+            select(Participation.acao_id, func.count())
+            .where(Participation.acao_id.in_([row.id for row in rows]))
+            .group_by(Participation.acao_id)
+        ).all()
+    )
+    events = session.scalars(
+        select(Outbox).where(
+            Outbox.idempotency_key.in_([f"acao:{row.id}:v{row.versao}" for row in rows])
+        )
+    ).all()
+    deliveries = {event.payload["acao_id"]: event for event in events}
+    return [snapshot(session, row, counts=counts, deliveries=deliveries) for row in rows]
 
 
 def enqueue(session: Session, row: Action) -> None:
@@ -144,7 +167,9 @@ def save_action(
             raise HTTPException(409, "Ação arquivada não pode ser editada.")
         previous_institutional = row.institucional
         values["institucional"] = (
-            persist_institutional(session, identifier, data.institucional)
+            persist_institutional(
+                session, identifier, data.institucional, professional.profissional_id
+            )
             if "institucional" in data.model_fields_set
             else row.institucional
         )
@@ -197,10 +222,16 @@ def save_action(
     else:
         if data.versao != 0:
             raise HTTPException(422, "A versão inicial deve ser zero.")
+        if not data.institucional.contratantes or not data.institucional.apoiadores:
+            raise HTTPException(
+                422, "Informe ao menos um contratante e um apoiador com tipo e modalidade."
+            )
         row = Action(**values, criado_por=professional.profissional_id)
         session.add(row)
         session.flush()
-        row.institucional = persist_institutional(session, row.id, data.institucional)
+        row.institucional = persist_institutional(
+            session, row.id, data.institucional, professional.profissional_id
+        )
     remember(session, row.id, row.versao, row.institucional, professional.profissional_id)
     session.flush()
     audit(session, professional, "acoes.update" if identifier else "acoes.create", row.id)
