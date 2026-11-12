@@ -1,9 +1,7 @@
 # AC Actions Map — Especificação otimizada para agente de desenvolvimento
 
-**Versão:** 2.1 (30/10/2026)
-
-**Estado:** PLANEJAMENTO ATUALIZADO / LEITURA DA FICHA ORIGINAL OBRIGATÓRIA PELO AGENTE / MVP OPERACIONAL SEM ASSINATURA DIGITAL
-
+**Versão:** 2.1 (30/10/2026)  
+**Estado:** PLANEJAMENTO ATUALIZADO / LEITURA DA FICHA ORIGINAL OBRIGATÓRIA PELO AGENTE / MVP OPERACIONAL SEM ASSINATURA DIGITAL  
 **Modelo previsto:** GPT-6.1 Sol no Codex, Work ou agente de IDE compatível  
 **Destino no repositório:** `docs/PLANO_ACTIONS_MAP_GPT61_SOL.md`  
 **Documento de entrada do agente:** `AGENTS.md` na raiz
