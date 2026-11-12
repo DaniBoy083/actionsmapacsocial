@@ -3,13 +3,22 @@
 Aplicação para gestão de ações institucionais, beneficiários e registro clínico segregado
 com liberação controlada. O fluxo completo de exame/documentos/etiqueta ainda não está concluído.
 
+**11/11/2026 — Ativação em produção autorizada:** migrações `0007`–`0009` aplicadas,
+chave clínica sensível própria e `CLINICAL_FIELDS_ENABLED=true` configuradas somente
+em produção. O commit `7a9aadf` foi republicado e o domínio público está no deployment
+validado. Backup cifrado restaurado em ambiente descartável, registros anteriores,
+RLS e permissões conferidos; testes externos de acesso negado aprovados.
+[Evidências, limites e reversão da ativação](docs/ATIVACAO_PRODUCAO_2026-11-11.md).
+O uso clínico ainda exige vínculo individual, habilitação e atribuição válidos.
+
 **11/11/2026 — Profissionais e campos clínicos:** cadastro de médico/optometrista/recepção,
 atribuições por ação/local, conferência de habilitação, autorização clínica específica,
 revogação e históricos privados. Incluídos os 13 campos da ficha original, cifrados
 separadamente, com controle por identidade/profissional/ação/local/caso e versões.
 Permanecem **em preenchimento**; não geram prescrição, conclusão de exame ou etiqueta.
-`CLINICAL_FIELDS_ENABLED=false` por padrão; a ativação exige `CLINICAL_KEY` própria
-e aprovação operacional. Nenhuma configuração ou banco real foi alterado.
+`CLINICAL_FIELDS_ENABLED=false` continua sendo o padrão do código; a ativação exige
+`CLINICAL_KEY` própria e aprovação operacional. A entrega de código manteve o recurso
+desligado; a ativação posterior em produção está registrada acima.
 [Implementação, matriz de campos, operação e rollback](docs/PROFISSIONAIS_E_CAMPOS_CLINICOS_2026-11-11.md).
 
 **11/11/2026 — Etapa administrativa implementada:** cadastro de apoio e emenda/convênio
@@ -19,7 +28,8 @@ segunda via geral, snapshot administrativo e filtros internos. Main foi conferid
 com `origin/main` antes das edições. **AC Auth e AC Core não foram alterados.**
 [Implementação, testes, limites e rollback](docs/IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).
 O banco existente precisa das migrações aditivas até **0009 antes de servir esta versão**;
-elas foram testadas somente em bases descartáveis, sem aplicação real ou deploy.
+a sequência foi aplicada em produção na ativação autorizada de 11/11, após backup
+cifrado, restauração e ensaio em base descartável.
 Para SQLite local, há prévia/atualização controlada em
 `scripts/migrate_institutional_metadata.py`; não é migração automática de startup.
 Conclusão clínica, etiqueta, identidade operacional exclusiva e contrato 1.2 continuam pendentes.
@@ -49,9 +59,11 @@ Inclui login institucional, autorização no backend, Visão geral com indicador
 **Estado do código:** desenvolvimento com SQLite isolado; adaptador produtivo
 Next.js + FastAPI/PostgreSQL em schema próprio. Os relatos de carga das 50 fichas,
 complemento de 294 campos e recebimento na Agenda são evidências históricas de
-26–28/10, não reexecutadas nesta revisão. Estado atual do deploy, revisão aplicada
-e operação institucional não foram consultados. Campos ausentes/ilegíveis
-permanecem pendentes. Consulte [deploy histórico](docs/DEPLOY_PRODUCAO.md),
+26–28/10; o recebimento na Agenda não foi reexecutado nesta ativação. Em 11/11,
+o deployment e a revisão `0009` foram conferidos, preservando 1 ação, 50 cadastros
+e 50 participações. Campos ausentes/ilegíveis permanecem pendentes.
+Consulte [ativação atual](docs/ATIVACAO_PRODUCAO_2026-11-11.md),
+[deploy histórico](docs/DEPLOY_PRODUCAO.md),
 [conformidade](docs/CONFORMIDADE_E_PENDENCIAS.md) e a auditoria atual.
 
 ## Rodar localmente no Windows

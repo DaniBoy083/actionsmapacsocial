@@ -1,5 +1,9 @@
 # Produção na Vercel — 26/10/2026
 
+> Atualização de 11/11/2026: [ativação clínica autorizada, revisão 0009,
+> evidências e reversão](ATIVACAO_PRODUCAO_2026-11-11.md).
+> Os resultados abaixo descrevem a implantação histórica de 26/10.
+
 ## Diagnóstico e correção
 
 O domínio `https://actionsmapacsocial.vercel.app` respondia `404 NOT_FOUND`. O projeto estava com preset **Other**: o comando `next build` terminava, mas a Vercel distribuía a pasta pública sem montar as rotas Next.js. O código estava correto para execução local; o empacotamento da hospedagem estava incorreto.
