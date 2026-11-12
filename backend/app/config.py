@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     actions_storage_url: str = "sqlite:///" + (ROOT / "backend/private/actions.sqlite3").as_posix()
     session_secret: SecretStr = SecretStr("")
     beneficiaries_key: SecretStr = SecretStr("")
+    clinical_fields_enabled: bool = False
+    clinical_key: SecretStr = SecretStr("")
     frontend_origin: str = "http://localhost:3000"
     agenda_web_url: str = ""
     agenda_summaries_url: str = ""

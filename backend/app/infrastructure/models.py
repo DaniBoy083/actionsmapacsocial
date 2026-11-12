@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -100,6 +101,104 @@ class Audit(Base):
     operacao: Mapped[str] = mapped_column(String(60))
     entidade_id: Mapped[str] = mapped_column(String(160))
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class StaffRecord(Base):
+    __tablename__ = "acoes_map_profissionais"
+    __table_args__ = (
+        CheckConstraint(
+            "categoria IN ('MEDICO','OPTOMETRISTA','RECEPCAO')", name="ck_profissional_categoria"
+        ),
+        CheckConstraint("versao >= 1", name="ck_profissional_versao"),
+        UniqueConstraint(
+            "registro_conselho", "registro_numero", "registro_uf", name="uq_profissional_registro"
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    versao: Mapped[int] = mapped_column(Integer, default=1)
+    nome: Mapped[str] = mapped_column(String(160))
+    categoria: Mapped[str] = mapped_column(String(20))
+    identidade_institucional_id: Mapped[str | None] = mapped_column(String(160), unique=True)
+    registro_conselho: Mapped[str | None] = mapped_column(String(40))
+    registro_numero: Mapped[str | None] = mapped_column(String(40))
+    registro_uf: Mapped[str | None] = mapped_column(String(2))
+    rqe: Mapped[str | None] = mapped_column(String(40))
+    habilitacao_validada: Mapped[bool] = mapped_column(Boolean, default=False)
+    habilitacao_referencia: Mapped[str] = mapped_column(String(200), default="")
+    registro_clinico_autorizado: Mapped[bool] = mapped_column(Boolean, default=False)
+    autorizacao_clinica_referencia: Mapped[str] = mapped_column(String(200), default="")
+    ativo: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    divulgacao_autorizada: Mapped[bool] = mapped_column(Boolean, default=False)
+    divulgacao_referencia: Mapped[str] = mapped_column(String(200), default="")
+    conferido_por: Mapped[str | None] = mapped_column(String(160))
+    conferido_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    divulgacao_registrada_por: Mapped[str | None] = mapped_column(String(160))
+    divulgacao_registrada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    criado_por: Mapped[str] = mapped_column(String(160))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    atualizado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class StaffAssignment(Base):
+    __tablename__ = "acoes_map_atribuicoes"
+    __table_args__ = (
+        UniqueConstraint("acao_id", "profissional_id", name="uq_atribuicao_acao_profissional"),
+        CheckConstraint("papel IN ('PROFISSIONAL','RECEPCAO')", name="ck_atribuicao_papel"),
+        CheckConstraint("versao >= 1", name="ck_atribuicao_versao"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    versao: Mapped[int] = mapped_column(Integer, default=1)
+    acao_id: Mapped[str] = mapped_column(ForeignKey(Action.id), index=True)
+    profissional_id: Mapped[str] = mapped_column(ForeignKey(StaffRecord.id), index=True)
+    papel: Mapped[str] = mapped_column(String(20))
+    locais_indices: Mapped[list | None] = mapped_column(JSON(none_as_null=True), nullable=True)
+    locais_snapshot: Mapped[list | None] = mapped_column(JSON(none_as_null=True), nullable=True)
+    profissional_snapshot: Mapped[dict] = mapped_column(JSON)
+    ativo: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    criado_por: Mapped[str] = mapped_column(String(160))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    atualizado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class StaffRevision(Base):
+    __tablename__ = "acoes_map_profissionais_historico"
+    __table_args__ = (
+        UniqueConstraint("tipo", "entidade_id", "versao", name="uq_profissional_historico"),
+        CheckConstraint(
+            "tipo IN ('PROFISSIONAL','ATRIBUICAO')", name="ck_profissional_historico_tipo"
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    tipo: Mapped[str] = mapped_column(String(20))
+    entidade_id: Mapped[str] = mapped_column(String(36), index=True)
+    versao: Mapped[int] = mapped_column(Integer)
+    dados: Mapped[dict] = mapped_column(JSON)
+    registrado_por: Mapped[str] = mapped_column(String(160))
+    registrado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ClinicalRecord(Base):
+    __tablename__ = "acoes_map_fichas_clinicas"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    participacao_id: Mapped[str] = mapped_column(ForeignKey(Participation.id), unique=True)
+    autor_profissional_id: Mapped[str] = mapped_column(ForeignKey(StaffRecord.id), index=True)
+    autor_identidade_id: Mapped[str] = mapped_column(String(160))
+    versao: Mapped[int] = mapped_column(Integer, default=1)
+    dados_cifrados: Mapped[str] = mapped_column(Text)
+    contexto: Mapped[dict] = mapped_column(JSON)
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    atualizado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ClinicalRevision(Base):
+    __tablename__ = "acoes_map_fichas_clinicas_versoes"
+    __table_args__ = (UniqueConstraint("ficha_id", "versao", name="uq_ficha_clinica_versao"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    ficha_id: Mapped[str] = mapped_column(ForeignKey(ClinicalRecord.id), index=True)
+    versao: Mapped[int] = mapped_column(Integer)
+    dados_cifrados: Mapped[str] = mapped_column(Text)
+    registrado_por: Mapped[str] = mapped_column(String(160))
+    registrado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
 class SessionRecord(Base):

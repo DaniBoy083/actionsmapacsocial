@@ -45,6 +45,8 @@ class FakeIdentities:
 def api_client(tmp_path, monkeypatch):
     monkeypatch.setenv("SESSION_SECRET", "test-only-" + os.urandom(32).hex())
     monkeypatch.setenv("BENEFICIARIES_KEY", Fernet.generate_key().decode())
+    monkeypatch.setenv("CLINICAL_FIELDS_ENABLED", "false")
+    monkeypatch.setenv("CLINICAL_KEY", Fernet.generate_key().decode())
     monkeypatch.setenv("APP_ENV", "test")
     monkeypatch.setenv("FRONTEND_ORIGIN", "http://localhost:3000")
     monkeypatch.setenv("AGENDA_SUMMARIES_URL", "")
@@ -61,6 +63,8 @@ def api_client(tmp_path, monkeypatch):
     monkeypatch.setattr("app.api.import_files.get_engine", lambda: engine)
     monkeypatch.setattr("app.api.integrations.get_engine", lambda: engine)
     monkeypatch.setattr("app.api.beneficiaries.get_engine", lambda: engine)
+    monkeypatch.setattr("app.api.staff.get_engine", lambda: engine)
+    monkeypatch.setattr("app.api.clinical.get_engine", lambda: engine)
     with TestClient(app, raise_server_exceptions=False) as client:
         yield client, engine, repo
     app.dependency_overrides.clear()

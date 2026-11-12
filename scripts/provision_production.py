@@ -143,6 +143,12 @@ def main() -> int:
         from app.infrastructure.institutional_grants import IMMUTABLE_INSTITUTIONAL_GRANTS
 
         raw.execute(IMMUTABLE_INSTITUTIONAL_GRANTS)
+        from app.infrastructure.staff_grants import STAFF_GRANTS
+
+        raw.execute(STAFF_GRANTS)
+        from app.infrastructure.clinical_grants import CLINICAL_GRANTS
+
+        raw.execute(CLINICAL_GRANTS)
         raw.execute(
             sql.SQL("REVOKE INSERT,UPDATE,DELETE ON actions_map.alembic_version FROM {}").format(
                 sql.Identifier(ROLE)

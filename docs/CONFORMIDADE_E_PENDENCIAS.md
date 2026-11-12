@@ -1,5 +1,10 @@
 # Verificação de conformidade e próximos incrementos
 
+> **Incremento atual em 11/11/2026:** profissionais, atribuições por local e campos
+> clínicos privados em preenchimento implementados. [Evidências atuais](PROFISSIONAIS_E_CAMPOS_CLINICOS_2026-11-11.md).
+> Ativação clínica permanece desligada; migrações até 0009 são necessárias antes
+> de servir a versão nova. O piloto completo segue não homologado.
+
 > **11/11/2026:** implementados metadados de emenda/convênio, apoio, marcas privadas,
 > histórico/snapshot administrativo da segunda via e filtros internos.
 > [Estado atual e limites](IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).

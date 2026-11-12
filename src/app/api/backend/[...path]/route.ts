@@ -6,14 +6,15 @@ const privateHeaders = {
   "Referrer-Policy": "no-referrer",
 };
 const permitted =
-  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|tecnologia\/(saude|sincronizar-agenda|tokens(?:\/[a-f0-9-]{36}\/(revogar|rotacionar))?)|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios(?:\/[a-zA-Z0-9-]+(?:\/segunda-via)?)?|marcas\/[a-f0-9-]{36}|institucional\/versoes\/\d+|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|arquivos|[a-zA-Z0-9-]+(?:\/(preparar|paginas\/\d+|partes\/\d+))?))$/;
+  /^(auth\/(login|me|logout)|localidades\/pb|indicadores|profissionais(?:\/[a-f0-9-]{36}(?:\/historico)?)?|tecnologia\/(saude|sincronizar-agenda|tokens(?:\/[a-f0-9-]{36}\/(revogar|rotacionar))?)|acoes(?:\/[a-zA-Z0-9-]+(?:\/(beneficiarios(?:\/[a-zA-Z0-9-]+(?:\/segunda-via)?)?|atribuicoes(?:\/[a-f0-9-]{36}(?:\/historico)?)?|marcas\/[a-f0-9-]{36}|institucional\/versoes\/\d+|revisar|aprovar|publicar))?)?|importacoes\/(preview|confirmar|arquivos|[a-zA-Z0-9-]+(?:\/(preparar|paginas\/\d+|partes\/\d+))?))$/;
+const clinicalPath = /^acoes\/[a-f0-9-]{36}\/(acesso-clinico|beneficiarios\/[a-f0-9-]{36}\/clinica)$/;
 async function proxy(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
   const targetPath = path.join("/");
-  if (!permitted.test(targetPath))
+  if (!permitted.test(targetPath) && !clinicalPath.test(targetPath))
     return Response.json(
       { detail: "Rota não encontrada." },
       { status: 404, headers: privateHeaders },

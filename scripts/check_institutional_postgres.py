@@ -1,4 +1,4 @@
-"""Testa revisão 0007 em PostgreSQL descartável local; não usa .env ou bancos existentes."""
+"""Testa revisões 0007–0009 em PostgreSQL descartável local; não usa bancos existentes."""
 
 import argparse
 import base64
@@ -9,10 +9,15 @@ import socket
 import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from threading import Barrier
+from uuid import uuid4
 
 from alembic import command
 from alembic.config import Config
+from cryptography.fernet import Fernet
+from fastapi import HTTPException
 from PIL import Image
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DBAPIError
@@ -22,10 +27,29 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.api.action_filters import filter_institutional
+from app.config import get_settings
+from app.domain.clinical import ClinicalInput
 from app.domain.contracts import ActionInput, Professional
+from app.domain.staff import AssignmentInput, AssignmentUpdate, StaffInput
 from app.infrastructure.actions import save_action
+from app.infrastructure.clinical import SqlClinicalRepository
+from app.infrastructure.clinical_grants import CLINICAL_GRANTS
 from app.infrastructure.institutional_grants import IMMUTABLE_INSTITUTIONAL_GRANTS
-from app.infrastructure.models import Action, ActionLogo, Base, InstitutionalRevision
+from app.infrastructure.models import (
+    Action,
+    ActionLogo,
+    Base,
+    Beneficiary,
+    ClinicalRecord,
+    ClinicalRevision,
+    InstitutionalRevision,
+    Participation,
+    StaffAssignment,
+    StaffRecord,
+    StaffRevision,
+)
+from app.infrastructure.staff import SqlStaffRepository
+from app.infrastructure.staff_grants import STAFF_GRANTS
 
 
 def main():
@@ -97,7 +121,15 @@ def main():
                     table
                     for table in Base.metadata.sorted_tables
                     if table
-                    not in {ActionLogo.__table__, InstitutionalRevision.__table__}
+                    not in {
+                        ActionLogo.__table__,
+                        InstitutionalRevision.__table__,
+                        StaffRecord.__table__,
+                        StaffAssignment.__table__,
+                        StaffRevision.__table__,
+                        ClinicalRecord.__table__,
+                        ClinicalRevision.__table__,
+                    }
                 ],
             )
             connection.execute(
@@ -137,6 +169,10 @@ def main():
             config.attributes["connection"] = connection
             command.upgrade(config, "0007_institutional_metadata")
             command.upgrade(config, "0007_institutional_metadata")
+            command.upgrade(config, "0008_staff_assignments")
+            command.upgrade(config, "0008_staff_assignments")
+            command.upgrade(config, "0009_clinical_fields")
+            command.upgrade(config, "0009_clinical_fields")
             # Simula a concessão geral do provisionamento e aplica sua regra de restrição.
             connection.execute(
                 text(
@@ -144,11 +180,13 @@ def main():
                 )
             )
             connection.execute(text(IMMUTABLE_INSTITUTIONAL_GRANTS))
+            connection.execute(text(STAFF_GRANTS))
+            connection.execute(text(CLINICAL_GRANTS))
             assert (
                 connection.scalar(
                     text("SELECT version_num FROM actions_map.alembic_version")
                 )
-                == "0007_institutional_metadata"
+                == "0009_clinical_fields"
             )
         image = io.BytesIO()
         Image.new("RGB", (96, 96), "red").save(image, "PNG")
@@ -191,7 +229,120 @@ def main():
                 session.scalar(filter_institutional(select(Action.id), filters))
                 == created["id"]
             )
-        for table in ("acoes_map_marcas", "acoes_map_revisoes_institucionais"):
+        os.environ.update(
+            {
+                "CLINICAL_FIELDS_ENABLED": "true",
+                "CLINICAL_KEY": Fernet.generate_key().decode(),
+                "BENEFICIARIES_KEY": Fernet.generate_key().decode(),
+                "APP_ENV": "test",
+            }
+        )
+        get_settings.cache_clear()
+        with Session(engine) as session, session.begin():
+            session.execute(text("SET LOCAL ROLE ac_actions_map_runtime"))
+            repository = SqlStaffRepository(session)
+            staff = repository.save(
+                StaffInput(
+                    nome="Profissional sintético",
+                    categoria="MEDICO",
+                    registro_conselho="CRM",
+                    registro_numero="000123",
+                    registro_uf="PB",
+                    habilitacao_validada=True,
+                    habilitacao_referencia="Teste",
+                    registro_clinico_autorizado=True,
+                    autorizacao_clinica_referencia="Teste",
+                    identidade_institucional_id=professional.profissional_id,
+                ),
+                professional,
+            )
+            assignment = repository.assign(
+                created["id"],
+                AssignmentInput(
+                    profissional_id=staff["id"],
+                    acao_versao=2,
+                    profissional_versao=1,
+                    locais_indices=[0],
+                ),
+                professional,
+            )
+            person_id = str(uuid4())
+            session.add(
+                Beneficiary(
+                    id=person_id, dados_cifrados="synthetic-unused-registration"
+                )
+            )
+            session.flush()
+            session.add(
+                Participation(
+                    acao_id=created["id"], beneficiario_id=person_id, local_indice=0
+                )
+            )
+            session.flush()
+            clinical = SqlClinicalRepository(session, professional)
+            result = clinical.save(
+                created["id"],
+                person_id,
+                ClinicalInput(campos={"lentes": "SYNTHETIC_CLINICAL_VALUE"}),
+            )
+            assert result["versao"] == 1
+            assert (
+                clinical.read(created["id"], person_id)["campos"]["lentes"]
+                == "SYNTHETIC_CLINICAL_VALUE"
+            )
+            assert (
+                "SYNTHETIC_CLINICAL_VALUE"
+                not in session.get(ClinicalRecord, result["id"]).dados_cifrados
+            )
+        barrier = Barrier(2)
+
+        def concurrent_change(deactivate):
+            barrier.wait(timeout=10)
+            try:
+                with Session(engine) as session, session.begin():
+                    session.execute(text("SET LOCAL ROLE ac_actions_map_runtime"))
+                    session.execute(text("SET LOCAL lock_timeout = '5s'"))
+                    repository = SqlStaffRepository(session)
+                    if deactivate:
+                        data = {
+                            key: value
+                            for key, value in staff.items()
+                            if key in StaffInput.model_fields
+                        }
+                        repository.save(
+                            StaffInput(**{**data, "versao": 1, "ativo": False}),
+                            professional,
+                            staff["id"],
+                        )
+                    else:
+                        repository.assign(
+                            created["id"],
+                            AssignmentUpdate(
+                                versao=1,
+                                acao_versao=2,
+                                profissional_versao=1,
+                                ativo=True,
+                                locais_indices=[0],
+                            ),
+                            professional,
+                            assignment["id"],
+                        )
+                return 200
+            except HTTPException as error:
+                return error.status_code
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            outcomes = list(pool.map(concurrent_change, [False, True]))
+        assert all(status in {200, 409} for status in outcomes)
+        with Session(engine) as session:
+            assert not session.get(StaffRecord, staff["id"]).ativo
+            assert not session.get(StaffAssignment, assignment["id"]).ativo
+        for table in (
+            "acoes_map_marcas",
+            "acoes_map_revisoes_institucionais",
+            "acoes_map_profissionais_historico",
+            "acoes_map_fichas_clinicas_versoes",
+        ):
             for operation in ("DELETE", "UPDATE"):
                 with engine.begin() as connection:
                     connection.execute(text("SET LOCAL ROLE ac_actions_map_runtime"))
@@ -199,7 +350,9 @@ def main():
                         statement = (
                             f"DELETE FROM actions_map.{table}"
                             if operation == "DELETE"
-                            else f"UPDATE actions_map.{table} SET criado_em=criado_em"
+                            else f"UPDATE actions_map.{table} SET id=id"
+                            if table not in {"acoes_map_revisoes_institucionais"}
+                            else f"UPDATE actions_map.{table} SET versao=versao"
                         )
                         connection.execute(text(statement))
                     except DBAPIError as error:
@@ -210,7 +363,7 @@ def main():
                         )
                     connection.rollback()
         print(
-            "POSTGRES_INSTITUTIONAL_OK: revisão 0007 idempotente, CRUD/CAS, filtros JSON, histórico e grants imutáveis."
+            "POSTGRES_INSTITUTIONAL_OK: revisões 0007/0008/0009 idempotentes, CRUD/CAS, escopo, clínica cifrada, revogação concorrente e grants imutáveis."
         )
     finally:
         if engine:

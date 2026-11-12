@@ -1,0 +1,49 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "acao_versao": {
+      "minimum": 1,
+      "title": "Acao Versao",
+      "type": "integer"
+    },
+    "profissional_versao": {
+      "minimum": 1,
+      "title": "Profissional Versao",
+      "type": "integer"
+    },
+    "locais_indices": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Locais Indices"
+    },
+    "versao": {
+      "minimum": 1,
+      "title": "Versao",
+      "type": "integer"
+    },
+    "ativo": {
+      "title": "Ativo",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "acao_versao",
+    "profissional_versao",
+    "versao",
+    "ativo"
+  ],
+  "title": "AssignmentUpdate",
+  "type": "object"
+}

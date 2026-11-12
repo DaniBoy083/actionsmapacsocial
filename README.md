@@ -1,7 +1,16 @@
 # AC Actions Map — AC Social
 
-Aplicação atual para gestão de ações institucionais e cadastros gerais de beneficiários.
-O fluxo clínico ocular definido em 30/10/2026 ainda não está implementado.
+Aplicação para gestão de ações institucionais, beneficiários e registro clínico segregado
+com liberação controlada. O fluxo completo de exame/documentos/etiqueta ainda não está concluído.
+
+**11/11/2026 — Profissionais e campos clínicos:** cadastro de médico/optometrista/recepção,
+atribuições por ação/local, conferência de habilitação, autorização clínica específica,
+revogação e históricos privados. Incluídos os 13 campos da ficha original, cifrados
+separadamente, com controle por identidade/profissional/ação/local/caso e versões.
+Permanecem **em preenchimento**; não geram prescrição, conclusão de exame ou etiqueta.
+`CLINICAL_FIELDS_ENABLED=false` por padrão; a ativação exige `CLINICAL_KEY` própria
+e aprovação operacional. Nenhuma configuração ou banco real foi alterado.
+[Implementação, matriz de campos, operação e rollback](docs/PROFISSIONAIS_E_CAMPOS_CLINICOS_2026-11-11.md).
 
 **11/11/2026 — Etapa administrativa implementada:** cadastro de apoio e emenda/convênio
 (nome, número textual e autor), órgão/clínica com duas logos opcionais e permissões
@@ -9,11 +18,11 @@ separadas de uso/divulgação, histórico privado, cabeçalho com três marcas n
 segunda via geral, snapshot administrativo e filtros internos. Main foi conferida
 com `origin/main` antes das edições. **AC Auth e AC Core não foram alterados.**
 [Implementação, testes, limites e rollback](docs/IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).
-O banco existente precisa da migração aditiva **0007 antes de servir este código**;
-ela foi testada somente em bases descartáveis, sem aplicação real ou deploy.
+O banco existente precisa das migrações aditivas até **0009 antes de servir esta versão**;
+elas foram testadas somente em bases descartáveis, sem aplicação real ou deploy.
 Para SQLite local, há prévia/atualização controlada em
 `scripts/migrate_institutional_metadata.py`; não é migração automática de startup.
-Ficha clínica, etiqueta, atribuição operacional e contrato 1.2 continuam pendentes.
+Conclusão clínica, etiqueta, identidade operacional exclusiva e contrato 1.2 continuam pendentes.
 Não há declaração de conformidade absoluta nem liberação do piloto clínico.
 
 **03/11/2026 — AC-Core:** [diagnóstico, contratos pendentes e handoff técnico](docs/AC_CORE_PENDING_IMPLEMENTATIONS.md).

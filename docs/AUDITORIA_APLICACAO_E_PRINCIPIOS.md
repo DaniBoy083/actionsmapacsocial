@@ -1,11 +1,24 @@
 # Auditoria técnica da aplicação e princípios
 
-## Revisão atual — 11/11/2026
+## Revisão atual — profissionais e campos clínicos, 11/11/2026
+
+[Entrega atual, fonte, permissões e limites](PROFISSIONAIS_E_CAMPOS_CLINICOS_2026-11-11.md).
+Conformidade global continua **PARCIAL**; não há liberação do piloto clínico.
+
+| Requisito | Estado atual |
+| --- | --- |
+| Profissionais e atribuições | Cadastro/edição/inativação, habilitação/autorizações administrativas, ação/locais/versões, revogação automática e histórico implementados |
+| Campos clínicos da fonte | 13 campos opcionais, textuais, sem unidades/faixas inventadas; segregados/cifrados; estado em preenchimento; contexto institucional preservado |
+| Autorização clínica | Sessão existente + vínculo próprio + habilitação + autorização específica + ação/local/caso/autor; nem papel administrativo nem registro de recepção liberam leitura por si |
+| Auth/Core | Sem nova integração ou login; contas operacionais exclusivas continuam em standby |
+| Produção e documentos | Ativação desligada por padrão; 0008/0009 preparadas, sem aplicação real; conclusão de exame, etiqueta e impressão física pendentes |
+
+## Etapa administrativa inicial — 11/11/2026
 
 Conformidade global **PARCIAL**; o MVP clínico continua **NÃO LIBERADO**.
 [Evidências, campos, autorização, migração, testes e rollback desta entrega](IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).
 
-| Requisito | Estado em 11/11 |
+| Requisito | Estado na etapa administrativa inicial |
 | --- | --- |
 | Main sincronizada antes de implementar | Fetch executado; árvore limpa e divergência 0/0 em dda4712 |
 | Metadados de emenda/convênio e apoio | Implementados na ação com validação estrita, versão e histórico; ausências explícitas |

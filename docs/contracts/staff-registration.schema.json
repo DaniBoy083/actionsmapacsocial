@@ -1,0 +1,164 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "nome": {
+      "maxLength": 160,
+      "minLength": 2,
+      "title": "Nome",
+      "type": "string"
+    },
+    "categoria": {
+      "enum": [
+        "MEDICO",
+        "OPTOMETRISTA",
+        "RECEPCAO"
+      ],
+      "title": "Categoria",
+      "type": "string"
+    },
+    "identidade_institucional_id": {
+      "anyOf": [
+        {
+          "maxLength": 160,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Identidade Institucional Id"
+    },
+    "registro_conselho": {
+      "anyOf": [
+        {
+          "maxLength": 40,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Registro Conselho"
+    },
+    "registro_numero": {
+      "anyOf": [
+        {
+          "maxLength": 40,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Registro Numero"
+    },
+    "registro_uf": {
+      "anyOf": [
+        {
+          "enum": [
+            "AC",
+            "AL",
+            "AP",
+            "AM",
+            "BA",
+            "CE",
+            "DF",
+            "ES",
+            "GO",
+            "MA",
+            "MT",
+            "MS",
+            "MG",
+            "PA",
+            "PB",
+            "PR",
+            "PE",
+            "PI",
+            "RJ",
+            "RN",
+            "RS",
+            "RO",
+            "RR",
+            "SC",
+            "SP",
+            "SE",
+            "TO"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Registro Uf"
+    },
+    "rqe": {
+      "anyOf": [
+        {
+          "maxLength": 40,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rqe"
+    },
+    "habilitacao_validada": {
+      "default": false,
+      "title": "Habilitacao Validada",
+      "type": "boolean"
+    },
+    "habilitacao_referencia": {
+      "default": "",
+      "maxLength": 200,
+      "title": "Habilitacao Referencia",
+      "type": "string"
+    },
+    "registro_clinico_autorizado": {
+      "default": false,
+      "title": "Registro Clinico Autorizado",
+      "type": "boolean"
+    },
+    "autorizacao_clinica_referencia": {
+      "default": "",
+      "maxLength": 200,
+      "title": "Autorizacao Clinica Referencia",
+      "type": "string"
+    },
+    "ativo": {
+      "default": true,
+      "title": "Ativo",
+      "type": "boolean"
+    },
+    "divulgacao_autorizada": {
+      "default": false,
+      "title": "Divulgacao Autorizada",
+      "type": "boolean"
+    },
+    "divulgacao_referencia": {
+      "default": "",
+      "maxLength": 200,
+      "title": "Divulgacao Referencia",
+      "type": "string"
+    },
+    "versao": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Versao",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "nome",
+    "categoria"
+  ],
+  "title": "StaffInput",
+  "type": "object"
+}

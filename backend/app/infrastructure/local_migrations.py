@@ -12,10 +12,83 @@ from sqlalchemy.engine import Engine
 from app.infrastructure.models import (
     Action,
     ActionLogo,
+    ClinicalRecord,
+    ClinicalRevision,
     InstitutionalRevision,
     IntegrationCredential,
     Participation,
+    StaffAssignment,
+    StaffRecord,
+    StaffRevision,
 )
+
+
+def add_local_clinical(
+    engine: Engine, key: str, backup_directory: Path, *, apply: bool = False
+) -> bool:
+    if engine.dialect.name != "sqlite":
+        raise ValueError("Procedimento exclusivo do SQLite local.")
+    with engine.begin() as connection:
+        connection.exec_driver_sql("BEGIN IMMEDIATE")
+        inspector = inspect(connection)
+        if not inspector.has_table(
+            StaffRecord.__tablename__
+        ) or "identidade_institucional_id" not in {
+            column["name"] for column in inspector.get_columns(StaffRecord.__tablename__)
+        }:
+            raise ValueError("Prepare o armazenamento até a etapa 0008 antes dos campos clínicos.")
+        tables = [
+            table
+            for table in (ClinicalRecord.__table__, ClinicalRevision.__table__)
+            if not inspector.has_table(table.name)
+        ]
+        if not apply or not tables:
+            return False
+        plaintext = connection.connection.driver_connection.serialize()
+        cipher = Fernet(key.encode())
+        backup_directory.mkdir(parents=True, exist_ok=True)
+        destination = backup_directory / ("sqlite-clinica-" + str(uuid4()) + ".fernet")
+        with destination.open("xb") as stream:
+            stream.write(cipher.encrypt(plaintext))
+        if cipher.decrypt(destination.read_bytes()) != plaintext:
+            raise RuntimeError("Backup SQLite não verificado.")
+        for table in tables:
+            table.create(connection, checkfirst=True)
+    return True
+
+
+def add_local_staff(
+    engine: Engine, key: str, backup_directory: Path, *, apply: bool = False
+) -> bool:
+    if engine.dialect.name != "sqlite":
+        raise ValueError("Procedimento exclusivo do SQLite local.")
+    with engine.begin() as connection:
+        connection.exec_driver_sql("BEGIN IMMEDIATE")
+        inspector = inspect(connection)
+        if not inspector.has_table(Action.__tablename__) or "institucional" not in {
+            column["name"] for column in inspector.get_columns(Action.__tablename__)
+        }:
+            raise ValueError(
+                "Prepare o armazenamento até a etapa 0007 antes de cadastrar profissionais."
+            )
+        tables = [
+            table
+            for table in (StaffRecord.__table__, StaffAssignment.__table__, StaffRevision.__table__)
+            if not inspector.has_table(table.name)
+        ]
+        if not apply or not tables:
+            return False
+        plaintext = connection.connection.driver_connection.serialize()
+        cipher = Fernet(key.encode())
+        backup_directory.mkdir(parents=True, exist_ok=True)
+        destination = backup_directory / ("sqlite-profissionais-" + str(uuid4()) + ".fernet")
+        with destination.open("xb") as stream:
+            stream.write(cipher.encrypt(plaintext))
+        if cipher.decrypt(destination.read_bytes()) != plaintext:
+            raise RuntimeError("Backup SQLite não verificado.")
+        for table in tables:
+            table.create(connection, checkfirst=True)
+    return True
 
 
 def add_local_institutional_metadata(

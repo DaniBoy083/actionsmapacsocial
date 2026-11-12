@@ -1,5 +1,10 @@
 # MVP ocular — proposta, backlog e aceite após a Fase 0
 
+> **Incremento seguinte em 11/11:** cadastro de profissionais/atribuições e campos
+> clínicos em preenchimento implementados, com cifra e escopo individual.
+> [Estado, testes e dependências atuais](PROFISSIONAIS_E_CAMPOS_CLINICOS_2026-11-11.md).
+> Não conclui triagem/fila, exame finalizado, documentos/etiqueta nem homologação.
+
 > **Atualização de 11/11/2026:** ação com metadados de instrumento/apoio, marcas,
 > histórico, propagação para segunda via geral e filtros administrativos foram
 > implementados. [Entrega e aceite técnico](IMPLEMENTACAO_ADMINISTRATIVA_2026-11-11.md).

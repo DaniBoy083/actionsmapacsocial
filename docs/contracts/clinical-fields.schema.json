@@ -1,0 +1,158 @@
+{
+  "$defs": {
+    "ClinicalFields": {
+      "additionalProperties": false,
+      "properties": {
+        "glicose": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Glicose"
+        },
+        "pressao": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pressao"
+        },
+        "tipo_sangue": {
+          "anyOf": [
+            {
+              "maxLength": 32,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tipo Sangue"
+        },
+        "od": {
+          "$ref": "#/$defs/EyeFields"
+        },
+        "oe": {
+          "$ref": "#/$defs/EyeFields"
+        },
+        "adicao": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Adicao"
+        },
+        "lentes": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lentes"
+        }
+      },
+      "title": "ClinicalFields",
+      "type": "object"
+    },
+    "EyeFields": {
+      "additionalProperties": false,
+      "properties": {
+        "esferico": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Esferico"
+        },
+        "cilindrico": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cilindrico"
+        },
+        "eixo": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Eixo"
+        },
+        "dp": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dp"
+        }
+      },
+      "title": "EyeFields",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "versao": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Versao",
+      "type": "integer"
+    },
+    "campos": {
+      "$ref": "#/$defs/ClinicalFields"
+    }
+  },
+  "required": [
+    "campos"
+  ],
+  "title": "ClinicalInput",
+  "type": "object"
+}

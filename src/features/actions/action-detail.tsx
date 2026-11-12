@@ -18,6 +18,8 @@ import { BeneficiaryDialog } from "@/features/beneficiaries/beneficiary-dialog";
 import { BeneficiarySheet } from "@/features/beneficiaries/beneficiary-sheet";
 import { InstitutionalSummary } from "./institutional-summary";
 import type { Institutional } from "./institutional";
+import { ActionAssignments } from "@/features/staff/action-assignments";
+import { ClinicalDialog } from "@/features/clinical/clinical-dialog";
 
 export function ActionDetail({ id }: { id: string }) {
   const session = useSession();
@@ -32,6 +34,17 @@ export function ActionDetail({ id }: { id: string }) {
   const [failure, setFailure] = useState("");
   const [busy, setBusy] = useState(false);
   const [page, setPage] = useState(1);
+  const [clinicalPerson, setClinicalPerson] = useState<{
+    id: string;
+    nome: string;
+  } | null>(null);
+  const clinicalAccess = useQuery({
+    queryKey: ["acesso-clinico", id],
+    gcTime: 0,
+    queryFn: async () =>
+      (await api.get<{ permitido: boolean }>(`/acoes/${id}/acesso-clinico`))
+        .data,
+  });
   const [institutionalVersion, setInstitutionalVersion] = useState<
     number | null
   >(null);
@@ -222,6 +235,7 @@ export function ActionDetail({ id }: { id: string }) {
           </details>
         )}
       </section>
+      <ActionAssignments action={row} />
       <section className="panel">
         <h2>Prévia do resumo público</h2>
         <p>
@@ -305,6 +319,14 @@ export function ActionDetail({ id }: { id: string }) {
                       </td>
                       <td>
                         <div className="actions-row">
+                          {clinicalAccess.data?.permitido && (
+                            <Button
+                              aria-label={`Campos clínicos de ${person.nome}`}
+                              onClick={() => setClinicalPerson(person)}
+                            >
+                              Campos clínicos
+                            </Button>
+                          )}
                           <Button
                             aria-label={`Ver ficha de ${person.nome}`}
                             onClick={() =>
@@ -360,6 +382,14 @@ export function ActionDetail({ id }: { id: string }) {
           <p className="muted">Nenhuma alteração registrada.</p>
         )}
       </section>
+      {clinicalPerson && (
+        <ClinicalDialog
+          actionId={id}
+          personId={clinicalPerson.id}
+          personName={clinicalPerson.nome}
+          onClose={() => setClinicalPerson(null)}
+        />
+      )}
       {editing && (
         <ActionDialog action={row} onClose={() => setEditing(false)} />
       )}

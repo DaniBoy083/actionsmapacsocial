@@ -22,6 +22,8 @@ os.environ.update(
         "ACTIONS_STORAGE_URL": "sqlite:///" + (directory / "test.sqlite3").as_posix(),
         "SESSION_SECRET": secrets.token_urlsafe(48),
         "BENEFICIARIES_KEY": Fernet.generate_key().decode(),
+        "CLINICAL_FIELDS_ENABLED": "true",
+        "CLINICAL_KEY": Fernet.generate_key().decode(),
         "FRONTEND_ORIGIN": "http://localhost:"
         + os.environ.get("ACTIONS_E2E_FRONTEND_PORT", "3310"),
         "AGENDA_WEB_URL": "https://agenda.example.invalid",

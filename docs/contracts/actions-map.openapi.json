@@ -1666,6 +1666,676 @@
           }
         }
       }
+    },
+    "/api/v1/profissionais": {
+      "get": {
+        "summary": "List Staff",
+        "operationId": "list_staff_api_v1_profissionais_get",
+        "parameters": [
+          {
+            "name": "busca",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 160,
+              "default": "",
+              "title": "Busca"
+            }
+          },
+          {
+            "name": "ativo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ativo"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamanho",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Tamanho"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Staff",
+        "operationId": "create_staff_api_v1_profissionais_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profissionais/{identifier}": {
+      "get": {
+        "summary": "Read Staff",
+        "operationId": "read_staff_api_v1_profissionais__identifier__get",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Staff",
+        "operationId": "update_staff_api_v1_profissionais__identifier__patch",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifier"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StaffInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profissionais/{identifier}/historico": {
+      "get": {
+        "summary": "Staff History",
+        "operationId": "staff_history_api_v1_profissionais__identifier__historico_get",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifier"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamanho",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Tamanho"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/acoes/{action_id}/atribuicoes": {
+      "get": {
+        "summary": "Action Assignments",
+        "operationId": "action_assignments_api_v1_acoes__action_id__atribuicoes_get",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamanho",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Tamanho"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Assign Staff",
+        "operationId": "assign_staff_api_v1_acoes__action_id__atribuicoes_post",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/acoes/{action_id}/atribuicoes/{identifier}/historico": {
+      "get": {
+        "summary": "Assignment History",
+        "operationId": "assignment_history_api_v1_acoes__action_id__atribuicoes__identifier__historico_get",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          },
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifier"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "tamanho",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Tamanho"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/acoes/{action_id}/atribuicoes/{identifier}": {
+      "patch": {
+        "summary": "Update Assignment",
+        "operationId": "update_assignment_api_v1_acoes__action_id__atribuicoes__identifier__patch",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          },
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifier"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/acoes/{action_id}/acesso-clinico": {
+      "get": {
+        "summary": "Clinical Access",
+        "operationId": "clinical_access_api_v1_acoes__action_id__acesso_clinico_get",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/acoes/{action_id}/beneficiarios/{person_id}/clinica": {
+      "get": {
+        "summary": "Clinical Read",
+        "operationId": "clinical_read_api_v1_acoes__action_id__beneficiarios__person_id__clinica_get",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          },
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Person Id"
+            }
+          },
+          {
+            "name": "versao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Versao"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Clinical Save",
+        "operationId": "clinical_save_api_v1_acoes__action_id__beneficiarios__person_id__clinica_put",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Action Id"
+            }
+          },
+          {
+            "name": "person_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Person Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClinicalInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicalView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1746,6 +2416,219 @@
           "locais"
         ],
         "title": "ActionInput"
+      },
+      "AssignmentInput": {
+        "properties": {
+          "acao_versao": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Acao Versao"
+          },
+          "profissional_versao": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Profissional Versao"
+          },
+          "locais_indices": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array",
+                "maxItems": 100,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locais Indices"
+          },
+          "profissional_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Profissional Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "acao_versao",
+          "profissional_versao",
+          "profissional_id"
+        ],
+        "title": "AssignmentInput"
+      },
+      "AssignmentPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AssignmentView"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "pagina": {
+            "type": "integer",
+            "title": "Pagina"
+          },
+          "tamanho": {
+            "type": "integer",
+            "title": "Tamanho"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "pagina",
+          "tamanho"
+        ],
+        "title": "AssignmentPage"
+      },
+      "AssignmentUpdate": {
+        "properties": {
+          "acao_versao": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Acao Versao"
+          },
+          "profissional_versao": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Profissional Versao"
+          },
+          "locais_indices": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array",
+                "maxItems": 100,
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locais Indices"
+          },
+          "versao": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Versao"
+          },
+          "ativo": {
+            "type": "boolean",
+            "title": "Ativo"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "acao_versao",
+          "profissional_versao",
+          "versao",
+          "ativo"
+        ],
+        "title": "AssignmentUpdate"
+      },
+      "AssignmentView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "versao": {
+            "type": "integer",
+            "title": "Versao"
+          },
+          "acao_id": {
+            "type": "string",
+            "title": "Acao Id"
+          },
+          "profissional_id": {
+            "type": "string",
+            "title": "Profissional Id"
+          },
+          "profissional": {
+            "$ref": "#/components/schemas/StaffView"
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "PROFISSIONAL",
+              "RECEPCAO"
+            ],
+            "title": "Papel"
+          },
+          "ativo": {
+            "type": "boolean",
+            "title": "Ativo"
+          },
+          "locais_indices": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locais Indices"
+          },
+          "locais_snapshot": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locais Snapshot"
+          },
+          "profissional_snapshot": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Profissional Snapshot"
+          },
+          "atualizado_em": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Atualizado Em"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "versao",
+          "acao_id",
+          "profissional_id",
+          "profissional",
+          "papel",
+          "ativo",
+          "locais_indices",
+          "locais_snapshot",
+          "profissional_snapshot",
+          "atualizado_em"
+        ],
+        "title": "AssignmentView"
       },
       "BeneficiaryAction": {
         "properties": {
@@ -2355,6 +3238,154 @@
         "type": "object",
         "title": "BrandInput"
       },
+      "ClinicalFields": {
+        "properties": {
+          "glicose": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glicose"
+          },
+          "pressao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pressao"
+          },
+          "tipo_sangue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo Sangue"
+          },
+          "od": {
+            "$ref": "#/components/schemas/EyeFields"
+          },
+          "oe": {
+            "$ref": "#/components/schemas/EyeFields"
+          },
+          "adicao": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adicao"
+          },
+          "lentes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lentes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ClinicalFields"
+      },
+      "ClinicalInput": {
+        "properties": {
+          "versao": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Versao",
+            "default": 0
+          },
+          "campos": {
+            "$ref": "#/components/schemas/ClinicalFields"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "campos"
+        ],
+        "title": "ClinicalInput"
+      },
+      "ClinicalView": {
+        "properties": {
+          "versao": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Versao",
+            "default": 0
+          },
+          "campos": {
+            "$ref": "#/components/schemas/ClinicalFields"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "estado": {
+            "type": "string",
+            "const": "EM_PREENCHIMENTO",
+            "title": "Estado",
+            "default": "EM_PREENCHIMENTO"
+          },
+          "contexto": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Contexto"
+          },
+          "atualizado_em": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Atualizado Em"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "campos",
+          "id",
+          "contexto",
+          "atualizado_em"
+        ],
+        "title": "ClinicalView"
+      },
       "CredentialAuthorization": {
         "properties": {
           "password": {
@@ -2597,6 +3628,61 @@
           "items"
         ],
         "title": "ExportPage"
+      },
+      "EyeFields": {
+        "properties": {
+          "esferico": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Esferico"
+          },
+          "cilindrico": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cilindrico"
+          },
+          "eixo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eixo"
+          },
+          "dp": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dp"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "EyeFields"
       },
       "FileStart": {
         "properties": {
@@ -3026,6 +4112,416 @@
           "limite_por_minuto"
         ],
         "title": "ServiceHealth"
+      },
+      "StaffInput": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Nome"
+          },
+          "categoria": {
+            "type": "string",
+            "enum": [
+              "MEDICO",
+              "OPTOMETRISTA",
+              "RECEPCAO"
+            ],
+            "title": "Categoria"
+          },
+          "identidade_institucional_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identidade Institucional Id"
+          },
+          "registro_conselho": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registro Conselho"
+          },
+          "registro_numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registro Numero"
+          },
+          "registro_uf": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "AC",
+                  "AL",
+                  "AP",
+                  "AM",
+                  "BA",
+                  "CE",
+                  "DF",
+                  "ES",
+                  "GO",
+                  "MA",
+                  "MT",
+                  "MS",
+                  "MG",
+                  "PA",
+                  "PB",
+                  "PR",
+                  "PE",
+                  "PI",
+                  "RJ",
+                  "RN",
+                  "RS",
+                  "RO",
+                  "RR",
+                  "SC",
+                  "SP",
+                  "SE",
+                  "TO"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registro Uf"
+          },
+          "rqe": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rqe"
+          },
+          "habilitacao_validada": {
+            "type": "boolean",
+            "title": "Habilitacao Validada",
+            "default": false
+          },
+          "habilitacao_referencia": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Habilitacao Referencia",
+            "default": ""
+          },
+          "registro_clinico_autorizado": {
+            "type": "boolean",
+            "title": "Registro Clinico Autorizado",
+            "default": false
+          },
+          "autorizacao_clinica_referencia": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Autorizacao Clinica Referencia",
+            "default": ""
+          },
+          "ativo": {
+            "type": "boolean",
+            "title": "Ativo",
+            "default": true
+          },
+          "divulgacao_autorizada": {
+            "type": "boolean",
+            "title": "Divulgacao Autorizada",
+            "default": false
+          },
+          "divulgacao_referencia": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Divulgacao Referencia",
+            "default": ""
+          },
+          "versao": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Versao",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nome",
+          "categoria"
+        ],
+        "title": "StaffInput"
+      },
+      "StaffPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StaffView"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "pagina": {
+            "type": "integer",
+            "title": "Pagina"
+          },
+          "tamanho": {
+            "type": "integer",
+            "title": "Tamanho"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "pagina",
+          "tamanho"
+        ],
+        "title": "StaffPage"
+      },
+      "StaffView": {
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Nome"
+          },
+          "categoria": {
+            "type": "string",
+            "enum": [
+              "MEDICO",
+              "OPTOMETRISTA",
+              "RECEPCAO"
+            ],
+            "title": "Categoria"
+          },
+          "identidade_institucional_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Identidade Institucional Id"
+          },
+          "registro_conselho": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registro Conselho"
+          },
+          "registro_numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registro Numero"
+          },
+          "registro_uf": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "AC",
+                  "AL",
+                  "AP",
+                  "AM",
+                  "BA",
+                  "CE",
+                  "DF",
+                  "ES",
+                  "GO",
+                  "MA",
+                  "MT",
+                  "MS",
+                  "MG",
+                  "PA",
+                  "PB",
+                  "PR",
+                  "PE",
+                  "PI",
+                  "RJ",
+                  "RN",
+                  "RS",
+                  "RO",
+                  "RR",
+                  "SC",
+                  "SP",
+                  "SE",
+                  "TO"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registro Uf"
+          },
+          "rqe": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rqe"
+          },
+          "habilitacao_validada": {
+            "type": "boolean",
+            "title": "Habilitacao Validada",
+            "default": false
+          },
+          "habilitacao_referencia": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Habilitacao Referencia",
+            "default": ""
+          },
+          "registro_clinico_autorizado": {
+            "type": "boolean",
+            "title": "Registro Clinico Autorizado",
+            "default": false
+          },
+          "autorizacao_clinica_referencia": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Autorizacao Clinica Referencia",
+            "default": ""
+          },
+          "ativo": {
+            "type": "boolean",
+            "title": "Ativo",
+            "default": true
+          },
+          "divulgacao_autorizada": {
+            "type": "boolean",
+            "title": "Divulgacao Autorizada",
+            "default": false
+          },
+          "divulgacao_referencia": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Divulgacao Referencia",
+            "default": ""
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "versao": {
+            "type": "integer",
+            "title": "Versao"
+          },
+          "atualizado_em": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Atualizado Em"
+          },
+          "conferido_por": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conferido Por"
+          },
+          "conferido_em": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conferido Em"
+          },
+          "divulgacao_registrada_por": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Divulgacao Registrada Por"
+          },
+          "divulgacao_registrada_em": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Divulgacao Registrada Em"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "nome",
+          "categoria",
+          "id",
+          "versao",
+          "atualizado_em",
+          "conferido_por",
+          "conferido_em",
+          "divulgacao_registrada_por",
+          "divulgacao_registrada_em"
+        ],
+        "title": "StaffView"
       },
       "Status": {
         "type": "string",

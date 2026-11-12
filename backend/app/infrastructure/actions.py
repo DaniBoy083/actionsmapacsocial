@@ -18,7 +18,14 @@ from app.domain.institutional import Institutional
 from app.domain.rules import can_transition
 from app.infrastructure.beneficiary_data import encode_beneficiary, same_beneficiary
 from app.infrastructure.institutional import persist_institutional, remember
-from app.infrastructure.models import Action, Audit, Beneficiary, Outbox, Participation
+from app.infrastructure.models import (
+    Action,
+    Audit,
+    Beneficiary,
+    Outbox,
+    Participation,
+    StaffAssignment,
+)
 
 
 def audit(session: Session, professional: Professional, operation: str, entity_id: str) -> None:
@@ -129,7 +136,9 @@ def save_action(
 ) -> dict:
     values = data.model_dump(mode="json", exclude={"versao", "institucional"})
     if identifier:
-        row = action_or_404(session, identifier)
+        row = session.scalar(select(Action).where(Action.id == identifier).with_for_update())
+        if not row:
+            raise HTTPException(404, "Ação não encontrada.")
         require_version(row, data.versao)
         if row.status == "arquivada":
             raise HTTPException(409, "Ação arquivada não pode ser editada.")
@@ -150,6 +159,18 @@ def save_action(
             raise HTTPException(
                 409,
                 "Há participações vinculadas aos locais. Preserve os locais até revisar os vínculos.",
+            )
+        if row.locais != values["locais"] and session.scalar(
+            select(func.count())
+            .select_from(StaffAssignment)
+            .where(
+                StaffAssignment.acao_id == row.id,
+                StaffAssignment.ativo.is_(True),
+                StaffAssignment.locais_indices.is_not(None),
+            )
+        ):
+            raise HTTPException(
+                409, "Revogue as atribuições por local antes de alterar os locais da ação."
             )
         # CAS impede perda de alterações entre operadores.
         from sqlalchemy import update
@@ -212,6 +233,10 @@ def change_status(
         raise HTTPException(409, "Esta ação foi alterada. Recarregue antes de continuar.")
     session.expire_all()
     row = session.get(Action, identifier)
+    if target == "arquivada":
+        from app.infrastructure.staff import revoke_action_assignments
+
+        revoke_action_assignments(session, identifier, professional)
     audit(session, professional, "acoes." + target, row.id)
     enqueue(session, row)
     return snapshot(session, row)

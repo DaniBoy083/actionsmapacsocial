@@ -14,6 +14,7 @@ import {
   FiMapPin,
   FiMenu,
   FiServer,
+  FiUsers,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { api, errorMessage, type Session } from "@/lib/api";
@@ -37,6 +38,7 @@ export function AppShell({
   const links = [
     { href: "/dashboard", label: "Visão geral", icon: FiGrid },
     { href: "/acoes", label: "Ações institucionais", icon: FiMapPin },
+    { href: "/profissionais", label: "Profissionais", icon: FiUsers },
     { href: "/importacoes", label: "Importar dados", icon: FiFilePlus },
     ...(session.equipe === "tecnologia"
       ? [
