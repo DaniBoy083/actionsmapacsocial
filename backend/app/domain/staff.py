@@ -149,6 +149,7 @@ class AssignmentView(StrictModel):
     acao_id: str
     profissional_id: str
     profissional: StaffView
+    conta_operacional_ativa: bool = False
     papel: Literal["PROFISSIONAL", "RECEPCAO"]
     ativo: bool
     locais_indices: list[int] | None

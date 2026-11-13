@@ -1,6 +1,16 @@
 # Auditoria técnica da aplicação e princípios
 
-## Revisão atual — demonstração local, 13/11/2026
+## Revisão atual — acesso operacional, 13/11/2026
+
+[Implementação, permissões, testes, migração/rollback e matriz de todo o planejamento](ACESSO_OPERACIONAL_2026-11-13.md).
+A lacuna de contas individuais/área da equipe foi corrigida: recepção, oftalmo e
+opto usam o código operacional real no demo, com RBAC por ação/local/caso.
+Ativação institucional permanece desligada até migração 0011 e homologação.
+Conformidade global **PARCIAL**: documento clínico final/etiqueta, analytics
+completo, evolução nas consumidoras e aceites institucionais ainda pendentes.
+Os relatos de ausência de login operacional nas seções anteriores são históricos.
+
+## Histórico — primeira demonstração local, 13/11/2026
 
 [Implementação, fonte conferida, comandos, testes e matriz de conformidade](DEMONSTRACAO_LOCAL_2026-11-13.md).
 Modo demo isolado, autenticado, com dados sintéticos, cookie próprio e bloqueio

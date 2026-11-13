@@ -23,6 +23,7 @@ os.environ.update(
         "SESSION_SECRET": secrets.token_urlsafe(48),
         "BENEFICIARIES_KEY": Fernet.generate_key().decode(),
         "CLINICAL_FIELDS_ENABLED": "true",
+        "OPERATIONAL_ACCESS_ENABLED": "false",
         "CLINICAL_KEY": Fernet.generate_key().decode(),
         "FRONTEND_ORIGIN": "http://localhost:"
         + os.environ.get("ACTIONS_E2E_FRONTEND_PORT", "3310"),

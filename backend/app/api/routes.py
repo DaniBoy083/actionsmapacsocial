@@ -70,7 +70,7 @@ router = APIRouter(prefix="/api/v1")
 
 @router.get("/health")
 def health() -> dict:
-    return {"status": "API_OK", "versao": "0.3.0"}
+    return {"status": "API_OK", "versao": "0.4.0"}
 
 
 @router.post("/auth/login", status_code=204)
@@ -117,7 +117,8 @@ def me(request: Request, professional: Professional = Depends(current_profession
 @router.get("/auth/context")
 def auth_context(request: Request):
     # Apenas sinalização de interface; nunca autentica ou seleciona permissões.
-    return {"demonstracao": getattr(request.app.state, "demonstracao", False)}
+    return {"demonstracao": getattr(request.app.state, "demonstracao", False),
+            "acesso_operacional": get_settings().operational_access_enabled}
 
 
 @router.post("/auth/logout", status_code=204)

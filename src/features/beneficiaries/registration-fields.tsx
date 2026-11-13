@@ -10,12 +10,14 @@ export function RegistrationFields({
   locations,
   nameLabel = "Nome",
   onChange,
+  localRequired = false,
 }: {
   form: UseFormReturn<RegistrationForm>;
   municipalities: Municipality[];
   locations?: Location[];
   nameLabel?: string;
   onChange?: (values: RegistrationForm) => void;
+  localRequired?: boolean;
 }) {
   const {
     register,
@@ -114,7 +116,12 @@ export function RegistrationFields({
             <TextField
               {...field}
               select
-              label="Local da participação (opcional)"
+              label={
+                localRequired
+                  ? "Local da participação"
+                  : "Local da participação (opcional)"
+              }
+              required={localRequired}
               onChange={(event) => {
                 field.onChange(event);
                 changed();
@@ -122,7 +129,10 @@ export function RegistrationFields({
             >
               <MenuItem value="">Não identificado / revisar</MenuItem>
               {locations.map((place, index) => (
-                <MenuItem key={index} value={String(index)}>
+                <MenuItem
+                  key={place.indice ?? index}
+                  value={String(place.indice ?? index)}
+                >
                   {place.municipio_nome || place.municipio_ibge}
                   {place.nome_local ? ` · ${place.nome_local}` : ""}
                 </MenuItem>

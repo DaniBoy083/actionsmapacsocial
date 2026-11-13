@@ -89,7 +89,8 @@ export function DesignationDialog({
       row.profissional.ativo &&
       row.profissional.habilitacao_validada &&
       row.profissional.registro_clinico_autorizado &&
-      row.profissional.identidade_institucional_id,
+      (row.profissional.identidade_institucional_id ||
+        row.conta_operacional_ativa),
   );
   return (
     <Dialog

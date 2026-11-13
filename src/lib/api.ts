@@ -18,12 +18,16 @@ export type Session = {
   profissional_id: string;
   nome: string;
   tipo_login: string;
-  equipe: "administracao" | "tecnologia";
+  equipe: "administracao" | "tecnologia" | "operacional";
   csrf_token: string;
   agenda_url: string;
   demonstracao: boolean;
+  auth_source?: "GLOBAL" | "LOCAL";
+  staff_id?: string | null;
+  categoria?: "MEDICO" | "OPTOMETRISTA" | "RECEPCAO" | null;
 };
 export type Location = {
+  indice?: number;
   municipio_ibge: string;
   municipio_nome?: string;
   nome_local: string;

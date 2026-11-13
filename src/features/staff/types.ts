@@ -36,6 +36,7 @@ export type Staff = StaffData & {
   divulgacao_registrada_em: string | null;
 };
 export type Assignment = {
+  conta_operacional_ativa?: boolean;
   id: string;
   versao: number;
   acao_id: string;

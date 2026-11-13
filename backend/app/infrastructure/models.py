@@ -264,6 +264,26 @@ class SessionRecord(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class OperationalAccount(Base):
+    __tablename__ = "acoes_map_contas_operacionais"
+    __table_args__ = (CheckConstraint("versao >= 1", name="ck_conta_operacional_versao"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    profissional_id: Mapped[str] = mapped_column(ForeignKey(StaffRecord.id), unique=True)
+    usuario: Mapped[str] = mapped_column(String(80), unique=True)
+    senha_hash: Mapped[str] = mapped_column(String(161))
+    ativo: Mapped[bool] = mapped_column(Boolean, default=True)
+    versao: Mapped[int] = mapped_column(Integer, default=1)
+    atualizado_por: Mapped[str] = mapped_column(String(160))
+    atualizado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class OperationalSession(Base):
+    __tablename__ = "acoes_map_sessoes_operacionais"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    conta_id: Mapped[str] = mapped_column(ForeignKey(OperationalAccount.id), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class LoginLimit(Base):
     __tablename__ = "acoes_map_login_limites"
     key: Mapped[str] = mapped_column(String(64), primary_key=True)

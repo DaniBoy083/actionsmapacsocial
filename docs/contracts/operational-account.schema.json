@@ -1,0 +1,53 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "usuario": {
+      "maxLength": 80,
+      "minLength": 3,
+      "pattern": "^[a-z0-9][a-z0-9._-]+$",
+      "title": "Usuario",
+      "type": "string"
+    },
+    "nova_senha": {
+      "anyOf": [
+        {
+          "format": "password",
+          "maxLength": 128,
+          "minLength": 12,
+          "type": "string",
+          "writeOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Nova Senha"
+    },
+    "senha_institucional": {
+      "format": "password",
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Senha Institucional",
+      "type": "string",
+      "writeOnly": true
+    },
+    "ativo": {
+      "default": true,
+      "title": "Ativo",
+      "type": "boolean"
+    },
+    "versao": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Versao",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "usuario",
+    "senha_institucional"
+  ],
+  "title": "OperationalAccountInput",
+  "type": "object"
+}

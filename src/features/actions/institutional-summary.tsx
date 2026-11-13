@@ -13,14 +13,16 @@ export function InstitutionalSummary({
   value,
   onImageLoad,
   onImageError,
+  operational = false,
 }: {
   actionId: string;
   value: Institutional;
   onImageLoad?: (source: string) => void;
   onImageError?: () => void;
+  operational?: boolean;
 }) {
   const instrument = value.instrumento;
-  const images = institutionalImages(actionId, value);
+  const images = institutionalImages(actionId, value, operational);
   return (
     <div className="institutional-summary">
       <div className="institutional-logos">

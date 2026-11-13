@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Toaster } from "react-hot-toast";
+import { Toaster, ToastBar } from "react-hot-toast";
 
 const theme = createTheme({
   palette: {
@@ -24,9 +24,16 @@ const theme = createTheme({
         root: {
           minHeight: 46,
           paddingInline: 20,
-          "&.MuiButton-contained": {
+          "&.MuiButton-contained:not(.Mui-disabled)": {
             backgroundColor: "#b80d27",
+            color: "#ffffff",
+            transition: "none",
             "&:hover": { backgroundColor: "#8f0d23" },
+          },
+          "&.MuiButton-contained.Mui-disabled": {
+            backgroundColor: "#e0cdd1",
+            color: "#65111f",
+            transition: "none",
           },
         },
       },
@@ -62,7 +69,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={client}>
       <ThemeProvider theme={theme}>
         {children}
-        <Toaster position="top-right" />
+        <Toaster position="top-right">
+          {(toast) => (
+            <ToastBar
+              toast={toast}
+              style={{
+                background: "#ffffff",
+                color: "#65111f",
+                animation: "none",
+                opacity: 1,
+              }}
+            />
+          )}
+        </Toaster>
       </ThemeProvider>
     </QueryClientProvider>
   );

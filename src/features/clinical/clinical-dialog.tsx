@@ -179,17 +179,19 @@ export function ClinicalDialog({
   personId,
   personName,
   onClose,
+  operational = false,
 }: {
   actionId: string;
   personId: string;
   personName: string;
   onClose: () => void;
+  operational?: boolean;
 }) {
   const [versionText, setVersionText] = useState("");
   const [version, setVersion] = useState<number | null>(null);
-  const endpoint = `/acoes/${actionId}/beneficiarios/${personId}/clinica`;
+  const endpoint = `${operational ? "/operacao" : ""}/acoes/${actionId}/beneficiarios/${personId}/clinica`;
   const query = useQuery({
-    queryKey: ["campos-clinicos", actionId, personId, version],
+    queryKey: ["campos-clinicos", operational, actionId, personId, version],
     gcTime: 0,
     staleTime: 0,
     retry: false,
@@ -253,6 +255,7 @@ export function ClinicalDialog({
               institucional da revisão {query.data.contexto.acao.versao}.
             </p>
             <InstitutionalSummary
+              operational={operational}
               actionId={actionId}
               value={query.data.contexto.institucional}
             />

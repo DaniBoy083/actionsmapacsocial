@@ -119,7 +119,10 @@ def test_demo_cannot_inherit_institutional_settings(tmp_path, monkeypatch):
 
 def test_demo_auth_rbac_csrf_clinical_and_synthetic_source(tmp_path):
     with running_demo(tmp_path) as client:
-        assert client.get("/auth/context").json() == {"demonstracao": True}
+        assert client.get("/auth/context").json() == {
+            "demonstracao": True,
+            "acesso_operacional": True,
+        }
         assert client.get("/acoes").status_code == 401
         assert client.get("/indicadores").status_code == 401
         client.headers["Origin"] = ORIGIN
@@ -157,8 +160,7 @@ def test_demo_auth_rbac_csrf_clinical_and_synthetic_source(tmp_path):
         people = client.get(url).json()["items"]
         assert all(person["nome"].startswith("Pessoa fictícia DEMO") for person in people)
         records = [client.get(f"{url}/{person['id']}/clinica") for person in people]
-        assert sum(record.status_code == 200 for record in records) == 1
-        assert all(record.status_code in {200, 403} for record in records)
+        assert all(record.status_code == 403 for record in records)
         assert client.post("/auth/logout", json={}).status_code == 204
         assert client.get("/acoes/" + action["id"]).status_code == 401
 
@@ -201,7 +203,10 @@ def test_demo_refuses_production(flag):
 
 def test_normal_runtime_has_no_demo_credentials(api_client):
     client, _, _ = api_client
-    assert client.get("/api/v1/auth/context").json() == {"demonstracao": False}
+    assert client.get("/api/v1/auth/context").json() == {
+        "demonstracao": False,
+        "acesso_operacional": False,
+    }
     response = client.post(
         "/api/v1/auth/login",
         json={

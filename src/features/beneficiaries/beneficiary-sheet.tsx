@@ -29,31 +29,39 @@ export function BeneficiarySheet({
   personId,
   secondCopy,
   onClose,
+  operational = false,
 }: {
   actionId: string;
   personId: string;
   secondCopy: boolean;
   onClose: () => void;
+  operational?: boolean;
 }) {
   const session = useSession();
   const [loadedImages, setLoadedImages] = useState<string[]>([]);
   const [imageFailure, setImageFailure] = useState(false);
   const query = useQuery({
-    queryKey: ["beneficiary-sheet", actionId, personId, secondCopy],
+    queryKey: [
+      "beneficiary-sheet",
+      operational,
+      actionId,
+      personId,
+      secondCopy,
+    ],
     gcTime: 0,
     staleTime: 0,
     retry: false,
     queryFn: async ({ signal }) =>
       (
         await api.get<Sheet>(
-          `/acoes/${actionId}/beneficiarios/${personId}${secondCopy ? "/segunda-via" : ""}`,
+          `${operational ? "/operacao" : ""}/acoes/${actionId}/beneficiarios/${personId}${secondCopy ? "/segunda-via" : ""}`,
           { signal },
         )
       ).data,
   });
   const data = query.data;
   const requiredImages = data
-    ? institutionalImages(actionId, data.acao.institucional).map(
+    ? institutionalImages(actionId, data.acao.institucional, operational).map(
         (image) => image.source,
       )
     : [];
@@ -102,6 +110,7 @@ export function BeneficiarySheet({
                   Programa / ação: <strong>{data.acao.nome}</strong>
                 </p>
                 <InstitutionalSummary
+                  operational={operational}
                   actionId={actionId}
                   value={data.acao.institucional}
                   onImageLoad={(source) =>

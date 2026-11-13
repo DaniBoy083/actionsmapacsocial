@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { api, dateLabel, errorMessage } from "@/lib/api";
 import { StaffDialog } from "./staff-dialog";
+import { StaffAccess } from "./staff-access";
 import { staffCategories, type PageResult, type Staff } from "./types";
 
 function StaffHistory({
@@ -105,6 +106,12 @@ export function StaffList() {
   const [filters, setFilters] = useState({ busca: "", ativo: "", pagina: 1 });
   const [editing, setEditing] = useState<Staff | "new" | null>(null);
   const [history, setHistory] = useState<Staff | null>(null);
+  const [access, setAccess] = useState<Staff | null>(null);
+  const context = useQuery({
+    queryKey: ["auth-context"],
+    queryFn: async () =>
+      (await api.get<{ acesso_operacional: boolean }>("/auth/context")).data,
+  });
   const query = useQuery({
     queryKey: ["profissionais", filters],
     gcTime: 0,
@@ -211,6 +218,14 @@ export function StaffList() {
                         </td>
                         <td>
                           <div className="actions-row">
+                            {context.data?.acesso_operacional && (
+                              <Button
+                                aria-label={`Gerenciar acesso de ${staff.nome}`}
+                                onClick={() => setAccess(staff)}
+                              >
+                                Acesso
+                              </Button>
+                            )}
                             <Button
                               aria-label={`Editar profissional ${staff.nome}`}
                               onClick={() => setEditing(staff)}
@@ -248,6 +263,7 @@ export function StaffList() {
       {history && (
         <StaffHistory staff={history} onClose={() => setHistory(null)} />
       )}
+      {access && <StaffAccess staff={access} onClose={() => setAccess(null)} />}
     </>
   );
 }

@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     session_secret: SecretStr = SecretStr("")
     beneficiaries_key: SecretStr = SecretStr("")
     clinical_fields_enabled: bool = False
+    operational_access_enabled: bool = False
     clinical_key: SecretStr = SecretStr("")
     frontend_origin: str = "http://localhost:3000"
     agenda_web_url: str = ""

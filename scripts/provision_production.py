@@ -157,6 +157,9 @@ def main() -> int:
         from app.infrastructure.operational_grants import OPERATIONAL_GRANTS
 
         raw.execute(OPERATIONAL_GRANTS)
+        from app.infrastructure.account_grants import ACCOUNT_GRANTS
+
+        raw.execute(ACCOUNT_GRANTS)
         raw.execute(
             sql.SQL(
                 "REVOKE INSERT,UPDATE,DELETE ON actions_map.alembic_version FROM {}"

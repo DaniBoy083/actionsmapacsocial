@@ -127,7 +127,14 @@ export const instrumentLabels: Record<
   NAO_INFORMADO: "Não informado",
 };
 
-export function institutionalImages(actionId: string, value: Institutional) {
+export function institutionalImages(
+  actionId: string,
+  value: Institutional,
+  operational = false,
+) {
+  const actionPrefix = operational
+    ? "/api/backend/operacao/acoes"
+    : "/api/backend/acoes";
   const images = [
     { source: "/logo-ac-social.png", alt: "AC Social" },
     ...(["governo", "clinica"] as const).flatMap((slot) => {
@@ -135,7 +142,7 @@ export function institutionalImages(actionId: string, value: Institutional) {
       return brand.logo_id && brand.uso_autorizado
         ? [
             {
-              source: `/api/backend/acoes/${actionId}/marcas/${brand.logo_id}`,
+              source: `${actionPrefix}/${actionId}/marcas/${brand.logo_id}`,
               alt: brand.nome,
             },
           ]
@@ -146,7 +153,9 @@ export function institutionalImages(actionId: string, value: Institutional) {
         link.logo_id && link.instituicao_id && link.uso_autorizado
           ? [
               {
-                source: `/api/backend/instituicoes/${link.instituicao_id}/marcas/${link.logo_id}`,
+                source: operational
+                  ? `${actionPrefix}/${actionId}/instituicoes/${link.instituicao_id}/marcas/${link.logo_id}`
+                  : `/api/backend/instituicoes/${link.instituicao_id}/marcas/${link.logo_id}`,
                 alt: link.nome,
               },
             ]

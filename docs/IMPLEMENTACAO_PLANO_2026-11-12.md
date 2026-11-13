@@ -1,5 +1,10 @@
 # Implementação incremental do plano de 12/11/2026
 
+**Atualização de 13/11:** a [etapa de acesso operacional](ACESSO_OPERACIONAL_2026-11-13.md)
+implementou contas individuais, área da equipe e os escopos de AM-06 no código
+e na demonstração. As referências abaixo à ausência desse login são o estado
+histórico da entrega de 12/11; os demais gates não foram convertidos em homologações.
+
 ## Escopo e fontes
 
 Solicitação: implementar a documentação anexada, auditar os princípios e preparar

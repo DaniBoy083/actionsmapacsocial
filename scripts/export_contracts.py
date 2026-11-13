@@ -15,6 +15,7 @@ from app.domain.contracts import (
 )
 from app.domain.institutions import InstitutionInput
 from app.domain.integrations import ExportPage
+from app.domain.operational import OperationalAccountInput, OperationalAccountView
 from app.domain.staff import AssignmentInput, AssignmentUpdate, StaffInput
 from app.main import app
 
@@ -24,6 +25,8 @@ for filename, document in [
     ("actions-map.openapi.json", app.openapi()),
     ("action-registration.schema.json", ActionInput.model_json_schema()),
     ("staff-registration.schema.json", StaffInput.model_json_schema()),
+    ("operational-account.schema.json", OperationalAccountInput.model_json_schema()),
+    ("operational-account-view.schema.json", OperationalAccountView.model_json_schema()),
     ("clinical-fields.schema.json", ClinicalInput.model_json_schema()),
     ("clinical-designation.schema.json", ClinicalDesignationInput.model_json_schema()),
     ("institution-registration.schema.json", InstitutionInput.model_json_schema()),

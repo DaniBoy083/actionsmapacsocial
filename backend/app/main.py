@@ -8,11 +8,12 @@ from app.api.clinical import router as clinical_router
 from app.api.import_files import router as import_router
 from app.api.institutions import router as institutions_router
 from app.api.integrations import router as integration_router
+from app.api.operational import router as operational_router
 from app.api.routes import router
 from app.api.staff import router as staff_router
 from app.infrastructure.outbox import dispatch_safely
 
-app = FastAPI(title="AC Actions Map — AC Social", version="0.3.0")
+app = FastAPI(title="AC Actions Map — AC Social", version="0.4.0")
 app.include_router(router)
 app.include_router(import_router)
 app.include_router(integration_router)
@@ -20,6 +21,7 @@ app.include_router(beneficiaries_router)
 app.include_router(staff_router)
 app.include_router(clinical_router)
 app.include_router(institutions_router)
+app.include_router(operational_router)
 
 
 @app.middleware("http")
@@ -43,7 +45,9 @@ async def private_responses(request: Request, call_next):
     if (
         request.method in {"POST", "PATCH", "PUT", "DELETE"}
         and response.status_code < 300
-        and request.url.path.startswith(("/api/v1/acoes", "/api/v1/importacoes"))
+        and request.url.path.startswith(
+            ("/api/v1/acoes", "/api/v1/importacoes", "/api/v1/operacao/acoes")
+        )
     ):
         tasks = BackgroundTasks()
         if response.background:

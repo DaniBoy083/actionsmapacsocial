@@ -30,7 +30,9 @@ from app.api.action_filters import filter_institutional
 from app.config import get_settings
 from app.domain.clinical import ClinicalDesignationInput, ClinicalInput
 from app.domain.contracts import ActionInput, Professional
+from app.domain.operational import OperationalAccountInput
 from app.domain.staff import AssignmentInput, AssignmentUpdate, StaffInput
+from app.infrastructure.account_grants import ACCOUNT_GRANTS
 from app.infrastructure.actions import save_action
 from app.infrastructure.clinical import SqlClinicalRepository
 from app.infrastructure.clinical_grants import CLINICAL_GRANTS
@@ -43,11 +45,14 @@ from app.infrastructure.models import (
     ClinicalRecord,
     ClinicalRevision,
     InstitutionalRevision,
+    OperationalAccount,
+    OperationalSession,
     Participation,
     StaffAssignment,
     StaffRecord,
     StaffRevision,
 )
+from app.infrastructure.operational_access import save_account
 from app.infrastructure.operational_grants import OPERATIONAL_GRANTS
 from app.infrastructure.operational_migration import TABLES
 from app.infrastructure.staff import SqlStaffRepository
@@ -132,13 +137,13 @@ def main():
                         StaffRevision.__table__,
                         ClinicalRecord.__table__,
                         ClinicalRevision.__table__,
+                        OperationalAccount.__table__,
+                        OperationalSession.__table__,
                     }
                 ],
             )
             connection.execute(
-                text(
-                    "ALTER TABLE actions_map.acoes_map_acoes DROP COLUMN institucional"
-                )
+                text("ALTER TABLE actions_map.acoes_map_acoes DROP COLUMN institucional")
             )
             connection.execute(
                 text(
@@ -151,13 +156,9 @@ def main():
                 )
             )
             connection.execute(
-                text(
-                    "INSERT INTO actions_map.alembic_version VALUES ('0006_nonexpiring_tokens')"
-                )
+                text("INSERT INTO actions_map.alembic_version VALUES ('0006_nonexpiring_tokens')")
             )
-            connection.execute(
-                text("GRANT USAGE ON SCHEMA actions_map TO ac_actions_map_runtime")
-            )
+            connection.execute(text("GRANT USAGE ON SCHEMA actions_map TO ac_actions_map_runtime"))
             connection.execute(
                 text(
                     "GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA actions_map TO ac_actions_map_runtime"
@@ -178,21 +179,20 @@ def main():
             command.upgrade(config, "0009_clinical_fields")
             command.upgrade(config, "0010_institutions_and_cases")
             command.upgrade(config, "0010_institutions_and_cases")
+            command.upgrade(config, "0011_operational_accounts")
+            command.upgrade(config, "0011_operational_accounts")
             # Simula a concessão geral do provisionamento e aplica sua regra de restrição.
             connection.execute(
-                text(
-                    "GRANT ALL ON ALL TABLES IN SCHEMA actions_map TO ac_actions_map_runtime"
-                )
+                text("GRANT ALL ON ALL TABLES IN SCHEMA actions_map TO ac_actions_map_runtime")
             )
             connection.execute(text(IMMUTABLE_INSTITUTIONAL_GRANTS))
             connection.execute(text(STAFF_GRANTS))
             connection.execute(text(CLINICAL_GRANTS))
             connection.execute(text(OPERATIONAL_GRANTS))
+            connection.execute(text(ACCOUNT_GRANTS))
             assert (
-                connection.scalar(
-                    text("SELECT version_num FROM actions_map.alembic_version")
-                )
-                == "0010_institutions_and_cases"
+                connection.scalar(text("SELECT version_num FROM actions_map.alembic_version"))
+                == "0011_operational_accounts"
             )
         image = io.BytesIO()
         Image.new("RGB", (96, 96), "red").save(image, "PNG")
@@ -239,10 +239,7 @@ def main():
                 "clinica": "",
                 "apoio": "",
             }
-            assert (
-                session.scalar(filter_institutional(select(Action.id), filters))
-                == created["id"]
-            )
+            assert session.scalar(filter_institutional(select(Action.id), filters)) == created["id"]
         from app.api import routes
 
         routes.get_engine = lambda: engine
@@ -297,16 +294,10 @@ def main():
                 professional,
             )
             person_id = str(uuid4())
-            session.add(
-                Beneficiary(
-                    id=person_id, dados_cifrados="synthetic-unused-registration"
-                )
-            )
+            session.add(Beneficiary(id=person_id, dados_cifrados="synthetic-unused-registration"))
             session.flush()
             session.add(
-                Participation(
-                    acao_id=created["id"], beneficiario_id=person_id, local_indice=0
-                )
+                Participation(acao_id=created["id"], beneficiario_id=person_id, local_indice=0)
             )
             session.flush()
             clinical = SqlClinicalRepository(session, professional)
@@ -395,12 +386,55 @@ def main():
                     except DBAPIError as error:
                         assert getattr(error.orig, "sqlstate", None) == "42501"
                     else:
-                        raise AssertionError(
-                            "Runtime não deve alterar histórico/marcas."
-                        )
+                        raise AssertionError("Runtime não deve alterar histórico/marcas.")
                     connection.rollback()
+        os.environ["OPERATIONAL_ACCESS_ENABLED"] = "true"
+        get_settings.cache_clear()
+        with Session(engine) as session, session.begin():
+            session.execute(text("SET LOCAL ROLE ac_actions_map_runtime"))
+            reception = SqlStaffRepository(session).save(
+                StaffInput(nome="Recepção local sintética", categoria="RECEPCAO"),
+                professional,
+            )
+            account = save_account(
+                session,
+                reception["id"],
+                OperationalAccountInput(
+                    usuario="recepcao.pg",
+                    nova_senha="Sintetica-Postgres-2026!",
+                    senha_institucional="Somente-validacao-de-DTO",
+                ),
+                professional,
+            )
+            assert account["versao"] == 1
+            reset = save_account(
+                session,
+                reception["id"],
+                OperationalAccountInput(
+                    usuario="recepcao.pg",
+                    versao=1,
+                    ativo=False,
+                    senha_institucional="Somente-validacao-de-DTO",
+                ),
+                professional,
+            )
+            assert reset["versao"] == 2 and not reset["ativo"]
+        for sql in [
+            "DELETE FROM actions_map.acoes_map_contas_operacionais",
+            "UPDATE actions_map.acoes_map_contas_operacionais SET profissional_id=profissional_id",
+            "UPDATE actions_map.acoes_map_sessoes_operacionais SET expires_at=expires_at",
+        ]:
+            with engine.begin() as connection:
+                connection.execute(text("SET LOCAL ROLE ac_actions_map_runtime"))
+                try:
+                    connection.execute(text(sql))
+                except DBAPIError as error:
+                    assert getattr(error.orig, "sqlstate", None) == "42501"
+                else:
+                    raise AssertionError("Privilégio operacional excessivo.")
+                connection.rollback()
         print(
-            "POSTGRES_INSTITUTIONAL_OK: revisões 0007–0010 idempotentes, CRUD/CAS, escopo, clínica cifrada, revogação concorrente e grants imutáveis."
+            "POSTGRES_INSTITUTIONAL_OK: revisões 0007–0011 idempotentes, contas/reset, CRUD/CAS, escopo, clínica cifrada, revogação concorrente e grants mínimos."
         )
     finally:
         if engine:
@@ -416,8 +450,6 @@ if __name__ == "__main__":
         main()
     except Exception as error:  # noqa: BLE001 -- ambiente sintético; não imprimir credenciais.
         print("POSTGRES_INSTITUTIONAL_FAILED: " + type(error).__name__)
-        if isinstance(error, RuntimeError) and str(error).startswith(
-            "Falha no executável local "
-        ):
+        if isinstance(error, RuntimeError) and str(error).startswith("Falha no executável local "):
             print(str(error))
         raise SystemExit(1) from None

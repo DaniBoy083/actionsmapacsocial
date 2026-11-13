@@ -1,0 +1,24 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "usuario": {
+      "title": "Usuario",
+      "type": "string"
+    },
+    "ativo": {
+      "title": "Ativo",
+      "type": "boolean"
+    },
+    "versao": {
+      "title": "Versao",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "usuario",
+    "ativo",
+    "versao"
+  ],
+  "title": "OperationalAccountView",
+  "type": "object"
+}

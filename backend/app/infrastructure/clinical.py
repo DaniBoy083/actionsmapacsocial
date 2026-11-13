@@ -21,6 +21,7 @@ from app.infrastructure.models import (
     StaffAssignment,
     StaffRecord,
 )
+from app.infrastructure.operational_access import action_scope, staff_identity
 
 
 def clinical_cipher() -> Fernet:
@@ -40,12 +41,16 @@ def clinical_cipher() -> Fernet:
 
 class SqlClinicalRepository:
     def __init__(self, session: Session, actor: Professional):
-        if not actor.allowed:
+        if not (actor.allowed or actor.operational_allowed):
             raise HTTPException(403, "Identidade institucional não autorizada.")
         self.session = session
         self.actor = actor
 
     def scope(self, action_id: str):
+        if self.actor.operational_allowed:
+            if self.actor.categoria == "RECEPCAO":
+                raise HTTPException(403, "Recepção não acessa campos clínicos.")
+            action_scope(self.session, action_id, self.actor)
         cipher = clinical_cipher()
         action = self.session.scalar(select(Action).where(Action.id == action_id).with_for_update())
         if not action or action.status == "arquivada":
@@ -53,7 +58,11 @@ class SqlClinicalRepository:
         staff = self.session.scalar(
             select(StaffRecord)
             .where(
-                StaffRecord.identidade_institucional_id == self.actor.profissional_id,
+                (
+                    StaffRecord.id == self.actor.staff_id
+                    if self.actor.operational_allowed
+                    else StaffRecord.identidade_institucional_id == self.actor.profissional_id
+                ),
                 StaffRecord.ativo.is_(True),
                 StaffRecord.habilitacao_validada.is_(True),
                 StaffRecord.registro_clinico_autorizado.is_(True),
@@ -117,7 +126,8 @@ class SqlClinicalRepository:
     def designation(
         self, action_id: str, person_id: str, data: ClinicalDesignationInput | None = None
     ):
-        # Gestão administrativa existente; não concede login nem habilitação clínica.
+        if self.actor.operational_allowed:
+            action_scope(self.session, action_id, self.actor, reception=True)
         action = self.session.scalar(select(Action).where(Action.id == action_id).with_for_update())
         if not action or action.status == "arquivada":
             raise HTTPException(403, "Ação indisponível para designação clínica.")
@@ -167,7 +177,7 @@ class SqlClinicalRepository:
                 and staff.categoria in {"MEDICO", "OPTOMETRISTA"}
                 and staff.habilitacao_validada
                 and staff.registro_clinico_autorizado
-                and staff.identidade_institucional_id
+                and staff_identity(self.session, staff)
                 and assignment
                 and (
                     assignment.locais_indices is None
@@ -177,14 +187,14 @@ class SqlClinicalRepository:
                 raise HTTPException(
                     422, "Selecione profissional autorizado para esta ação e local."
                 )
-            if not staff or not staff.identidade_institucional_id:
+            identity = staff_identity(self.session, staff) if staff else None
+            if not staff or not identity:
                 raise HTTPException(422, "Profissional sem vínculo individual válido.")
             record = self.session.scalar(
                 select(ClinicalRecord).where(ClinicalRecord.participacao_id == participation.id)
             )
             if record and (
-                record.autor_profissional_id != staff.id
-                or record.autor_identidade_id != staff.identidade_institucional_id
+                record.autor_profissional_id != staff.id or record.autor_identidade_id != identity
             ):
                 raise HTTPException(
                     409,
@@ -196,7 +206,7 @@ class SqlClinicalRepository:
             else:
                 row.versao += 1
             row.profissional_id = staff.id
-            row.identidade_id = staff.identidade_institucional_id
+            row.identidade_id = identity
             row.ativo = data.ativo
             row.atualizado_por = self.actor.profissional_id
             row.atualizado_em = datetime.now(UTC)

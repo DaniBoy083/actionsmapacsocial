@@ -87,6 +87,8 @@ def main() -> int:
     ]
     print(f"\nDEMONSTRAÇÃO LOCAL: http://localhost:{args.frontend_port}", flush=True)
     print("Acessos fictícios: admin@demo.invalid ou tecnologia@demo.invalid", flush=True)
+    print(f"Equipe da ação: http://localhost:{args.frontend_port}/acesso", flush=True)
+    print("Acessos profissionais fictícios: oftalmo.demo, opto.demo e recepcao.demo", flush=True)
     print("Senha fictícia: Demonstracao-local-2026!", flush=True)
     print(
         "Use somente dados sintéticos. Ctrl+C encerra; reiniciar cria uma base limpa.\n", flush=True

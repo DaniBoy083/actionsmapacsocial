@@ -15,10 +15,13 @@ async function proxy(
 ) {
   const { path } = await context.params;
   const targetPath = path.join("/");
+  const operationalPath =
+    /^(?:operacao\/(?:auth\/(?:login|me|logout)|localidades\/pb|acoes(?:\/[a-f0-9-]{36}(?:\/(?:profissionais|marcas\/[a-f0-9-]{36}|instituicoes\/[a-f0-9-]{36}\/marcas\/[a-f0-9-]{36}|beneficiarios(?:\/[a-f0-9-]{36}(?:\/(?:segunda-via|clinica|designacao-clinica))?)?))?)?)|profissionais\/[a-f0-9-]{36}\/acesso)$/;
   const institutionPath =
     /^instituicoes(?:\/[a-f0-9-]{36}\/marcas\/[a-f0-9-]{36})$/;
   if (
     !permitted.test(targetPath) &&
+    !operationalPath.test(targetPath) &&
     targetPath !== "auth/context" &&
     !clinicalPath.test(targetPath) &&
     targetPath !== "instituicoes" &&
@@ -37,7 +40,13 @@ async function proxy(
       { status: 403, headers: privateHeaders },
     );
   const headers = new Headers();
-  for (const name of ["cookie", "content-type", "x-csrf-token", "origin"]) {
+  for (const name of [
+    "cookie",
+    "content-type",
+    "x-csrf-token",
+    "origin",
+    "idempotency-key",
+  ]) {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }

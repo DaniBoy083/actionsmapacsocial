@@ -3,6 +3,15 @@
 Aplicação para gestão de ações institucionais, beneficiários e registro clínico segregado
 com liberação controlada. O fluxo completo de exame/documentos/etiqueta ainda não está concluído.
 
+**13/11/2026 — Acessos da equipe, API interna 0.4.0:** contas individuais de
+oftalmologista, optometrista e recepção implementadas, com área operacional e
+restrições no backend por ação/local/atendimento. Gestão em Profissionais →
+**Acesso**, com confirmação de senha institucional, reset e revogação. No demo,
+abra **http://localhost:3000/acesso** quando iniciado na porta 3000.
+[Operação, segurança, migração 0011, testes e conferência de todo o planejamento](docs/ACESSO_OPERACIONAL_2026-11-13.md).
+`OPERATIONAL_ACCESS_ENABLED=false` permanece o padrão fora do demo; ativação real
+exige migração e liberação próprias. Sem deploy ou alteração de AC Auth/AC Core.
+
 **13/11/2026 — Demonstração local:** `npm.cmd run demo` inicia frontend e backend
 com banco descartável, três ações e 12 pessoas fictícias, sem credenciais
 institucionais. Sessão própria, avisos de demonstração e impressos identificados;
@@ -123,8 +132,20 @@ npm.cmd run demo -- --frontend-port 3301 --backend-port 8301
 ```
 
 Nesse caso, abra `http://localhost:3301`. O demo não aceita publicação ou
-sincronização externa; não é ambiente de atendimento. Campos clínicos existentes
-aparecem apenas para o exemplo designado e para o acesso fictício de Tecnologia.
+sincronização externa; não é ambiente de atendimento. Em `/acesso`, os botões
+**Oftalmologista**, **Optometrista** e **Recepção** preenchem os usuários
+`oftalmo.demo`, `opto.demo` e `recepcao.demo`, com a mesma senha fictícia do demo.
+Os clínicos veem somente casos designados; recepção cadastra e encaminha no seu
+local. Administração/Tecnologia não ganham acesso clínico automaticamente.
+
+Na porta 3000, use:
+
+```powershell
+npm.cmd run demo -- --frontend-port 3000 --backend-port 8300
+```
+
+Abra **http://localhost:3000/acesso** para a equipe, ou `/login` para gestão.
+Uma única instância de desenvolvimento do demo deve estar em execução por vez.
 
 Se aparecer **Porta 8300 ocupada** ou **Porta 3300 ocupada**, use o comando com
 portas alternativas acima. Se o Next informar que outro demo já está usando

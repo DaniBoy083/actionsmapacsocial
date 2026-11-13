@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -26,7 +27,11 @@ export default function LoginPage() {
   const context = useQuery({
     queryKey: ["auth-context"],
     queryFn: async () =>
-      (await api.get<{ demonstracao: boolean }>("/auth/context")).data,
+      (
+        await api.get<{ demonstracao: boolean; acesso_operacional: boolean }>(
+          "/auth/context",
+        )
+      ).data,
     retry: false,
     staleTime: 0,
   });
@@ -99,6 +104,17 @@ export default function LoginPage() {
                 ))}
               </div>
             </Alert>
+          )}
+          {context.data?.acesso_operacional && (
+            <Button
+              component={Link}
+              href="/acesso"
+              variant="outlined"
+              fullWidth
+              sx={{ mb: 2 }}
+            >
+              Acessos de Oftalmologista, Optometrista e Recepção
+            </Button>
           )}
           <form onSubmit={handleSubmit(submit)} noValidate>
             <div className="login-fields">

@@ -31,6 +31,7 @@ type Props = {
   locations: Location[];
   onClose: () => void;
   onSaved: () => Promise<void>;
+  operational?: boolean;
 };
 function Editor({
   data,
@@ -38,6 +39,7 @@ function Editor({
   ...props
 }: Props & { data?: BeneficiarySheet; onSaving: (value: boolean) => void }) {
   const session = useSession();
+  const [requestId] = useState(() => crypto.randomUUID());
   const [failure, setFailure] = useState("");
   const form = useForm<RegistrationForm>({
     resolver: zodResolver(registrationSchema),
@@ -45,11 +47,22 @@ function Editor({
   });
   const busy = form.formState.isSubmitting;
   async function save(values: RegistrationForm) {
+    if (props.operational && values.local_indice === "") {
+      form.setError("local_indice", {
+        message: "Selecione o local da participação.",
+      });
+      return;
+    }
     setFailure("");
     onSaving(true);
     try {
-      const path = `/acoes/${props.actionId}/beneficiarios`;
-      const config = { headers: { "X-CSRF-Token": session.csrf_token } };
+      const path = `${props.operational ? "/operacao" : ""}/acoes/${props.actionId}/beneficiarios`;
+      const config = {
+        headers: {
+          "X-CSRF-Token": session.csrf_token,
+          ...(props.operational ? { "Idempotency-Key": requestId } : {}),
+        },
+      };
       if (data)
         await api.patch(
           `${path}/${data.id}`,
@@ -84,6 +97,7 @@ function Editor({
         {failure && <Alert severity="error">{failure}</Alert>}
         <div className="form-grid">
           <RegistrationFields
+            localRequired={props.operational}
             form={form}
             municipalities={props.municipalities}
             locations={props.locations}
@@ -104,11 +118,16 @@ function Editor({
 export function BeneficiaryDialog(props: Props) {
   const [saving, setSaving] = useState(false);
   const query = useQuery({
-    queryKey: ["beneficiary-editor", props.actionId, props.personId],
+    queryKey: [
+      "beneficiary-editor",
+      props.operational,
+      props.actionId,
+      props.personId,
+    ],
     queryFn: async ({ signal }) =>
       (
         await api.get<BeneficiarySheet>(
-          `/acoes/${props.actionId}/beneficiarios/${props.personId}`,
+          `${props.operational ? "/operacao" : ""}/acoes/${props.actionId}/beneficiarios/${props.personId}`,
           { signal },
         )
       ).data,

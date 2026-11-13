@@ -38,6 +38,7 @@ def isolated_environment(directory: Path, frontend_port: int) -> dict[str, str]:
         "SESSION_SECRET": secrets.token_urlsafe(48),
         "BENEFICIARIES_KEY": Fernet.generate_key().decode(),
         "CLINICAL_FIELDS_ENABLED": "true",
+        "OPERATIONAL_ACCESS_ENABLED": "true",
         "CLINICAL_KEY": Fernet.generate_key().decode(),
         "FRONTEND_ORIGIN": f"http://localhost:{frontend_port}",
         "AGENDA_WEB_URL": "",
@@ -93,30 +94,34 @@ def seed_demo(app) -> None:
             },
         )
         client.headers["X-CSRF-Token"] = call("GET", "/auth/me")["csrf_token"]
-        doctor = call(
-            "POST",
-            "/profissionais",
-            {
-                "nome": "Profissional clínico fictício — demonstração",
-                "categoria": "MEDICO",
-                "registro_conselho": "CRM",
-                "registro_numero": "DEMO-SEM-VALIDADE",
-                "registro_uf": "PB",
-                "habilitacao_validada": True,
-                "habilitacao_referencia": "SIMULAÇÃO descartável; não é conferência real",
-                "identidade_institucional_id": "demo-tech",
-                "registro_clinico_autorizado": True,
-                "autorizacao_clinica_referencia": "SIMULAÇÃO; sem autorização para atendimento real",
-            },
-        )
-        reception = call(
-            "POST",
-            "/profissionais",
-            {
-                "nome": "Recepção fictícia — demonstração",
-                "categoria": "RECEPCAO",
-            },
-        )
+        operators = []
+        for category, name, username in [
+            ("MEDICO", "Oftalmologista fictício DEMO", "oftalmo.demo"),
+            ("OPTOMETRISTA", "Optometrista fictício DEMO", "opto.demo"),
+            ("RECEPCAO", "Recepcionista fictício DEMO", "recepcao.demo"),
+        ]:
+            data = {"nome": name, "categoria": category}
+            if category != "RECEPCAO":
+                data.update(
+                    registro_conselho="CRM" if category == "MEDICO" else "REGISTRO-DEMO",
+                    registro_numero="DEMO-OP-" + category,
+                    registro_uf="PB",
+                    habilitacao_validada=True,
+                    habilitacao_referencia="SIMULAÇÃO de demonstração, sem validade",
+                    registro_clinico_autorizado=True,
+                    autorizacao_clinica_referencia="SIMULAÇÃO descartável",
+                )
+            staff = call("POST", "/profissionais", data)
+            call(
+                "PUT",
+                f"/profissionais/{staff['id']}/acesso",
+                {
+                    "usuario": username,
+                    "nova_senha": DEMO_PASSWORD,
+                    "senha_institucional": DEMO_PASSWORD,
+                },
+            )
+            operators.append(staff)
         for index, (city, code) in enumerate(
             [
                 ("João Pessoa", "2507507"),
@@ -173,7 +178,7 @@ def seed_demo(app) -> None:
                     },
                 )
             action = call("GET", url)
-            for staff in [doctor, reception]:
+            for staff in operators if index == 0 else []:
                 call(
                     "POST",
                     url + "/atribuicoes",
@@ -181,29 +186,43 @@ def seed_demo(app) -> None:
                         "profissional_id": staff["id"],
                         "acao_versao": action["versao"],
                         "profissional_versao": staff["versao"],
+                        **(
+                            {"locais_indices": [1 if staff["categoria"] == "OPTOMETRISTA" else 0]}
+                            if staff in operators
+                            else {}
+                        ),
                     },
                 )
             if index == 0:
-                person = call("GET", url + "/beneficiarios")["items"][0]
-                clinical_url = url + "/beneficiarios/" + person["id"]
-                call(
-                    "PUT",
-                    clinical_url + "/designacao-clinica",
-                    {
-                        "profissional_id": doctor["id"],
-                    },
+                people = sorted(
+                    call("GET", url + "/beneficiarios")["items"], key=lambda item: item["nome"]
                 )
-                call(
-                    "PUT",
-                    clinical_url + "/clinica",
-                    {
-                        "versao": 0,
-                        "campos": {"lentes": "EXEMPLO FICTÍCIO — sem validade clínica"},
-                    },
+                for target, staff in zip(people[1:3], operators[:2], strict=True):
+                    call(
+                        "PUT",
+                        url + f"/beneficiarios/{target['id']}/designacao-clinica",
+                        {
+                            "profissional_id": staff["id"],
+                        },
+                    )
+                example_clinical_url = (
+                    "/operacao" + url + "/beneficiarios/" + people[1]["id"] + "/clinica"
                 )
             if index < 2:
                 action = call("POST", url + "/aprovar", {"versao": action["versao"]})
         call("POST", "/auth/logout", {})
+        call(
+            "POST",
+            "/operacao/auth/login",
+            {"identifier": "oftalmo.demo", "password": DEMO_PASSWORD},
+        )
+        client.headers["X-CSRF-Token"] = call("GET", "/operacao/auth/me")["csrf_token"]
+        call(
+            "PUT",
+            example_clinical_url,
+            {"versao": 0, "campos": {"lentes": "EXEMPLO FICTÍCIO — sem validade clínica"}},
+        )
+        call("POST", "/operacao/auth/logout", {})
 
 
 def create_demo_app(directory: Path, frontend_port: int):

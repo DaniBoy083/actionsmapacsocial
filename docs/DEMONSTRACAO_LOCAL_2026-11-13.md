@@ -1,5 +1,11 @@
 # Demonstração local e revisão de princípios — 13/11/2026
 
+**Revisão posterior:** a [etapa de acesso operacional](ACESSO_OPERACIONAL_2026-11-13.md)
+implementou contas e área da equipe, antes ausentes. O demo agora inclui oftalmo,
+opto e recepção em `/acesso`, além da gestão em `/login`. A simulação clínica
+anterior vinculada à identidade de Tecnologia foi substituída pelos acessos
+individuais reais do novo fluxo. As seções seguintes registram a primeira entrega.
+
 Escopo autorizado: modo de apresentação local, documentação, auditoria técnica,
 correções verificáveis e commit. Sem deploy, migração de banco existente,
 importação definitiva, mudança de identidade institucional ou assinatura digital.

@@ -1,14 +1,22 @@
 from datetime import UTC, datetime
 
 from fastapi import HTTPException
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.domain.contracts import Professional
 from app.domain.staff import AssignmentInput, AssignmentUpdate, StaffData, StaffInput, StaffView
 from app.infrastructure.actions import audit
-from app.infrastructure.models import Action, StaffAssignment, StaffRecord, StaffRevision
+from app.infrastructure.models import (
+    Action,
+    OperationalAccount,
+    OperationalSession,
+    StaffAssignment,
+    StaffRecord,
+    StaffRevision,
+)
 
 QUALIFICATION_FIELDS = (
     "registro_clinico_autorizado",
@@ -250,6 +258,18 @@ class SqlStaffRepository:
                 )
             self.session.refresh(row)
             revoke_assignments(self.session, revoked, actor)
+            if get_settings().operational_access_enabled and (
+                not data.ativo or qualification_changed
+            ):
+                self.session.execute(
+                    delete(OperationalSession).where(
+                        OperationalSession.conta_id.in_(
+                            select(OperationalAccount.id).where(
+                                OperationalAccount.profissional_id == row.id,
+                            )
+                        )
+                    )
+                )
         else:
             row = StaffRecord(**values, criado_por=actor.profissional_id)
             self.session.add(row)
@@ -265,10 +285,30 @@ class SqlStaffRepository:
         self.flush_unique()
         return result
 
-    def assignment_view(self, row: StaffAssignment):
+    def active_local_accounts(self, staff_ids):
+        if not get_settings().operational_access_enabled or not staff_ids:
+            return set()
+        return set(
+            self.session.scalars(
+                select(OperationalAccount.profissional_id)
+                .join(StaffRecord)
+                .where(
+                    OperationalAccount.profissional_id.in_(staff_ids),
+                    OperationalAccount.ativo.is_(True),
+                    StaffRecord.identidade_institucional_id.is_(None),
+                )
+            )
+        )
+
+    def assignment_view(self, row: StaffAssignment, account_active=None):
         return {
             **assignment_snapshot(row),
             "profissional": staff_view(self.staff(row.profissional_id)),
+            "conta_operacional_ativa": (
+                row.profissional_id in self.active_local_accounts([row.profissional_id])
+                if account_active is None
+                else account_active
+            ),
         }
 
     def list_assignments(self, action_id: str, actor: Professional, *, page: int, size: int):
@@ -281,8 +321,11 @@ class SqlStaffRepository:
             .limit(size)
         ).all()
         audit(self.session, actor, "atribuicoes.list", action_id)
+        local_accounts = self.active_local_accounts([row.profissional_id for row in rows])
         return {
-            "items": [self.assignment_view(row) for row in rows],
+            "items": [
+                self.assignment_view(row, row.profissional_id in local_accounts) for row in rows
+            ],
             "total": total,
             "pagina": page,
             "tamanho": size,

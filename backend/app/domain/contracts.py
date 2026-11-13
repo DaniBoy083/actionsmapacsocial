@@ -35,13 +35,28 @@ class Professional(StrictModel):
     tipo_login: str
     equipe: str
     ativo: bool = True
+    auth_source: Literal["GLOBAL", "LOCAL"] = "GLOBAL"
+    staff_id: str | None = None
+    conta_versao: int | None = None
+    categoria: Literal["MEDICO", "OPTOMETRISTA", "RECEPCAO"] | None = None
 
     @property
     def allowed(self) -> bool:
         return (
             self.ativo
+            and self.auth_source == "GLOBAL"
             and self.tipo_login == "administracao"
             and self.equipe in {"administracao", "tecnologia"}
+        )
+
+    @property
+    def operational_allowed(self) -> bool:
+        return bool(
+            self.ativo
+            and self.auth_source == "LOCAL"
+            and self.staff_id
+            and self.tipo_login == "operacional"
+            and self.categoria in {"MEDICO", "OPTOMETRISTA", "RECEPCAO"}
         )
 
 

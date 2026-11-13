@@ -1,5 +1,10 @@
 # Verificação de conformidade e próximos incrementos
 
+**Revisão posterior em 13/11/2026:** [contas e área operacional implementadas,
+matriz completa dos planos e limites de homologação](ACESSO_OPERACIONAL_2026-11-13.md).
+A nova etapa corrige AM-06 no código e na demo; não transforma ficha final,
+etiqueta, analytics completo ou novas consumidoras em funcionalidades prontas.
+
 **13/11/2026:** modo de demonstração local implementado. A
 [revisão atual dos princípios](DEMONSTRACAO_LOCAL_2026-11-13.md) distingue controles
 verificados de recursos e homologações pendentes. Não interpretar as entregas
