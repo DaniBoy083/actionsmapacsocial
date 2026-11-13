@@ -91,9 +91,15 @@ Requisitos: Node.js 22+ e **Python 3.12**. Na raiz do projeto, prepare uma vez:
 
 ```powershell
 npm.cmd ci
-py -3.12 -m venv backend/.venv
+python --version
+python -m venv backend/.venv
 .\backend\.venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
 ```
+
+Confira que `python --version` informa **3.12.x**. O comando `py -3.12` pode
+falhar quando o Python 3.12 está instalado, mas não está registrado no launcher
+do Windows. Se `backend/.venv` já existe e funciona, não precisa recriá-lo ou
+reinstalar as dependências para iniciar o demo.
 
 Para iniciar os dois servidores em um terminal:
 
@@ -119,6 +125,11 @@ npm.cmd run demo -- --frontend-port 3301 --backend-port 8301
 Nesse caso, abra `http://localhost:3301`. O demo não aceita publicação ou
 sincronização externa; não é ambiente de atendimento. Campos clínicos existentes
 aparecem apenas para o exemplo designado e para o acesso fictício de Tecnologia.
+
+Se aparecer **Porta 8300 ocupada** ou **Porta 3300 ocupada**, use o comando com
+portas alternativas acima. Se o Next informar que outro demo já está usando
+`.next-demo/dev/lock`, encerre o demo anterior com `Ctrl+C` no terminal dele antes
+de iniciar outro. Não apague o lock de um processo em execução.
 
 ### Desenvolvimento com identidade institucional
 

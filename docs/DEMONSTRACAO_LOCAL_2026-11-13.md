@@ -41,10 +41,15 @@ Na raiz, Windows, Node.js 22+ e Python 3.12:
 
 ```powershell
 npm.cmd ci
-py -3.12 -m venv backend/.venv
+python --version
+python -m venv backend/.venv
 .\backend\.venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
 npm.cmd run demo
 ```
+
+Confirme **3.12.x** em `python --version`. No Windows deste workspace, `python`
+encontra o 3.12.10, enquanto `py -3.12` falha porque o launcher registra apenas
+outra versão. Um ambiente `backend/.venv` funcional não precisa ser recriado.
 
 Abra `http://localhost:3300`, preencha um dos acessos pelos botões do login e
 clique em Acessar plataforma. Administração: `admin@demo.invalid`; Tecnologia:
