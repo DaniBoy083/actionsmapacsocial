@@ -1,9 +1,11 @@
 node_modules
 .next
+.next-demo
 /backend/
 docs/contracts
 docs/data
 artifacts
 tmp
 test-results
+test-results-demo
 package-lock.json

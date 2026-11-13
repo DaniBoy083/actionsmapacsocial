@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Alert,
   Button,
@@ -22,9 +23,18 @@ export default function LoginPage() {
   const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [error, setError] = useState("");
+  const context = useQuery({
+    queryKey: ["auth-context"],
+    queryFn: async () =>
+      (await api.get<{ demonstracao: boolean }>("/auth/context")).data,
+    retry: false,
+    staleTime: 0,
+  });
+  const demo = context.data?.demonstracao === true;
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) });
   async function submit(data: z.infer<typeof schema>) {
@@ -40,7 +50,10 @@ export default function LoginPage() {
   return (
     <main id="conteudo" className="login-scene">
       <div className="login-stack">
-        <div className="eyebrow">Acesso institucional | AC Actions Map</div>
+        <div className="eyebrow">
+          {demo ? "Demonstração local" : "Acesso institucional"} | AC Actions
+          Map
+        </div>
         <section className="login-card" aria-labelledby="login-title">
           <Image
             className="brand-image"
@@ -52,7 +65,41 @@ export default function LoginPage() {
             priority
           />
           <h1 id="login-title">Entrar na plataforma</h1>
-          <p>Use seu e-mail institucional e sua senha para continuar.</p>
+          <p>
+            {demo
+              ? "Explore a aplicação com dados fictícios e descartáveis."
+              : "Use seu e-mail institucional e sua senha para continuar."}
+          </p>
+          {demo && (
+            <Alert severity="warning" sx={{ mb: 2, textAlign: "left" }}>
+              <strong>Demonstração · dados fictícios</strong>
+              <p>
+                Use somente dados sintéticos. Reiniciar restaura os exemplos.
+                Nenhum atendimento real deve ser registrado.
+              </p>
+              <div className="demo-accesses">
+                {[
+                  ["Administração", "admin@demo.invalid"],
+                  ["Tecnologia", "tecnologia@demo.invalid"],
+                ].map(([label, email]) => (
+                  <Button
+                    key={email}
+                    type="button"
+                    variant="outlined"
+                    onClick={() => {
+                      setValue("identifier", email, { shouldValidate: true });
+                      setValue("password", "Demonstracao-local-2026!", {
+                        shouldValidate: true,
+                      });
+                      setError("");
+                    }}
+                  >
+                    Preencher acesso de {label}
+                  </Button>
+                ))}
+              </div>
+            </Alert>
+          )}
           <form onSubmit={handleSubmit(submit)} noValidate>
             <div className="login-fields">
               <TextField

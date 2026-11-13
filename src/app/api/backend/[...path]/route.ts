@@ -19,6 +19,7 @@ async function proxy(
     /^instituicoes(?:\/[a-f0-9-]{36}\/marcas\/[a-f0-9-]{36})$/;
   if (
     !permitted.test(targetPath) &&
+    targetPath !== "auth/context" &&
     !clinicalPath.test(targetPath) &&
     targetPath !== "instituicoes" &&
     !institutionPath.test(targetPath)

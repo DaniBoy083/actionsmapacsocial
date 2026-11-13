@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.ACTIONS_LOCAL_DEMO === "1" ? ".next-demo" : ".next",
+  devIndicators: process.env.ACTIONS_LOCAL_DEMO === "1" ? false : undefined,
   /* config options here */
   experimental: {
     agentFeedback: true,

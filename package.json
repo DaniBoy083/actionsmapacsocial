@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "demo": "backend\\.venv\\Scripts\\python.exe scripts/demo.py",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "playwright test",
+    "test:demo": "playwright test --config playwright.demo.config.ts",
     "test:backend": "backend\\.venv\\Scripts\\python.exe -m pytest backend/tests -q"
   },
   "dependencies": {

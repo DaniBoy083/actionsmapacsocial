@@ -7,12 +7,16 @@ import { backendUrl } from "@/lib/backend";
 // A verificação da identidade sempre aguarda a sessão atual do servidor.
 export const instant = false;
 async function SessionGate({ children }: { children: React.ReactNode }) {
-  const token = (await cookies()).get("ac_actions_session");
+  const cookieName =
+    process.env.ACTIONS_LOCAL_DEMO === "1"
+      ? "ac_actions_demo_session"
+      : "ac_actions_session";
+  const token = (await cookies()).get(cookieName);
   if (!token) redirect("/login");
   let response: Response;
   try {
     response = await fetch(`${backendUrl()}/api/v1/auth/me`, {
-      headers: { Cookie: `ac_actions_session=${token.value}` },
+      headers: { Cookie: `${cookieName}=${token.value}` },
       cache: "no-store",
       signal: AbortSignal.timeout(12_000),
     });

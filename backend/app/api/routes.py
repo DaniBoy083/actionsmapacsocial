@@ -52,9 +52,9 @@ from app.infrastructure.models import (
 )
 from app.infrastructure.outbox import dispatch_pending
 from app.security.session import (
-    COOKIE,
     clear_login_failures,
     consume_login,
+    cookie_name,
     create_session,
     csrf,
     current_professional,
@@ -94,7 +94,7 @@ def login(
     clear_login_failures(data.identifier.lower())
     token = create_session(result[0])
     response.set_cookie(
-        COOKIE,
+        cookie_name(request),
         token,
         httponly=True,
         secure=get_settings().production,
@@ -108,20 +108,33 @@ def login(
 def me(request: Request, professional: Professional = Depends(current_professional)):
     return {
         **professional.model_dump(),
-        "csrf_token": csrf(request.cookies[COOKIE]),
+        "csrf_token": csrf(request.cookies[cookie_name(request)]),
         "agenda_url": get_settings().agenda_web_url,
+        "demonstracao": getattr(request.app.state, "demonstracao", False),
     }
+
+
+@router.get("/auth/context")
+def auth_context(request: Request):
+    # Apenas sinalização de interface; nunca autentica ou seleciona permissões.
+    return {"demonstracao": getattr(request.app.state, "demonstracao", False)}
 
 
 @router.post("/auth/logout", status_code=204)
 def logout(request: Request, response: Response, professional: Professional = Depends(writer)):
     with Session(get_engine()) as session, session.begin():
         session.execute(
-            delete(SessionRecord).where(SessionRecord.token_hash == digest(request.cookies[COOKIE]))
+            delete(SessionRecord).where(
+                SessionRecord.token_hash == digest(request.cookies[cookie_name(request)])
+            )
         )
         audit(session, professional, "auth.logout", professional.profissional_id)
     response.delete_cookie(
-        COOKIE, path="/", httponly=True, secure=get_settings().production, samesite="strict"
+        cookie_name(request),
+        path="/",
+        httponly=True,
+        secure=get_settings().production,
+        samesite="strict",
     )
 
 

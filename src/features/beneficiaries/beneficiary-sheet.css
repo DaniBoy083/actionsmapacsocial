@@ -108,6 +108,9 @@
   .beneficiary-sheet h1 {
     font-size: 17pt;
   }
+  .beneficiary-sheet[data-demo-print="true"] .beneficiary-sheet-fields > div {
+    padding: 6px 0;
+  }
   .beneficiary-sheet-fields {
     grid-template-columns: 1fr 1fr;
     gap: 6px 16px;

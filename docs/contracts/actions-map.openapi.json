@@ -72,6 +72,22 @@
         }
       }
     },
+    "/api/v1/auth/context": {
+      "get": {
+        "summary": "Auth Context",
+        "operationId": "auth_context_api_v1_auth_context_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/logout": {
       "post": {
         "summary": "Logout",

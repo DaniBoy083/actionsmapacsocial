@@ -1,5 +1,14 @@
 # Auditoria técnica da aplicação e princípios
 
+## Revisão atual — demonstração local, 13/11/2026
+
+[Implementação, fonte conferida, comandos, testes e matriz de conformidade](DEMONSTRACAO_LOCAL_2026-11-13.md).
+Modo demo isolado, autenticado, com dados sintéticos, cookie próprio e bloqueio
+das integrações. Não muda a autenticação institucional ou libera o piloto.
+Conformidade global **PARCIAL**: ficha clínica final/etiqueta, identidade
+operacional validada, analytics completo e novo contrato nas consumidoras ainda
+dependem dos gates documentados. Não há declaração de “100% absolutamente”.
+
 ## Revisão atual — plano consolidado de 12/11/2026
 
 [Implementação, evidências, matriz AM-01–AM-09 e gates](IMPLEMENTACAO_PLANO_2026-11-12.md).

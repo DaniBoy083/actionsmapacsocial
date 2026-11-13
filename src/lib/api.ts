@@ -21,6 +21,7 @@ export type Session = {
   equipe: "administracao" | "tecnologia";
   csrf_token: string;
   agenda_url: string;
+  demonstracao: boolean;
 };
 export type Location = {
   municipio_ibge: string;

@@ -18,6 +18,10 @@ from app.infrastructure.models import Audit, LoginLimit, SessionRecord
 COOKIE = "ac_actions_session"
 
 
+def cookie_name(request: Request) -> str:
+    return getattr(request.app.state, "session_cookie", COOKIE)
+
+
 def digest(value: str) -> str:
     return hashlib.sha256(value.encode()).hexdigest()
 
@@ -96,7 +100,7 @@ def clear_login_failures(identifier: str) -> None:
 def current_professional(
     request: Request, repository: IdentityRepository = Depends(identities)
 ) -> Professional:
-    token = request.cookies.get(COOKIE, "")
+    token = request.cookies.get(cookie_name(request), "")
     if not token:
         raise HTTPException(401, "Entre com sua conta institucional.")
     with Session(get_engine()) as session:
@@ -117,7 +121,7 @@ def writer(
 ) -> Professional:
     enforce_origin(request)
     if not hmac.compare_digest(
-        request.headers.get("x-csrf-token", ""), csrf(request.cookies.get(COOKIE, ""))
+        request.headers.get("x-csrf-token", ""), csrf(request.cookies.get(cookie_name(request), ""))
     ):
         raise HTTPException(403, "Recarregue a página para renovar a proteção da sessão.")
     return professional

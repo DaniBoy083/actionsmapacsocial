@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+/.next-demo/
 /out/
 
 # production
@@ -43,6 +44,7 @@ yarn-error.log*
 /tmp/
 /artifacts/
 /test-results/
+/test-results-demo/
 /playwright-report/
 /backend/private/
 # Fontes preenchidas de beneficiários permanecem privadas no disco.

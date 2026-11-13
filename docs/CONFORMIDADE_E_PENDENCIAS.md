@@ -1,5 +1,10 @@
 # Verificação de conformidade e próximos incrementos
 
+**13/11/2026:** modo de demonstração local implementado. A
+[revisão atual dos princípios](DEMONSTRACAO_LOCAL_2026-11-13.md) distingue controles
+verificados de recursos e homologações pendentes. Não interpretar as entregas
+históricas abaixo como conformidade integral ou autorização de produção.
+
 > **12/11/2026:** a revisão vigente está em
 > [Implementação do plano consolidado](IMPLEMENTACAO_PLANO_2026-11-12.md).
 > Inclui N instituições por papel, busca interna de logos e designação de caso.

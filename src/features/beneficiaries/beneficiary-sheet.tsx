@@ -14,6 +14,7 @@ import type { BeneficiarySheet as Sheet } from "./registration";
 import "./beneficiary-sheet.css";
 import { InstitutionalSummary } from "@/features/actions/institutional-summary";
 import { institutionalImages } from "@/features/actions/institutional";
+import { useSession } from "@/components/session-context";
 
 const shown = (value: string | null) => value || "Não informado";
 function receipt(value: boolean | null) {
@@ -34,6 +35,7 @@ export function BeneficiarySheet({
   secondCopy: boolean;
   onClose: () => void;
 }) {
+  const session = useSession();
   const [loadedImages, setLoadedImages] = useState<string[]>([]);
   const [imageFailure, setImageFailure] = useState(false);
   const query = useQuery({
@@ -83,8 +85,17 @@ export function BeneficiarySheet({
           <Alert severity="error">{errorMessage(query.error)}</Alert>
         ) : (
           data && (
-            <article className="beneficiary-sheet" data-beneficiary-print>
+            <article
+              className="beneficiary-sheet"
+              data-beneficiary-print
+              data-demo-print={session.demonstracao || undefined}
+            >
               <header>
+                {session.demonstracao && (
+                  <p className="demo-print-notice">
+                    DEMONSTRAÇÃO — DADOS FICTÍCIOS — SEM VALIDADE CLÍNICA
+                  </p>
+                )}
                 <strong>AC SOCIAL · AC ACTIONS MAP</strong>
                 <h1>{title}</h1>
                 <p>

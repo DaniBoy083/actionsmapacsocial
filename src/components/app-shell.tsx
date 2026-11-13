@@ -79,9 +79,10 @@ export function AppShell({
       setLeaving(false);
     }
   }
-  const agenda = /^https?:\/\//.test(session.agenda_url)
-    ? session.agenda_url
-    : null;
+  const agenda =
+    !session.demonstracao && /^https?:\/\//.test(session.agenda_url)
+      ? session.agenda_url
+      : null;
   return (
     <SessionContext value={session}>
       <div className={`app-frame ${collapsed ? "is-collapsed" : ""}`}>
@@ -142,7 +143,11 @@ export function AppShell({
           </nav>
           <div className="sidebar-bottom">
             <div className="session-card hide-collapsed">
-              <small>SESSÃO INSTITUCIONAL</small>
+              <small>
+                {session.demonstracao
+                  ? "SESSÃO DE DEMONSTRAÇÃO"
+                  : "SESSÃO INSTITUCIONAL"}
+              </small>
               <strong>{session.nome}</strong>
               <small>
                 Administrativo ·{" "}
@@ -181,6 +186,15 @@ export function AppShell({
             <span className="eyebrow">AC Social / Gestão de ações</span>
             <span className="muted">Acesso restrito</span>
           </header>
+          {session.demonstracao && (
+            <aside className="demo-banner" aria-label="Modo de demonstração">
+              <strong>Demonstração · dados fictícios</strong>
+              <span>
+                Alterações descartáveis. Use somente dados sintéticos.
+                Integrações externas bloqueadas.
+              </span>
+            </aside>
+          )}
           {children}
         </main>
       </div>

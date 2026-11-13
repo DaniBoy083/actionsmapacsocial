@@ -3,6 +3,13 @@
 Aplicação para gestão de ações institucionais, beneficiários e registro clínico segregado
 com liberação controlada. O fluxo completo de exame/documentos/etiqueta ainda não está concluído.
 
+**13/11/2026 — Demonstração local:** `npm.cmd run demo` inicia frontend e backend
+com banco descartável, três ações e 12 pessoas fictícias, sem credenciais
+institucionais. Sessão própria, avisos de demonstração e impressos identificados;
+fonte histórica substituída por PDF sintético e integrações externas bloqueadas.
+[Comandos, auditoria de princípios, limites e reversão](docs/DEMONSTRACAO_LOCAL_2026-11-13.md).
+Conformidade global continua **parcial**; o demo não libera uso clínico real.
+
 **12/11/2026 — Plano consolidado, API interna 0.3.0:** N contratantes e N apoiadores
 separados, modalidade por apoiador, catálogo interno reutilizável, busca de nomes/
 aliases e logos com escolha explícita, designação individual de atendimentos,
@@ -78,9 +85,46 @@ Consulte [ativação atual](docs/ATIVACAO_PRODUCAO_2026-11-11.md),
 
 ## Rodar localmente no Windows
 
+### Demonstração para apresentações
+
+Requisitos: Node.js 22+ e **Python 3.12**. Na raiz do projeto, prepare uma vez:
+
+```powershell
+npm.cmd ci
+py -3.12 -m venv backend/.venv
+.\backend\.venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
+```
+
+Para iniciar os dois servidores em um terminal:
+
+```powershell
+npm.cmd run demo
+```
+
+Abra **http://localhost:3300**. Na tela de acesso, use **Preencher acesso de
+Administração** ou **Preencher acesso de Tecnologia** e clique em **Acessar
+plataforma**. Acessos fictícios: `admin@demo.invalid` e `tecnologia@demo.invalid`;
+senha exclusiva dos exemplos: `Demonstracao-local-2026!`. Essas credenciais não
+funcionam no runtime normal.
+
+Não precisa criar `.env`, rodar `setup_local.py`, conectar à base institucional
+ou aplicar migrações para usar o demo. Use somente dados sintéticos. `Ctrl+C`
+encerra os dois servidores; iniciar novamente cria uma base limpa. Portas
+ocupadas podem ser alteradas, por exemplo:
+
+```powershell
+npm.cmd run demo -- --frontend-port 3301 --backend-port 8301
+```
+
+Nesse caso, abra `http://localhost:3301`. O demo não aceita publicação ou
+sincronização externa; não é ambiente de atendimento. Campos clínicos existentes
+aparecem apenas para o exemplo designado e para o acesso fictício de Tecnologia.
+
+### Desenvolvimento com identidade institucional
+
 **Gestão de integrações:** criação, rotação e revogação de tokens de leitura para a Agenda, com validade por prazo ou **Nunca expirar**, confirmação da senha institucional, cópia de endpoints/cURL e exportação agregada consistente. Em PostgreSQL, aplicar as migrações até `0006_nonexpiring_tokens` antes do deploy desta funcionalidade. Para SQLite local existente, há atualização administrativa própria. Veja [gestão de tokens e instalação](docs/GESTAO_TOKENS_E_ENDPOINTS_AGENDA.md). Esta alteração foi preparada para commit; seu push/deploy e a migração produtiva ficam com o operador.
 
-Requisitos: Node.js 22+, Python 3.12+, acesso de rede à base institucional para autenticação e as variáveis existentes de conexão fornecidas pela Tecnologia. Os comandos abaixo partem da raiz deste projeto e não exigem ativar scripts PowerShell.
+Requisitos: Node.js 22+, Python 3.12, acesso de rede à base institucional para autenticação e as variáveis existentes de conexão fornecidas pela Tecnologia. Os comandos abaixo partem da raiz deste projeto e não exigem ativar scripts PowerShell.
 
 Preparação inicial:
 
@@ -91,7 +135,7 @@ python -m venv backend/.venv
 .\backend\.venv\Scripts\python.exe scripts/setup_local.py
 ```
 
-`setup_local.py` acrescenta somente configurações locais ausentes em `.env.local`, preserva a conexão já configurada e gera segredos sem exibi-los. Se estiver montando um ambiente novo, use `.env.example` como referência e obtenha `DATABASE_URL` com a Tecnologia; não sobrescreva os arquivos de ambiente existentes. Não há senha de demonstração na aplicação.
+`setup_local.py` acrescenta somente configurações locais ausentes em `.env.local`, preserva a conexão já configurada e gera segredos sem exibi-los. Se estiver montando um ambiente novo, use `.env.example` como referência e obtenha `DATABASE_URL` com a Tecnologia; não sobrescreva os arquivos de ambiente existentes. O runtime institucional não aceita os acessos fictícios do modo demo.
 
 No primeiro terminal, inicie o backend:
 
